@@ -132,3 +132,24 @@ Sprint 02 schemas must include:
 - drift type labels
 - signal provenance indicating rule-based, model-derived, or human-reviewed origin
 - clear `not_comparable` handling for cross-model semantic extraction
+
+## Sprint 02.5 Model Invocation Metadata
+
+Imprint is BYOM/BYOP. Build manifests must record profile-affecting model invocations without assuming a provider.
+
+For each profile-affecting invocation, the manifest should record:
+
+- model role
+- provider kind and provider name
+- base URL kind without secrets
+- model name and model version, if known
+- extractor family and version fields, when the invocation participates in extraction
+- prompt version or policy version
+- schema version
+- decoding policy needed for reproducibility
+- seed, if supported
+- capability flags
+- local versus remote execution
+- retention and training policy, if known
+
+Experience-only generation is outside the durable profile unless explicitly promoted through artifact classification, evidence support, confidence scoring, and claim validation.

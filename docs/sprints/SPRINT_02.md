@@ -27,6 +27,111 @@ Before creating any schema explain:
 
 Generate: SCHEMA_PHILOSOPHY.md
 
+
+
+## Sprint 01.5 Architecture Review Constraints
+
+Before designing or implementing schemas, incorporate the conditional-go findings from `docs/SPRINT_01_5_ARCHITECTURE_REVIEW.md`.
+
+Sprint 02 must explicitly account for these constraints:
+
+### 1. Context Profile Budget
+
+The schema/config model must include an explicit context profile budget.
+
+MVP default recommendation:
+
+```yaml
+max_context_profiles: 5
+```
+
+The schema should make context cost visible. If the user requests more context profiles than the configured budget, the system should require an explicit override rather than silently recomputing unbounded context views.
+
+### 2. Extractor Family Taxonomy
+
+The profile build manifest must contain enough fields to compare builds without human judgment.
+
+At minimum, design for:
+
+- `extractor_family`
+- `extractor_major_version`
+- `extractor_minor_version`
+- `extractor_prompt_version`
+- `extractor_code_version`
+- `model_provider`
+- `model_name`
+- `model_version`
+- `source_policy_version`
+- `schema_version`
+
+### 3. Automated Comparability Decision
+
+Profile comparison must not depend on informal human judgment.
+
+The schema must support automatic classification of profile comparisons as:
+
+- `comparable`
+- `partially_comparable`
+- `not_comparable`
+
+The comparison object must also explain why.
+
+### 4. Claim Validation Framework
+
+Claim validation is mandatory.
+
+The schema must support claim levels such as:
+
+- `observation`
+- `bounded_interpretation`
+- `prohibited`
+- `quarantined`
+
+Public-safe exports must fail if prohibited claims survive compilation.
+
+Do not rely on simple keyword matching alone. The schema should make room for rule-based, taxonomy-based, and review-based validation.
+
+### 5. Export Schema Guardrails
+
+Core Imprint exports must not become prompt-generation artifacts.
+
+The schema should forbid or isolate fields that imply downstream model control, including:
+
+- `prompt`
+- `system_prompt`
+- `instruction`
+- `temperature`
+- `decoding`
+- `model_hint`
+- provider-specific generation settings
+
+If such fields are ever needed, they belong in downstream adapter packages, not canonical core Imprint profiles.
+
+### 6. Unknown Authorship Categories
+
+Do not use a single broad `unknown` category.
+
+The schema should distinguish reasons such as:
+
+- `unknown_speaker`
+- `quoted_or_forwarded`
+- `missing_metadata`
+- `suspected_ai_assisted`
+- `parser_uncertain`
+- `mixed_authorship`
+- `assistant_output`
+- `human_origin`
+- `human_directed_ai_assisted`
+
+Unknown or weakly attributed material should reduce confidence or trigger quarantine according to source policy.
+
+### 7. AI Detector Output Is Weak Evidence Only
+
+The schema may record AI detector output as metadata, but detector output must never become ground truth.
+
+Detector-derived signals should be bounded, weak evidence and should not silently promote or demote artifact authorship without corroboration.
+
+
 ## Required Core Objects
 - Artifact
 - Classification

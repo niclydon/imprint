@@ -111,3 +111,11 @@ Sprint 02 must define:
 - unknown and suspected AI-assisted weighting
 - claim-level validation
 - public-safe evidence references
+
+## Sprint 02.5 Model Evidence Boundary
+
+Model output can support evidence only according to its role.
+
+Profile-affecting model roles such as classification, signal extraction, claim validation, evidence interpretation, confidence assessment, and drift comparison must be recorded in the build manifest. Their output is compiler evidence, not ground truth about the subject.
+
+Experience-only model roles such as report writing or first-run artifact generation do not support durable profile claims unless their output is explicitly reintroduced as an artifact and passes classification, authorship-origin, confidence, evidence, and claim validation requirements.

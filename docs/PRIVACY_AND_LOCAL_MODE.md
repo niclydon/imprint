@@ -36,3 +36,11 @@ May include raw excerpts only when explicitly enabled. Not for commit or CI.
 - public fixtures must be synthetic
 - public-safe mode must fail closed on raw examples
 - cloud providers are optional, never required for default local behavior
+
+## Sprint 02.5 Model Provider Boundaries
+
+Imprint remains local-first and BYOM/BYOP. Remote model providers are optional and must be visible when used.
+
+Profile-affecting remote inference must disclose the model role, provider kind, provider name, model name, local versus remote execution, and known retention/training policy. Canonical schemas must not store API keys, bearer tokens, private base URLs, tenant IDs, or homelab-specific hostnames.
+
+Experience-only generation may improve onboarding or reporting, but it must not mutate durable profiles unless the generated output is explicitly promoted through the normal evidence and validation pipeline.

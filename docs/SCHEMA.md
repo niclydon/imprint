@@ -88,7 +88,8 @@ No raw private text required.
       "human_origin": 600,
       "human_directed_ai_assisted": 100,
       "quoted_or_forwarded": 300,
-      "unknown": 200
+      "unknown_speaker": 120,
+      "missing_metadata": 80
     }
   }
 }
@@ -135,12 +136,15 @@ corpus drift.
     "schema_version": "0.1",
     "compiler_version": "0.1.0",
     "classifier_version": "0.1.0",
-    "extractor_version": "0.1.0",
+    "extractor_family": "rule_baseline",
+    "extractor_major_version": 0,
+    "extractor_minor_version": 1,
     "extractor_prompt_version": "rule-baseline",
-    "model_provider": null,
-    "model_id": null,
+    "extractor_code_version": "0.1.0",
+    "profile_affecting_model_invocations": [],
     "source_policy_version": "0.1",
     "authorship_policy_version": "0.1",
+    "export_schema_version": "0.1",
     "artifact_store_mode": "metadata_only",
     "config_hash": "example-hash"
   }
@@ -247,3 +251,11 @@ than using hidden inheritance.
 Claim validation is mandatory, not advisory. Canonical and public-safe exports must fail if a
 prohibited claim survives compilation. Private-local workflows may quarantine rejected claims for
 review, but must not export them as profile guidance.
+
+## Sprint 02.5 Model Provider Policy
+
+Canonical schemas are provider-neutral. Imprint is BYOM/BYOP and does not assume any single hosted or local inference stack.
+
+Build manifests should record profile-affecting model invocations as structured metadata: model role, provider kind, provider name, base URL kind without secrets, model name and version, prompt or policy version, decoding policy, seed if supported, capability flags, local versus remote execution, and known retention/training policy.
+
+Core profile exports must remain profile projections, not generation-ready prompts. Experience-only generation can produce reports, summaries, demos, or first-run artifacts, but those outputs do not mutate durable profiles unless explicitly promoted through validated evidence.
