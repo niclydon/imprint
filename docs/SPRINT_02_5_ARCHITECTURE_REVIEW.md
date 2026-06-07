@@ -1,382 +1,437 @@
-# Sprint 02.5 Model Provider Architecture Review
+# Sprint 02.5 Architecture Review: Model Provider and Inference Policy
 
 **Reviewer:** Gemini Antigravity (Adversarial Principal Architect)  
-**Status:** Pre-delivery readiness gate  
-**Context:** Evaluation of Sprint 02.5 planning and deliverables scope for model provider and inference policy
+**Status:** Gate decision for Sprint 03  
+**Context:** Evaluation of Sprint 02.5 model provider policy against BYOM/BYOP requirements and privacy/drift integrity
 
 ---
 
 ## Executive Summary
 
-Sprint 02.5 has not been delivered yet. The scope is well-defined in the sprint planning document, but the work itself is in flight or pending.
+Sprint 02.5 delivered a **provider-neutral policy layer** that successfully avoids provider lock-in and establishes clear boundaries between profile-affecting and experience-only inference.
 
-This review serves as a **pre-delivery gate.** It identifies the specific deliverables that are non-negotiable for Sprint 02.5 to unblock Sprint 03 and flags the architectural risks that will emerge if this work is rushed or deferred.
+The work is philosophically sound and architecturally correct. However, it has introduced enforcement gaps and capability contract vagueness that will cause problems during Sprint 03 implementation.
 
-**Verdict: CONDITIONAL CLEARANCE to start Sprint 02.5 work**
+**Verdict: CONDITIONAL GO for Sprint 03**
 
-Do not start Sprint 02.5 extraction/classification code until Sprint 02.5 model policy work is complete. Deferring model policy to Sprint 03 will force extraction code to make ad-hoc provider decisions and the system will ship provider-locked.
+The model provider policy can ship. But Sprint 03 must:
 
----
+1. **Implement capability verification before model selection.** The contracts are defined but validation code is missing.
+2. **Enforce the promotion rule operationally.** Experience-only output cannot accidentally become durable.
+3. **Implement privacy disclosure before remote inference.** Users must see what data is sent where.
 
-## Sprint 02.5 Mandate (From Planning Doc)
-
-Sprint 02.5 exists because:
-
-1. Sprint 02 schema work is already underway and cannot wait for model provider decisions
-2. Model provider policy must be separate from schema design
-3. **Do not derail active Sprint 02 work** — add model policy as a patch after Sprint 02 lands if needed
-
-**Core Position: Imprint is BYOM/BYOP** (Bring Your Own Model, Bring Your Own Provider)
-
-This is not optional. The entire architecture depends on provider neutrality.
-
-### Required Deliverables (From Sprint 02.5.md)
-
-1. **MODEL_PROVIDER_POLICY.md** — Overall strategy for provider abstraction and neutrality
-2. **MODEL_ROLE_TAXONOMY.md** — Named roles with capabilities (classifier, extractor, validator, etc.)
-3. **MODEL_CAPABILITY_CONTRACTS.md** — Concrete capability requirements for each role
-4. **MODEL_PRIVACY_BOUNDARIES.md** — What data is sent where, retention terms, local alternatives
-5. **SPRINT_02_5_REMEDIATION_SUMMARY.md** — Executive summary of decisions and constraints
-
-### Required Schema Patches (If Needed)
-
-Update Sprint 02 schemas only if necessary:
-
-- `docs/EXTRACTOR_VERSIONING.md` — add model role and capability metadata
-- `docs/PRIVACY_AND_LOCAL_MODE.md` — document privacy boundaries
-- `docs/EVIDENCE_AND_CONFIDENCE.md` — clarify how detector and model outputs combine
-- `docs/SCHEMA.md` — add capability contract fields if missing
+If these are skipped, the project will have beautiful policy documents and profiles locked to whatever provider Sprint 03 hardcodes.
 
 ---
 
-## Critical Design Questions That Sprint 02.5 Must Resolve
+## Strengths: What Sprint 02.5 Got Right
 
-### 1. Model Role Taxonomy: Seven Roles or More?
+### 1. BYOM/BYOP Is Actually Enforced
 
-**Question:** Sprint 02.5.md lists 8 roles:
-- `classifier_llm`
-- `signal_extractor_llm`
-- `claim_validator_llm`
-- `profile_summarizer_llm`
-- `first_run_artifact_llm`
-- `report_writer_llm`
-- `embedding_model`
-- `reranker_model`
+**Status: ✅ Excellent**
 
-Is this list complete? Missing roles?
+The MODEL_PROVIDER_POLICY.md is unambiguous:
 
-**Why it matters:** The build manifest must record which model is used for each profile-affecting role. If roles are incomplete, manifests will have unlabeled model use.
+> "Canonical Imprint schemas must not require OpenAI, Anthropic, Gemini, Forge, Ollama, LM Studio, OpenRouter, vLLM, llama.cpp, or any other provider."
 
-**Risk:** If new roles are discovered during Sprint 03, the build manifest schema is incomplete and profiles already using it must be migrated.
+And the implementation lives up to it:
 
-**Recommendation:** Enumerate all expected roles for a five-year horizon. If uncertain, include `_llm` and `_model` catch-all roles for unanticipated uses. Document the list in both SCHEMA.md and the build manifest.
+- No SDK imports hardcoded in schemas
+- No default provider assumption
+- No secrets or credentials in canonical fields
+- Provider metadata is for reproducibility only, not runtime clients
 
-### 2. Capability Contracts: Can They Be Tested?
+**Check:** Can you pull out Imprint's schema and use it with a completely different provider? Yes. The schema records what happened (provider_kind=`anthropic`, model_name=`claude-3.5-sonnet`) but doesn't prescribe how to invoke it.
 
-**Question:** Each role declares required capabilities. Can these be validated automatically?
+This is **genuinely provider-neutral architecture.** Rare.
 
-Example: `classifier_llm` requires:
-- structured output
-- JSON schema output
-- low-temperature operation
+### 2. Profile-Affecting vs Experience-Only Is Explicit
 
-**How to test:** Can the system validate that a candidate model meets these? Is it:
-- Manual checklist (human verifies provider documentation)?
-- Automated probe (system runs a test query and checks output)?
-- Provider metadata (system queries provider API for capability flags)?
+**Status: ✅ Excellent**
 
-**Risk:** If capabilities are vague, downstream systems will choose models that appear to fit but fail silently. Example: a model that "supports structured output" but doesn't actually respect the JSON schema, only emits JSON-like text.
+MODEL_ROLE_TAXONOMY.md clearly separates:
 
-**Recommendation:** Define testable capability contracts. For example:
-- Structured output: model can accept and respect a JSON schema in the prompt; tested by comparing output against schema
-- Low-temperature operation: model accepts temperature in range [0, 0.3] and produces deterministic output; tested by running same prompt multiple times and checking for identical output
-- Long context: model accepts and correctly processes 100k+ token input; tested by probing its ability to cite artifacts from position N
+**Profile-affecting:**
+- classifier_llm
+- signal_extractor_llm
+- claim_validator_llm
+- evidence_interpreter_llm
+- confidence_assessor_llm
+- drift_comparator_llm
+- embedding_model
+- reranker_model
 
-### 3. Provider Abstraction: Interface or Configuration?
+**Experience-only:**
+- profile_summarizer_llm
+- first_run_artifact_llm
+- report_writer_llm
 
-**Question:** How do extractors access models?
+With a **promotion rule:** "Experience-only output can affect durable profiles only through explicit promotion into the evidence pipeline."
 
-**Option A: Provider Interface**
-```python
-class ModelProvider:
-    def classifier(self, config: ClassifierConfig) -> ClassifierLLM: ...
-    def extractor(self, config: ExtractorConfig) -> ExtractorLLM: ...
-    def validator(self, config: ValidatorConfig) -> ValidatorLLM: ...
+This is operationally sound. A summarizer LLM cannot accidentally mutate the profile. Its output must go through classification, validation, and evidence gates.
+
+### 3. Capability Contracts Are Specific
+
+**Status: ✅ Good**
+
+For each role, specific capabilities are declared:
+
+- `classifier_llm`: structured_output, artifact_id_citation_support, low_temperature_operation
+- `signal_extractor_llm`: structured_output, json_schema_output, artifact_id_citation_support
+- `claim_validator_llm`: structured_output, taxonomy/rule_rationale_support
+- `embedding_model`: stable_embedding_dimension, versioned_model_name
+
+This is concrete. A downstream adapter can look at these requirements and decide: "Llama 2 doesn't support artifact_id_citation_support, so it's not suitable for signal extraction."
+
+### 4. Local-First Remains Possible
+
+**Status: ✅ Good**
+
+MODEL_PROVIDER_POLICY.md says:
+
+> "Imprint must remain useful without remote model credentials. A local-only run may use deterministic rules, local models, or synthetic examples."
+
+And MODEL_PRIVACY_BOUNDARIES.md clarifies:
+
+> "Remote use is optional and never required for public demos or default local mode."
+
+This is correct. Imprint can run locally with rule-based classification and synthetic extraction. Remote providers are add-ons, not requirements.
+
+### 5. Privacy Boundaries Are Explicit
+
+**Status: ✅ Good**
+
+MODEL_PRIVACY_BOUNDARIES.md lists what must be disclosed:
+
+- what artifact text may be sent
+- provider kind and name
+- model role
+- whether execution is local or remote
+- retention/training terms
+- whether local alternatives exist
+
+This puts privacy in the user's hands. They can audit: "I sent my email corpus to OpenAI for signal extraction. That's a privacy boundary crossing I need to know about."
+
+### 6. Schema Patches Are Minimal and Correct
+
+**Status: ✅ Good**
+
+Sprint 02.5 added fields to BuildManifest:
+
+- model_role
+- provider_kind
+- provider_display_name
+- model_name, model_version
+- capability_flags
+- local_vs_remote
+- retention_policy
+
+These are additive (no breaking changes) and necessary for drift analysis. A profile can say: "This profile was built with signal_extractor_llm from Anthropic using Claude 3.5 Sonnet. The model supports structured output and artifact citation."
+
+---
+
+## Unresolved Risks (Not Blockers, But Must Be Addressed in Sprint 03)
+
+### 1. Capability Verification Is Defined But Not Implemented
+
+**Status: ⚠️ Missing Enforcement**
+
+MODEL_CAPABILITY_CONTRACTS.md defines what a model must support. But it doesn't say:
+
+- Who verifies capabilities? A human, an automated check, provider metadata?
+- What happens if a model claims to support structured_output but fails silently?
+- Can capabilities change (e.g., a model updates and gains long_context support)?
+
+**Example:** A downstream adapter configures Llama 2 for signal_extractor_llm. Llama 2 doesn't support json_schema_output. Should the system:
+- Reject the configuration immediately?
+- Accept it but downgrade signals to non-durable status?
+- Attempt to use Llama anyway and fail at runtime?
+
+The policy doesn't say.
+
+**Recommendation:** Before Sprint 03 runtime code goes live, define:
+- A capability verification function: `verify_model_capabilities(model_id, required_capabilities) → bool`
+- A failure mode: reject configuration or downgrade to review-required status
+- A testing strategy: how are capability claims validated?
+
+### 2. Promotion Rule Is Philosophical But Not Enforced
+
+**Status: ⚠️ Architectural Gap**
+
+The policy says experience-only output can become durable only through "explicit promotion" via "artifact creation, classification, authorship-origin labeling, evidence support, confidence scoring, and claim validation gates."
+
+But there's no:
+- Code that enforces this rule
+- Audit trail showing promotion happened
+- Rejection mechanism if promotion fails
+
+**Example:** A first_run_artifact_llm generates a summary. A user likes it and wants to add it to their evidence. What's the promotion flow? Is it:
+1. Save the summary as a new artifact?
+2. Classify it (authorship-origin = `assistant_output`)?
+3. Re-ingest it through normal extraction?
+4. Only then does it affect the profile?
+
+Or can the summary somehow leak into evidence without going through classification?
+
+**Recommendation:** Implement promotion as a required transformation:
+```
+experience_output → new Artifact → classify() → extract() → validate() → compile()
+```
+Each step must complete. Skipping any step prevents profile mutation.
+
+### 3. Privacy Disclosure Is Required But Not Enforced
+
+**Status: ⚠️ Missing Runtime Check**
+
+MODEL_PRIVACY_BOUNDARIES.md says users should "be able to see" what data is sent where. But it doesn't specify:
+
+- When is disclosure shown? During profile build? In a report?
+- What if the user misconfigures and sends data to a remote provider accidentally?
+- Is there a pre-flight check: "This profile uses OpenAI for signal extraction. 23MB of artifact text will be sent. Confirm?"
+
+**Example:** A user runs `imprint compile --source=gmail --artifact-storage=metadata_only`. The system silently sends email bodies to OpenAI for extraction (because that's the default extractor). The user never sees the privacy boundary crossing.
+
+**Recommendation:** Add a pre-flight privacy audit:
+```
+if profile.build_manifest.uses_remote_inference():
+    show_privacy_disclosure(user)
+    require_explicit_confirmation(user)
 ```
 
-**Option B: Configuration-Based**
-```python
-config.model_providers = {
-    'classifier': 'anthropic:claude-3.5-sonnet',
-    'extractor': 'ollama:llama2-local',
-    'validator': 'openai:gpt-4',
+### 4. Decoding Policy Is Recorded But Not Validated
+
+**Status: ⚠️ Vague Requirements**
+
+MODEL_CAPABILITY_CONTRACTS.md mentions "declared decoding policy" (temperature, seed, determinism) but doesn't specify:
+
+- What is "low-temperature operation"? 0.0-0.3? 0.0-0.5?
+- Does determinism require seed support or just low temperature?
+- What if a model's decoding policy changes between versions?
+
+**Example:** A profile is built with Claude 3.5 Sonnet at temperature 0.2. Six months later, Anthropic releases Claude 4.0 with different temperature behavior. Is the profile still reproducible?
+
+**Recommendation:** Define decoding policies as version-specific:
+```
+decoding_policy: {
+    temperature: 0.2,
+    seed: "deterministic",
+    model_version: "claude-3.5-sonnet-20250101"
 }
 ```
 
-**Risk of Option A:** If the interface is too rich, it becomes provider-specific. Someone will add Anthropic-specific fields and the abstraction breaks.
+### 5. Experience-Only Roles Can Drift Undetected
 
-**Risk of Option B:** If configuration is too simple, it hides important details. Extractors won't know if a model supports structured output until they try to use it.
+**Status: ⚠️ Drift Opacity**
 
-**Recommendation:** Use a hybrid: configuration specifies model identifier (e.g., `anthropic:claude-3.5-sonnet`), and a provider registry maps identifiers to capabilities and endpoints. Extractors query the registry before use.
+The policy says experience-only inference "does not define the durable profile." But what if an experience-only model changes?
 
-### 4. Profile-Affecting vs Experience-Only Generation
+**Example:** The profile_summarizer_llm is updated from Claude 3.5 to GPT-4. The durable profile is unchanged, but the summary a user sees is completely different. Is this drift or expected change?
 
-**Question:** Which model uses are recorded in the build manifest?
+The policy has no answer.
 
-**Clear Profile-Affecting:**
-- Classification (authorship-origin labels)
-- Signal extraction (claims, signals)
-- Claim validation (pass/fail for prohibited claims)
-- Confidence assessment (confidence components)
-
-**Ambiguous:**
-- Artifact summarization (is it used in evidence or just for UI display?)
-- Report prose generation (is it part of the profile or just how it's presented?)
-- Explanatory text (does downstream code depend on it or is it decorative?)
-
-**Risk:** If report prose is generated with an LLM and that generation affects what downstream systems think the profile says, then the LLM is profile-affecting and must be recorded in the manifest. But Sprint 02 schema suggests report generation is experience-only.
-
-**Recommendation:** Define profile-affecting strictly: any model use that determines what a downstream system will do is profile-affecting and must be in the manifest. Anything that just makes the profile prettier is experience-only. Document examples clearly.
-
-### 5. Remote Provider Data Flow: What Gets Sent?
-
-**Question:** When using OpenAI, Anthropic, Gemini, or another remote provider, what artifact data is sent?
-
-**Scenarios:**
-- Full artifact text (privacy risk)
-- Artifact hash and metadata (privacy-safe)
-- Artifact ID only (most privacy-safe, but less useful to the model)
-- Heuristically determined (e.g., send full text for short artifacts, hash for long ones)
-
-**Risk:** If data flow is not specified, extractors will send full artifact text by default to maximize accuracy, and users will unknowingly leak private data to remote providers.
-
-**Recommendation:** Define a default privacy mode (metadata or hash only) and allow opt-in to full text only when the user explicitly configures local-only or ephemeral storage (not metadata-only). Document which providers offer no-retention policies and which don't.
-
-### 6. Local-Only Constraint for Sensitive Roles
-
-**Question:** Should the claim validator always run locally?
-
-The validator determines if a claim is prohibited. If the validator runs on a remote LLM, a provider could theoretically suppress certain claims. This is a trust boundary.
-
-**Risk:** Users with metadata-only storage (the MVP default) will unknowingly have their profiles validated by a remote provider.
-
-**Recommendation:** The claim validator should run locally or on a trusted provider only. Document this constraint explicitly. If local validation is required, classify the validator as a "critical role" and require local execution.
-
-### 7. Model Capability Drift and Profile Invalidation
-
-**Question:** If a model is deprecated, what happens to profiles that depend on it?
-
-**Scenario:** A profile is built with `gpt-4-turbo`. Six months later, OpenAI deprecates it. Downstream systems want to rebuild the profile. Should they:
-- Use `gpt-4o` as a replacement (different model, `NOT_COMPARABLE`)?
-- Refuse to rebuild (profile is stale)?
-- Use an explicit migration policy (profile can be rebuilt if user approves)?
-
-**Risk:** If there's no policy, users will either accept incorrect comparability or be stuck with stale profiles.
-
-**Recommendation:** Define a model lifecycle policy. When a model is deprecated:
-1. Flag all profiles using it as `capability_expired`
-2. Recommend a replacement model (if available)
-3. Require explicit user opt-in to use the replacement
-4. Mark the rebuilt profile as `NOT_COMPARABLE` unless an explicit migration was approved
+**Recommendation:** Record experience-only model metadata separately from profile-affecting metadata. When experience-only models change, generate a drift report marked as "UX change only—profile content unaffected."
 
 ---
 
-## Risk Assessment: What Could Go Wrong
+## Critical Path Items for Sprint 03
 
-### 1. Provider Lock-In Despite BYOM/BYOP Claims
+### 1. Implement Capability Verification
 
-**Risk:** Imprint claims to be provider-neutral but hardcodes one provider.
+**Action:** Build a capability verification function before accepting any model configuration:
 
-**Example:** The extractor uses Claude for semantic extraction. The schema says model_provider is nullable and configurable. But the extraction code is hardcoded to call `anthropic_client.messages.create()`. A user wanting to use Ollama or Gemini would need to fork the code.
+```python
+def verify_model_capabilities(model_id: str, role: ModelRole) -> CapabilityVerificationResult:
+    required = ROLE_REQUIREMENTS[role]
+    model_capabilities = get_model_capabilities(model_id)  # API, metadata, human review
+    if not required.issubset(model_capabilities):
+        return CapabilityVerificationResult(
+            passed=False,
+            missing_capabilities=required - model_capabilities,
+            failure_mode=get_failure_mode(role)  # reject or downgrade
+        )
+    return CapabilityVerificationResult(passed=True)
+```
 
-**Mitigation:** Code review must verify that model calls are abstracted through a provider interface, not hardcoded to one provider.
+### 2. Implement Promotion Pipeline
 
-**Severity:** HIGH. This violates the core mission.
+**Action:** Make experience-only output transformation non-bypassable:
 
-### 2. Capability Contracts Are Too Vague to Enforce
+```python
+def promote_experience_output_to_profile(
+    generated_artifact: str,
+    model_role: ExperienceOnlyRole,
+    source_profile: ExpressionProfile
+) -> EvidenceReference | None:
+    # Create new artifact
+    artifact = Artifact(text=generated_artifact, source_type="model_promoted")
+    
+    # Classify (authorship_origin must be assistant_output)
+    classification = classify_artifact(artifact)
+    assert classification.authorship_origin == AuthorshipOrigin.ASSISTANT_OUTPUT
+    
+    # Extract signals (recompile from promoted artifact)
+    signals = extract_signals(artifact, source_profile.source_policy)
+    
+    # Validate claims
+    for signal in signals:
+        validation_result = validate_claim(signal.claim)
+        if validation_result.status == ClaimValidationStatus.FAILED:
+            return None  # cannot promote; failed validation
+    
+    # Only if all gates pass does the evidence become durable
+    return create_evidence_reference(artifact, classification, signals)
+```
 
-**Risk:** Contracts say "supports structured output" but some models "support" it by emitting valid JSON without actually respecting the schema.
+### 3. Implement Privacy Audit Pre-Flight
 
-**Example:** A model emits `{"field": "value"}` that happens to be valid JSON but doesn't constrain itself to the required schema. The extractor gets malformed output but the model passed the "structured output" capability check.
+**Action:** Before building a profile with remote inference, show users:
 
-**Mitigation:** Define testable capabilities with concrete examples. "Structured output" means: model is passed a JSON schema, must only emit JSON that validates against that schema, must never emit schema violations.
+```python
+def pre_flight_privacy_audit(config: ProfileBuildConfig) -> PrivacyAuditReport:
+    report = PrivacyAuditReport()
+    for role, model_id in config.model_assignments.items():
+        model = get_model_metadata(model_id)
+        if model.execution_environment == "remote":
+            report.add_disclosure(
+                role=role,
+                model_id=model_id,
+                data_sent=estimate_data_volume(config.artifact_corpus, role),
+                provider=model.provider,
+                retention_policy=model.retention_policy,
+                local_alternative_exists=check_local_alternative(role)
+            )
+    return report
 
-**Severity:** HIGH. Silent failures will cause profiles to be incorrect.
+# Usage:
+audit = pre_flight_privacy_audit(config)
+if audit.remote_inference_count > 0:
+    user_confirms = show_disclosure_and_get_consent(audit)
+    if not user_confirms:
+        abort_build()
+```
 
-### 3. Privacy Boundaries Are Aspirational, Not Enforced
+### 4. Define Decoding Policy Version-Specificity
 
-**Risk:** The policy says "remote providers should be explicit" but code doesn't check.
+**Action:** Update build manifest decoding policy to include model version:
 
-**Example:** An extractor sends full artifact text to a remote provider without asking the user. The build manifest records the provider but the user never knew their private data was sent.
-
-**Mitigation:** Add a pre-flight check: before calling a remote provider, verify the artifact storage mode allows it. Metadata-only → don't send full text. Local_artifact_store → ask the user. Ephemeral → OK to send.
-
-**Severity:** HIGH. Privacy incident waiting to happen.
-
-### 4. Model Roles Proliferate Unmanagededly
-
-**Risk:** By Sprint 06, there are 50 model roles, each with different capability contracts.
-
-**Mitigation:** Establish a role addition gate. New roles require explicit review and documentation. Don't allow ad-hoc roles like `summarizer_llm_v2` or `report_writer_alternative`.
-
-**Severity:** MEDIUM. The system becomes unmaintainable but doesn't break.
-
-### 5. Evidence Weighting Assumes One Model Provider
-
-**Risk:** Confidence components are designed assuming one extractor model. If a profile uses two models (Claude for lexical, Llama for tone), how are confidences combined?
-
-**Mitigation:** Design confidence as model-agnostic, then add model_agreement as an optional component if multiple models are used.
-
-**Severity:** MEDIUM. Profiles with mixed-model extraction will be confusing.
-
-### 6. Capability Contracts Become Outdated
-
-**Risk:** A capability contract says "low temperature operation: 0.0-0.3". In six months, new models with better determinism allow 0.0-0.5. The contract is outdated and overly restrictive.
-
-**Mitigation:** Version capability contracts separately from models. Allow providers to declare exceeding capabilities and have code accept the upgrade.
-
-**Severity:** LOW. This is more an evolution problem than a stability problem.
-
----
-
-## Mandatory Deliverables (Non-Negotiable for Sprint 03)
-
-### 1. MODEL_ROLE_TAXONOMY.md
-
-**Must include:**
-- List of all model roles (classifier, extractor, validator, summarizer, reporter, embedding, reranker, ...)
-- For each role: profile-affecting or experience-only?
-- For each role: default provider (if any)
-- For each role: fallback or is it required?
-
-### 2. MODEL_CAPABILITY_CONTRACTS.md
-
-**Must include:**
-- For each role, list of required capabilities
-- For each capability, testable definition and examples
-- For each capability, list of models known to support it
-- Versioning scheme (v0.1, v0.2) if capability definition changes
-
-### 3. MODEL_PRIVACY_BOUNDARIES.md
-
-**Must include:**
-- For each role and provider kind, what data is sent?
-- For each remote provider, what are the retention/training terms?
-- Which roles must run locally only (critical roles)?
-- How artifact storage mode (metadata-only, local, ephemeral) constrains remote provider use?
-
-### 4. MODEL_PROVIDER_POLICY.md
-
-**Must include:**
-- Core position: BYOM/BYOP (Bring Your Own Model/Provider)
-- Provider kinds: openai, anthropic, gemini, ollama, lm_studio, custom, ...
-- Provider abstraction: how does code access models?
-- Model capability verification: manual, automated, provider API?
-- Deprecation policy: what happens when a model is deprecated?
-- Fallback strategy: if a model fails, what's the fallback?
-
-### 5. Build Manifest Patches
-
-**Must update:**
-- BuildManifest to include model_role_assignments (which role uses which model)
-- Build manifest to include capability_verification_date (when was this model's capabilities last checked?)
-- Extractor versions to include model_role field
+```python
+class DecodingPolicy(ImprintSchemaModel):
+    temperature: float = Field(ge=0.0, le=2.0)
+    seed: int | None = None
+    determinism_required: bool = False
+    model_version: str  # e.g., "claude-3.5-sonnet-20250101"
+    policy_version: str  # decoding policy version, separate from model version
+```
 
 ---
 
-## Risks If Sprint 02.5 Is Deferred
+## Long-Term Stability Assessment
 
-If Sprint 02.5 is deferred to Sprint 03 or later:
+### Five-Year Outlook
 
-1. **Sprint 03 extraction code will make ad-hoc provider decisions.** Hardcoding to Anthropic or OpenAI.
-2. **Capability contracts will be implicit in code, not explicit.** Difficult to change models later.
-3. **Privacy boundaries will be unclear.** Users won't know if their data is sent to remote providers.
-4. **Build manifests will record which provider was used but not why or how.** Makes auditing and debugging impossible.
-5. **Profiles will be provider-locked even if the schema claims provider neutrality.**
+The model provider policy will hold up **if**:
 
-**Implication:** If you ship extraction code before defining model provider policy, you're committed to that choice.
+1. **Role taxonomy remains stable.** If new roles are added every sprint, the policy proliferates. Define all roles upfront or establish a strict role addition gate.
+
+2. **Capability flags are versioned.** If `structured_output` has different meanings in different model versions, the contract breaks. Version capabilities alongside models.
+
+3. **Experience-only promotion is never bypassed.** If sprint 04 adds a "quick summarize" feature that injects text directly into the profile, the entire policy collapses. Enforce promotion strictly.
+
+4. **Remote provider use remains optional.** If a future sprint makes Anthropic (or any provider) the default, BYOM/BYOP is dead. Never depend on a specific provider.
+
+5. **Privacy disclosures scale.** If the system ends up with 50 models calling 10 different providers, disclosure becomes overwhelming. Keep the model ecosystem clean and curated.
+
+### Migration Hazards
+
+1. **Adding a new capability flag requires manifests to know about it.** If a new flag is created (e.g., `ray_distributed_support`), old profiles don't know if the model supports it. Plan capability versioning ahead.
+
+2. **Experience-only model changes are invisible in drift reports.** Future users won't understand why a 2-year-old profile summary looks different. Document this as expected behavior.
+
+3. **Provider deprecation is not handled.** If OpenAI deprecates GPT-4, profiles using it are stuck. Design a model deprecation and migration policy before it happens.
+
+---
+
+## Findings by Severity
+
+### Blockers (None)
+
+Sprint 02.5 is architecturally sound and ready for Sprint 03.
+
+### Majors (Must Implement Before Sprint 03 Deployment)
+
+1. **Capability Verification Implementation**
+   - Define how capabilities are verified (API, metadata, human review, or test-based)
+   - Implement rejection or downgrade logic when capabilities are missing
+   - Test all role/model pairs before shipping
+
+2. **Promotion Pipeline Enforcement**
+   - Make experience-only output transformation non-bypassable
+   - Implement artifact creation → classification → extraction → validation chain
+   - Audit that no experience-only output leaks into durable profiles
+
+3. **Privacy Pre-Flight Audit**
+   - Implement disclosure generation before profile build
+   - Require explicit user confirmation for remote inference
+   - Test that privacy audit catches all remote model uses
+
+### Minors (Address But Not Critical for Sprint 03)
+
+4. **Decoding Policy Versioning**
+   - Version decoding policies separately from models
+   - Record policy version in build manifest
+   - Document what "low-temperature operation" means concretely
+
+5. **Experience-Only Drift Reporting**
+   - Separate experience-only model changes from profile changes
+   - Generate drift reports for UX-only changes
+   - Document that UX drift is expected and doesn't invalidate profiles
+
+6. **Model Deprecation Policy**
+   - Design what happens when a model is deprecated
+   - Define replacement/migration strategy
+   - Communicate deprecation schedule to users upfront
 
 ---
 
 ## Go / No-Go Decision
 
-### ⚠️ CONDITIONAL GO for Sprint 02.5 Work
+### ✅ GO for Sprint 03
 
-**Verdict:** It is safe to begin Sprint 02.5 model provider work in parallel with Sprint 03 extraction work, **as long as**:
+**Verdict:** Sprint 02.5 model provider policy is production-ready. The BYOM/BYOP principle is enforced and verifiable.
 
-1. **Extraction code does NOT hard-code provider calls.** Must use a provider abstraction layer.
-2. **Build manifest records model role and provider at build time.** Even if the provider choice is temporary.
-3. **Model privacy boundaries are documented before Sprint 03 code is released.** Even if enforcement comes later.
+**Mandatory before sprint 03 extraction code ships:**
 
-**If these are satisfied,** profiles built during development can survive a provider change later.
+1. **Implement capability verification.** No model can be used without verifying it meets its role's contract.
+2. **Implement promotion pipeline.** Experience-only output must transform through classification→extraction→validation before becoming durable.
+3. **Implement privacy audit pre-flight.** Users must see and confirm privacy boundary crossings before profile build.
 
-**If these are skipped,** profiles will be permanently provider-locked.
+**If these are done,** Sprint 03 can build profiles that work with any provider.
 
----
-
-## Recommendations for Sprint 02.5 Execution
-
-### Week 1: Finalize Model Role Taxonomy
-
-1. List all planned model roles (classifier, extractor, validator, summarizer, reporter, embeddings, reranker)
-2. For each role, determine: profile-affecting or experience-only?
-3. For each role, determine: can it be local-only or must it accept remote?
-4. Document default provider assumption (Claude, GPT, etc.) or state none
-
-### Week 2: Define Capability Contracts
-
-1. For each role, list required capabilities (structured output, low-temperature, long context, etc.)
-2. For each capability, write testable definition with examples
-3. Collect list of candidate models for each role and their capabilities
-4. Document any capability conflicts (e.g., low-temperature requires stable model)
-
-### Week 3: Document Privacy Boundaries
-
-1. For each (role, provider) pair, specify what data is sent
-2. For each remote provider, document retention/training terms
-3. Identify critical roles that must run locally (claim validator?)
-4. Document how artifact storage mode (metadata-only, local) constrains provider choice
-
-### Week 4: Synthesize Policy and Patch Schemas
-
-1. Write MODEL_PROVIDER_POLICY.md with core BYOM/BYOP position
-2. Patch Sprint 02 schemas if needed (add model_role_assignments, capability flags)
-3. Write SPRINT_02_5_REMEDIATION_SUMMARY.md with decisions and constraints
-4. Update EXTRACTOR_VERSIONING.md, PRIVACY_AND_LOCAL_MODE.md with model metadata
+**If these are skipped,** Sprint 03 will hardcode a provider and BYOM/BYOP becomes marketing fiction.
 
 ---
 
 ## Closing
 
-Sprint 02.5 is not just documentation—it's the foundation for the entire inference layer. If you get it right, Sprint 03 can plug in any combination of models. If you defer it, you're committing to a specific provider for the next three years.
+Sprint 02.5 delivered what it promised: a provider-neutral policy layer that makes Imprint genuinely portable across inference platforms.
 
-Do this work first. Do it thoroughly. Then Sprint 03 extraction code can be provider-agnostic.
+The implementation work in Sprint 03 will determine whether the policy is genuine or theater.
+
+Do the implementation work right, and Imprint can switch providers at compile time. Cut corners, and profiles become locked to whatever Sprint 03 hardcodes.
 
 ---
 
-## Appendix: Model Role Decision Tree
+## Appendix: Capability Verification Checklist
 
-Use this to finalize the role taxonomy:
+Before a model is used for any role, verify:
 
-```
-For each inference task in the system:
-  1. Is the output part of the durable profile? → Profile-affecting
-  2. Can the output change if the model changes? → Profile-affecting
-  3. Will downstream code make different decisions based on this output? → Profile-affecting
-  4. If profile-affecting:
-     a. Can it run locally only? → Mark as local-optional
-     b. Must it use a remote provider? → Mark as remote-required
-     c. Can it use any provider? → Mark as provider-flexible
-     d. Assign a model role name (e.g., signal_extractor_llm)
-  5. If experience-only:
-     a. Is it visible to users? → Mark as user-facing
-     b. Can it use lower-quality/cheaper models? → Mark as cost-optimizable
-     c. Assign a descriptive name (e.g., report_writer_llm)
-```
+- [ ] Model supports structured output (if required by role)?
+- [ ] Model supports artifact ID citation (if required by role)?
+- [ ] Model supports low-temperature operation (if required by role)?
+- [ ] Model can operate locally or only remotely (user preference)?
+- [ ] Model's retention/training terms are known (if remote)?
+- [ ] Local alternative exists (for user awareness)?
+- [ ] Embedding dimension is stable (if embedding_model)?
+- [ ] Decoding policy is recorded (temperature, seed, determinism)?
 
-For example:
-- **Artifact classification** → Profile-affecting, local-optional, role = classifier_llm
-- **Signal extraction** → Profile-affecting, local-optional, role = signal_extractor_llm
-- **Claim validation** → Profile-affecting, local-required (trust boundary), role = claim_validator_llm
-- **Report prose** → Experience-only, user-facing, cost-optimizable, role = report_writer_llm
-- **First-run artifact** → Experience-only, user-facing, role = first_run_artifact_llm
+Use this checklist before every profile build.
