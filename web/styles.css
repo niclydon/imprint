@@ -1,6 +1,7 @@
-/* Imprint landing page — Sprint 10 */
+/* Imprint landing page — ai-glass-futuristic overlay, Imprint palette frozen */
 
 :root {
+  /* ── Imprint palette — frozen ───────────────────────────────────────── */
   --midnight: #111318;
   --deep-blue: #1a1d24;
   --slate: #242b33;
@@ -11,12 +12,22 @@
   --text-dim: #9aa3ad;
   --text-faint: #5c6670;
   --rule: rgba(91, 164, 207, 0.15);
-  --glass: rgba(26, 29, 36, 0.82);
   --font-heading: "Inter Tight", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --max-width: 1080px;
+
+  /* ── ai-glass-futuristic overlay (non-color DNA) ───────────────────── */
+  --glass: rgba(26, 29, 36, 0.52);
+  --glass-2: rgba(17, 19, 24, 0.34);
+  --glass-edge: rgba(255, 255, 255, 0.09);
+  --glass-edge-lit: rgba(255, 255, 255, 0.22);
+  --shadow-cine: 0 28px 80px rgba(0, 0, 0, 0.46), 0 6px 18px rgba(0, 0, 0, 0.32);
+  --shadow-lift: 0 40px 90px -28px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(126, 200, 227, 0.18);
+  --blur: 18px;
+  --t: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  --radius: 16px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *,
@@ -43,6 +54,23 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .atmos::before {
+    animation: none;
+  }
+
+  .reveal {
+    animation: none;
+  }
+
+  .lift:hover {
+    transform: none;
+  }
+
+  .lift:hover .sheen {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 body {
@@ -56,16 +84,136 @@ body {
   overflow-x: hidden;
 }
 
-body::before {
-  content: "";
+/* ── Atmosphere: cerulean/amber mesh + blueprint grid + grain ─────────── */
+
+.atmos {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.atmos::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
   background:
+    radial-gradient(42% 38% at 16% 8%, rgba(91, 164, 207, 0.28), transparent 70%),
+    radial-gradient(40% 44% at 88% 92%, rgba(212, 168, 83, 0.14), transparent 72%),
+    radial-gradient(30% 30% at 78% 14%, rgba(126, 200, 227, 0.1), transparent 70%);
+  filter: saturate(120%);
+  animation: drift 22s ease-in-out infinite alternate;
+}
+
+.atmos::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-image:
     linear-gradient(rgba(91, 164, 207, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(91, 164, 207, 0.04) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 80%);
+  mask-image: radial-gradient(120% 90% at 50% 0%, #000 35%, transparent 90%);
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+@keyframes drift {
+  to {
+    transform: translate3d(2.5%, -2%, 0) scale(1.06);
+  }
+}
+
+/* ── Glass primitive ──────────────────────────────────────────────────── */
+
+.glass {
+  position: relative;
+  background: linear-gradient(160deg, var(--glass), var(--glass-2));
+  backdrop-filter: blur(var(--blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(140%);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-cine);
+}
+
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--glass-edge-lit), transparent 26%);
+  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  mask-composite: exclude;
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  padding: 1px;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: var(--deep-blue);
+  }
+}
+
+.lift {
+  transition: transform var(--t), box-shadow var(--t), border-color var(--t);
+}
+
+.lift:hover {
+  transform: translateY(-6px);
+  border-color: rgba(126, 200, 227, 0.4);
+  box-shadow: var(--shadow-lift);
+}
+
+.sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity var(--t);
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.14) 50%, transparent 62%);
+  transform: translateX(-30%);
+}
+
+.lift:hover .sheen {
+  opacity: 1;
+  animation: sweep 900ms ease;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-60%);
+  }
+  to {
+    transform: translateX(60%);
+  }
+}
+
+.reveal {
+  animation: rise var(--t) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 ::selection {
@@ -105,10 +253,11 @@ a:focus-visible {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--glass);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(160deg, rgba(26, 29, 36, 0.72), rgba(17, 19, 24, 0.55));
+  backdrop-filter: blur(var(--blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(140%);
+  border-bottom: 1px solid var(--glass-edge);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
 }
 
 .header-inner {
@@ -134,6 +283,7 @@ a:focus-visible {
 .brand img {
   width: 28px;
   height: 28px;
+  filter: drop-shadow(0 0 8px rgba(91, 164, 207, 0.35));
 }
 
 .nav-links {
@@ -152,6 +302,7 @@ a:focus-visible {
 
 .nav-links a:hover {
   color: var(--electric);
+  text-shadow: 0 0 12px rgba(91, 164, 207, 0.35);
 }
 
 .status-pill {
@@ -168,6 +319,7 @@ a:focus-visible {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+  box-shadow: 0 0 16px rgba(212, 168, 83, 0.12);
 }
 
 .status-pill::before {
@@ -176,6 +328,7 @@ a:focus-visible {
   height: 6px;
   border-radius: 50%;
   background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
   animation: pulse 2.5s ease-in-out infinite;
 }
 
@@ -208,25 +361,45 @@ a:focus-visible {
   height: 100%;
   object-fit: cover;
   object-position: center 40%;
-  opacity: 0.32;
+  opacity: 0.38;
+  filter: contrast(1.22) saturate(1.08);
+}
+
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    var(--midnight) 0%,
+    rgba(17, 19, 24, 0.35) 35%,
+    rgba(17, 19, 24, 0.55) 65%,
+    var(--midnight) 100%
+  );
 }
 
 .hero-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--midnight) 0%,
-    rgba(17, 19, 24, 0.4) 35%,
-    rgba(17, 19, 24, 0.6) 65%,
-    var(--midnight) 100%
-  );
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  background: radial-gradient(120% 80% at 50% -8%, rgba(255, 255, 255, 0.14), transparent 46%);
 }
 
 .hero-content {
   position: relative;
   z-index: 1;
+  text-align: center;
+}
+
+.hero-panel {
+  display: inline-block;
+  padding: 2.5rem 2rem;
+  max-width: 52rem;
   text-align: center;
 }
 
@@ -247,6 +420,7 @@ a:focus-visible {
   letter-spacing: -0.02em;
   max-width: 18ch;
   margin: 0 auto 1.25rem;
+  text-shadow: 0 0 40px rgba(91, 164, 207, 0.12);
 }
 
 .hero-lead {
@@ -269,36 +443,40 @@ a:focus-visible {
   align-items: center;
   gap: 0.4rem;
   padding: 0.65rem 1.25rem;
-  border-radius: 6px;
+  border-radius: 999px;
   font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  transition: all 0.25s var(--ease);
+  transition: all var(--t);
 }
 
 .btn-primary {
-  background: var(--electric);
+  background: linear-gradient(135deg, var(--electric), var(--cyan));
   color: var(--midnight);
-  border: 1px solid var(--electric);
+  border: 1px solid rgba(126, 200, 227, 0.5);
+  box-shadow: 0 0 24px rgba(91, 164, 207, 0.28);
 }
 
 .btn-primary:hover {
-  background: var(--cyan);
-  border-color: var(--cyan);
+  box-shadow: 0 0 32px rgba(126, 200, 227, 0.42);
+  transform: translateY(-2px);
   color: var(--midnight);
 }
 
 .btn-secondary {
-  background: transparent;
+  background: linear-gradient(160deg, var(--glass), var(--glass-2));
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: var(--white);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--glass-edge);
 }
 
 .btn-secondary:hover {
-  border-color: var(--electric);
-  color: var(--electric);
+  border-color: rgba(126, 200, 227, 0.4);
+  color: var(--cyan);
+  box-shadow: 0 0 20px rgba(91, 164, 207, 0.15);
 }
 
 .hero-tagline {
@@ -342,9 +520,6 @@ a:focus-visible {
 /* ─── Pipeline ─── */
 
 .pipeline {
-  background: var(--deep-blue);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
   padding: 1.5rem;
   overflow-x: auto;
 }
@@ -369,7 +544,7 @@ a:focus-visible {
   gap: 0.5rem 1.5rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--glass-edge);
 }
 
 .principle {
@@ -395,10 +570,9 @@ a:focus-visible {
 }
 
 .outcomes li {
+  position: relative;
+  overflow: hidden;
   padding: 0.85rem 1rem;
-  background: var(--deep-blue);
-  border: 1px solid var(--rule);
-  border-radius: 6px;
   font-size: 0.9rem;
   color: var(--text-dim);
 }
@@ -424,9 +598,8 @@ a:focus-visible {
 }
 
 .compare-panel {
-  background: var(--deep-blue);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
   padding: 1.5rem;
 }
 
@@ -466,7 +639,7 @@ a:focus-visible {
   padding: 1rem 1.25rem;
   background: rgba(212, 168, 83, 0.08);
   border-left: 3px solid var(--amber);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
   color: var(--text-dim);
   font-size: 0.92rem;
 }
@@ -484,9 +657,8 @@ a:focus-visible {
 }
 
 .diff-card {
-  background: var(--deep-blue);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
   padding: 1.25rem;
 }
 
@@ -514,10 +686,9 @@ a:focus-visible {
 }
 
 .privacy-item {
+  position: relative;
+  overflow: hidden;
   padding: 1.25rem;
-  background: var(--slate);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
 }
 
 .privacy-item h3 {
@@ -535,9 +706,6 @@ a:focus-visible {
 /* ─── Status banner ─── */
 
 .status-banner {
-  background: linear-gradient(135deg, var(--deep-blue) 0%, var(--slate) 100%);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
   padding: 2rem;
   text-align: center;
 }
@@ -592,6 +760,15 @@ a:focus-visible {
   color: var(--text-faint);
 }
 
+/* ─── Staggered reveal delays ─── */
+
+.reveal-1 { animation-delay: 0.05s; }
+.reveal-2 { animation-delay: 0.1s; }
+.reveal-3 { animation-delay: 0.15s; }
+.reveal-4 { animation-delay: 0.2s; }
+.reveal-5 { animation-delay: 0.25s; }
+.reveal-6 { animation-delay: 0.3s; }
+
 /* ─── Mobile nav ─── */
 
 @media (max-width: 768px) {
@@ -601,5 +778,9 @@ a:focus-visible {
 
   .hero {
     padding: 3rem 0 2rem;
+  }
+
+  .hero-panel {
+    padding: 1.75rem 1.25rem;
   }
 }

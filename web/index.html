@@ -33,6 +33,9 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <div class="atmos" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
   <header class="site-header">
     <div class="container header-inner">
       <a href="#" class="brand" aria-label="Imprint home">
@@ -56,21 +59,23 @@
         <img src="/hero.webp" alt="" width="1600" height="900">
       </div>
       <div class="container hero-content">
-        <p class="eyebrow">Evidence<span class="amber">.</span> Expression<span class="amber">.</span> Identity<span class="amber">.</span></p>
-        <h1 id="hero-heading">Public-first identity and expression profile compiler</h1>
-        <p class="hero-lead">
-          Imprint analyzes human-authored artifacts — writing, messages, transcripts, notes, and documents —
-          then compiles structured expression profiles that downstream systems can use without reading the raw private corpus.
-        </p>
-        <div class="hero-ctas">
-          <a href="https://github.com/niclydon/imprint" class="btn btn-primary">View on GitHub</a>
-          <a href="https://github.com/niclydon/imprint/tree/main/docs" class="btn btn-secondary">Read the docs</a>
+        <div class="hero-panel glass reveal">
+          <p class="eyebrow">Evidence<span class="amber">.</span> Expression<span class="amber">.</span> Identity<span class="amber">.</span></p>
+          <h1 id="hero-heading">Public-first identity and expression profile compiler</h1>
+          <p class="hero-lead">
+            Imprint analyzes human-authored artifacts — writing, messages, transcripts, notes, and documents —
+            then compiles structured expression profiles that downstream systems can use without reading the raw private corpus.
+          </p>
+          <div class="hero-ctas">
+            <a href="https://github.com/niclydon/imprint" class="btn btn-primary">View on GitHub</a>
+            <a href="https://github.com/niclydon/imprint/tree/main/docs" class="btn btn-secondary">Read the docs</a>
+          </div>
+          <p class="hero-tagline">Open-source · Local-first · MIT License</p>
         </div>
-        <p class="hero-tagline">Open-source · Local-first · MIT License</p>
       </div>
     </section>
 
-    <section id="about" class="section">
+    <section id="about" class="section reveal reveal-1">
       <div class="container">
         <p class="section-eyebrow">What it is</p>
         <h2>Evidence in<span class="amber">,</span> portable profiles out</h2>
@@ -80,7 +85,7 @@
           without direct corpus access.
         </p>
 
-        <div id="pipeline" class="pipeline" role="img" aria-label="Imprint processing pipeline">
+        <div id="pipeline" class="pipeline glass" role="img" aria-label="Imprint processing pipeline">
           <pre>configured sources
   <span class="arrow">-></span> harvest
   <span class="arrow">-></span> classify
@@ -90,12 +95,12 @@
         </div>
 
         <ul class="outcomes">
-          <li>Writing tools and drafting assistants</li>
-          <li>Publishing systems and content workflows</li>
-          <li>Agent personas and downstream consumers</li>
-          <li>Aesthetic and identity packs</li>
-          <li>Profile comparison and drift analysis</li>
-          <li>First-run "What Imprint Learned" reports</li>
+          <li class="glass lift reveal reveal-2"><span class="sheen" aria-hidden="true"></span>Writing tools and drafting assistants</li>
+          <li class="glass lift reveal reveal-3"><span class="sheen" aria-hidden="true"></span>Publishing systems and content workflows</li>
+          <li class="glass lift reveal reveal-4"><span class="sheen" aria-hidden="true"></span>Agent personas and downstream consumers</li>
+          <li class="glass lift reveal reveal-5"><span class="sheen" aria-hidden="true"></span>Aesthetic and identity packs</li>
+          <li class="glass lift reveal reveal-6"><span class="sheen" aria-hidden="true"></span>Profile comparison and drift analysis</li>
+          <li class="glass lift reveal reveal-6"><span class="sheen" aria-hidden="true"></span>First-run "What Imprint Learned" reports</li>
         </ul>
 
         <div class="principles">
@@ -108,7 +113,7 @@
       </div>
     </section>
 
-    <section id="boundaries" class="section">
+    <section id="boundaries" class="section reveal reveal-2">
       <div class="container">
         <p class="section-eyebrow">What it is not</p>
         <h2>Clear boundaries<span class="amber">,</span> honest claims</h2>
@@ -118,7 +123,8 @@
         </p>
 
         <div class="compare-grid">
-          <div class="compare-panel is">
+          <div class="compare-panel is glass lift">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Imprint is</h3>
             <ul>
               <li>An expression profile compiler</li>
@@ -128,7 +134,8 @@
               <li>Local-first by default</li>
             </ul>
           </div>
-          <div class="compare-panel not">
+          <div class="compare-panel not glass lift">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Imprint is not</h3>
             <ul>
               <li>A memory system or data lake</li>
@@ -148,7 +155,7 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section reveal reveal-3">
       <div class="container">
         <p class="section-eyebrow">Why it matters</p>
         <h2>Portable profiles<span class="amber">,</span> not pasted prompts</h2>
@@ -164,19 +171,23 @@
         </p>
 
         <div class="diff-cards">
-          <article class="diff-card">
+          <article class="diff-card glass lift reveal reveal-2">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Writing assistants</h3>
             <p>Optimize for immediate draft generation. Imprint produces the durable profile contract those tools can consume.</p>
           </article>
-          <article class="diff-card">
+          <article class="diff-card glass lift reveal reveal-3">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Memory systems</h3>
             <p>Store facts and preferences for agents. Imprint compiles expression signals — it does not compete as a memory store.</p>
           </article>
-          <article class="diff-card">
+          <article class="diff-card glass lift reveal reveal-4">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Digital twins</h3>
             <p>Simulate conversation and delegation. Imprint stays bounded to evidence-backed expression, not persona simulation.</p>
           </article>
-          <article class="diff-card">
+          <article class="diff-card glass lift reveal reveal-5">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Brand voice tools</h3>
             <p>Enforce approved language in enterprise workflows. Imprint exports portable profiles; downstream adapters own generation.</p>
           </article>
@@ -184,7 +195,7 @@
       </div>
     </section>
 
-    <section id="privacy" class="section">
+    <section id="privacy" class="section reveal reveal-4">
       <div class="container">
         <p class="section-eyebrow">Privacy</p>
         <h2>Local-first<span class="amber">,</span> public-safe by design</h2>
@@ -194,19 +205,23 @@
         </p>
 
         <div class="privacy-grid">
-          <article class="privacy-item">
+          <article class="privacy-item glass lift">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>No credentials required</h3>
             <p>Default local mode runs without cloud providers, private connectors, or network calls. Synthetic examples power public demos.</p>
           </article>
-          <article class="privacy-item">
+          <article class="privacy-item glass lift">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>BYOM / BYOP</h3>
             <p>Bring your own model and provider. Remote inference is optional, visible when used, and never required for basic operation.</p>
           </article>
-          <article class="privacy-item">
+          <article class="privacy-item glass lift">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Export modes</h3>
             <p>Public-safe exports contain no raw private text. Richer metadata and excerpts exist only in ignored local paths you control.</p>
           </article>
-          <article class="privacy-item">
+          <article class="privacy-item glass lift">
+            <span class="sheen" aria-hidden="true"></span>
             <h3>Fail closed</h3>
             <p>Public-safe mode rejects raw examples. Provider secrets, private URLs, and account identifiers never belong in canonical schemas.</p>
           </article>
@@ -214,9 +229,9 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section reveal reveal-5">
       <div class="container">
-        <div class="status-banner">
+        <div class="status-banner glass">
           <p class="section-eyebrow" style="margin-bottom: 0.5rem;">Status</p>
           <h2>Pre-release / active development</h2>
           <p>

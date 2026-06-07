@@ -1,5 +1,14 @@
 # Imprint Changelog
 
+## Sprint 10: ai-glass-futuristic overlay — 2026-06-07
+
+**Decision:** Apply `ai-glass-futuristic` structural DNA (glassmorphism, atmosphere, cinematic depth, motion) to the Imprint landing page while keeping the existing Imprint palette frozen. Register the result as Mosvera aesthetic `imprint`.
+
+**What changed:**
+
+- `web/styles.css` and `web/index.html`: glass surfaces, cerulean/amber atmosphere mesh, grain, spotlit hero, lift/sheen hovers, staggered reveal.
+- Mosvera registry: `~/.config/mosvera/registry/template.imprint-base.json` and `composition.imprint.json`.
+
 ## Sprint 10: Public Web Presence — 2026-06-07
 
 **Decision:** Ship a single-page static landing site at `imprint.niclydon.dev` for project communication and social sharing — not an application UI.
