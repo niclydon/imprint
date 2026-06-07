@@ -691,23 +691,31 @@ body.nav-open {
   margin-bottom: 2rem;
 }
 
-/* ─── Pipeline ─── */
+/* ─── Pipeline diagram ─── */
 
-.pipeline {
-  padding: 1.5rem;
-  overflow-x: auto;
+.pipeline-visual {
+  padding: 0.65rem;
+  overflow: hidden;
+  margin-top: 0.25rem;
 }
 
-.pipeline pre {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  line-height: 1.8;
-  color: var(--cyan);
-  white-space: pre;
+.pipeline-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--radius) - 6px);
 }
 
-.pipeline .arrow {
-  color: var(--amber);
+.pipeline-img--light {
+  display: none;
+}
+
+[data-theme="light"] .pipeline-img--dark {
+  display: none;
+}
+
+[data-theme="light"] .pipeline-img--light {
+  display: block;
 }
 
 /* ─── Principles strip ─── */
@@ -1013,9 +1021,6 @@ body.nav-open {
     gap: 0.5rem;
   }
 
-  .pipeline pre {
-    font-size: 0.74rem;
-  }
 }
 
 @media (max-width: 520px) {
