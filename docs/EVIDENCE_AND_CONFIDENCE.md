@@ -57,6 +57,11 @@ Recommended components:
 
 A single display confidence may exist, but it should be derived from named components.
 
+Sprint 04 artifact classification uses a versioned deterministic confidence model. The baseline
+components are attribution, authorship-origin confidence, evidence strength, source reliability,
+policy fit, contamination penalty, and a derived display score. If these formulas change, the
+classifier should version the model rather than silently redefining old results.
+
 ## Authorship-Origin Policy
 
 Authorship origin means the best-supported classification from available evidence.
@@ -71,6 +76,11 @@ Allowed evidence:
 - user-provided source policy
 - template or notification markers
 - quote/forward parsing
+
+Adapter-provided metadata is upstream source evidence, not final classification truth. Hints such
+as `authorship_origin`, `authorship_confidence`, `classification_label`, and record-level
+`artifact_type` must be re-assessed by classification logic before they influence durable profile
+claims or validation outcomes.
 
 Disallowed claim:
 

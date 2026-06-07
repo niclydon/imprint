@@ -36,6 +36,8 @@ May include raw excerpts only when explicitly enabled. Not for commit or CI.
 - public fixtures must be synthetic
 - public-safe mode must fail closed on raw examples
 - cloud providers are optional, never required for default local behavior
+- exported source identifiers must be opaque and must not reveal local filesystem paths
+- adapter metadata hints are not ground truth and must be re-classified before profile compilation
 
 ## Sprint 02.5 Model Provider Boundaries
 

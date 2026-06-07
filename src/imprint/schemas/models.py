@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, model_validator
@@ -43,6 +44,7 @@ class ArtifactClassificationLabel(StrEnum):
 class AuthorshipOrigin(StrEnum):
     UNKNOWN_SPEAKER = "unknown_speaker"
     QUOTED_OR_FORWARDED = "quoted_or_forwarded"
+    TEMPLATE_OR_NOTIFICATION = "template_or_notification"
     MISSING_METADATA = "missing_metadata"
     SUSPECTED_AI_ASSISTED = "suspected_ai_assisted"
     PARSER_UNCERTAIN = "parser_uncertain"
@@ -267,6 +269,68 @@ class Artifact(ImprintSchemaModel):
     reference: ArtifactReference
     storage_policy: ArtifactStoragePolicy = Field(default_factory=ArtifactStoragePolicy)
     classification: ArtifactClassification
+    source_hints: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def source_hints_are_export_safe(self) -> Artifact:
+        forbidden_hint_keys = {"raw_text", "content", "text", "source_path", "local_path", "filepath"}
+        path_pattern = re.compile(r"^(?:/|[A-Za-z]:[\\/])")
+        for key, value in self.source_hints.items():
+            lowered = key.lower()
+            if lowered in forbidden_hint_keys or "path" in lowered:
+                raise ValueError("source_hints cannot include raw text or filesystem paths")
+            if isinstance(value, str) and path_pattern.match(value):
+                raise ValueError("source_hints cannot include filesystem paths")
+        return self
+
+
+class ClassificationEvidence(ImprintSchemaModel):
+    artifact_id: str = Field(min_length=1)
+    source_id: str = Field(min_length=1)
+    source_type: str = Field(min_length=1)
+    source_hints_considered: dict[str, Any] = Field(default_factory=dict)
+    rule_ids: list[str] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
+    evidence_summary: str = Field(min_length=1)
+    quote_or_forward_likelihood: float = Field(ge=0, le=1)
+    template_or_notification_likelihood: float = Field(ge=0, le=1)
+    assistant_output_likelihood: float = Field(ge=0, le=1)
+    contamination_risk: float = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def evidence_uses_opaque_source_id(self) -> ClassificationEvidence:
+        if self.source_id.startswith("/") or re.match(r"^[A-Za-z]:[\\/]", self.source_id):
+            raise ValueError("classification evidence cannot expose filesystem paths")
+        return self
+
+
+class ClassificationConfidence(ImprintSchemaModel):
+    model_version: str = Field(min_length=1)
+    attribution: float = Field(ge=0, le=1)
+    authorship_origin: float = Field(ge=0, le=1)
+    evidence_strength: float = Field(ge=0, le=1)
+    source_reliability: float = Field(ge=0, le=1)
+    policy_fit: float = Field(ge=0, le=1)
+    contamination_penalty: float = Field(ge=0, le=1)
+    display: float = Field(ge=0, le=1)
+
+
+class ArtifactClassificationResult(ImprintSchemaModel):
+    artifact_id: str = Field(min_length=1)
+    source_id: str = Field(min_length=1)
+    source_type: str = Field(min_length=1)
+    artifact_type: ArtifactType
+    classification: ArtifactClassification
+    evidence: ClassificationEvidence
+    confidence: ClassificationConfidence
+
+    @model_validator(mode="after")
+    def result_ids_remain_consistent(self) -> ArtifactClassificationResult:
+        if self.artifact_id != self.evidence.artifact_id:
+            raise ValueError("classification result and evidence artifact_id must match")
+        if self.source_id != self.evidence.source_id:
+            raise ValueError("classification result and evidence source_id must match")
+        return self
 
 
 class SourcePolicy(ImprintSchemaModel):

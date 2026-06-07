@@ -69,5 +69,8 @@ class LocalTranscriptJsonAdapter(SourceAdapter):
             artifact_id_hint=str(segment["artifact_id"]) if isinstance(segment.get("artifact_id"), str) else None,
             authorship_origin=authorship_origin,
             authorship_confidence=0.75 if authorship_origin == AuthorshipOrigin.HUMAN_ORIGIN else 0.4,
-            metadata={"speaker": speaker} if isinstance(speaker, str) else {},
+            metadata={
+                "artifact_type_hint": ArtifactType.TRANSCRIPT_SEGMENT.value,
+                "speaker_present": isinstance(speaker, str),
+            },
         )

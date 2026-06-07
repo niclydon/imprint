@@ -28,6 +28,9 @@ Those requirements need access to source text or a deliberate decision not to pr
 
 Stores artifact metadata, classifications, evidence references, and hashes, but not raw text.
 
+Local adapters may read raw text into memory briefly for hashing and normalization, but `metadata_only`
+mode must not persist that raw text to disk, tracked fixtures, exports, or canonical profile objects.
+
 Use when:
 
 - source systems are easy to re-harvest
@@ -113,6 +116,14 @@ Profiles should reference evidence through non-raw support metadata by default:
 - extraction run IDs
 - content hash or text fingerprint
 - included/quarantined/excluded status
+
+Source IDs should be opaque and stable. They must not expose local filesystem paths, hostnames, or
+directory names in canonical or public-safe exports. If a future local/private audit surface needs
+the original path, it must keep that locator outside exported canonical artifacts.
+
+Adapter-provided metadata such as artifact type, authorship origin, authorship confidence, or
+pre-labeled inclusion state is advisory source metadata only. Sprint 04 classification and
+validation must re-assess those hints before durable profile use.
 
 Public-safe exports must not include raw artifact text. Private-local reports may include redacted
 excerpts. Full-local reports may include raw excerpts only when explicitly enabled.

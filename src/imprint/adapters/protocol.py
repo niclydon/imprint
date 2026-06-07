@@ -17,6 +17,12 @@ from imprint.schemas import (
 
 @dataclass(frozen=True)
 class ArtifactEnvelope:
+    """Adapter-local artifact payload before normalization.
+
+    Fields such as authorship/classification/type may reflect upstream source hints.
+    Downstream classification must re-assess them before durable profile use.
+    """
+
     source_type: str
     source_id: str
     content: str

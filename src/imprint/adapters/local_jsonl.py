@@ -58,9 +58,6 @@ class LocalJsonlAdapter(SourceAdapter):
                 f"jsonl payload in {file_path} line {line_number} is missing text content"
             )
 
-        artifact_type = self._artifact_type(payload.get("artifact_type"))
-        authorship_origin = self._authorship_origin(payload.get("authorship_origin"))
-        classification_label = self._classification_label(payload.get("classification_label"))
         timestamp = parse_timestamp(payload.get("timestamp")) if payload.get("timestamp") is not None else None
 
         source_id = str(payload.get("source_id") or f"{file_path.as_posix()}#line:{line_number}")
@@ -77,12 +74,13 @@ class LocalJsonlAdapter(SourceAdapter):
             source_type=self.source_type,
             source_id=source_id,
             content=content.strip(),
-            artifact_type=artifact_type,
+            artifact_type=ArtifactType.DOCUMENT,
             timestamp=timestamp,
             artifact_id_hint=artifact_id_hint,
-            classification_label=classification_label,
-            authorship_origin=authorship_origin,
-            authorship_confidence=float(authorship_confidence),
+            classification_label=ArtifactClassificationLabel.INCLUDED,
+            authorship_origin=AuthorshipOrigin.MISSING_METADATA,
+            authorship_confidence=0.5,
+            metadata=self._hint_metadata(payload, float(authorship_confidence)),
         )
 
     def _artifact_type(self, value: object) -> ArtifactType:
@@ -108,3 +106,20 @@ class LocalJsonlAdapter(SourceAdapter):
             return ArtifactClassificationLabel(str(value))
         except ValueError as exc:
             raise InvalidArtifactPayloadError(f"unsupported classification_label: {value}") from exc
+
+    def _hint_metadata(
+        self,
+        payload: dict[str, object],
+        authorship_confidence: float,
+    ) -> dict[str, object]:
+        metadata: dict[str, object] = {}
+        if payload.get("artifact_type") is not None:
+            metadata["artifact_type_hint"] = self._artifact_type(payload.get("artifact_type")).value
+        if payload.get("authorship_origin") is not None:
+            metadata["authorship_origin_hint"] = self._authorship_origin(payload.get("authorship_origin")).value
+            metadata["authorship_confidence_hint"] = authorship_confidence
+        if payload.get("classification_label") is not None:
+            metadata["classification_label_hint"] = self._classification_label(
+                payload.get("classification_label")
+            ).value
+        return metadata

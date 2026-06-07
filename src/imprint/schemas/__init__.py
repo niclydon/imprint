@@ -1,6 +1,7 @@
 from imprint.schemas.models import (
     Artifact,
     ArtifactClassification,
+    ArtifactClassificationResult,
     ArtifactClassificationLabel,
     ArtifactReference,
     ArtifactStorageMode,
@@ -14,6 +15,8 @@ from imprint.schemas.models import (
     ClaimValidation,
     ClaimValidationMethod,
     ClaimValidationStatus,
+    ClassificationConfidence,
+    ClassificationEvidence,
     ComparabilityLabel,
     ComparabilityReason,
     ComparabilityResult,
@@ -45,6 +48,7 @@ from imprint.schemas.models import (
 __all__ = [
     "Artifact",
     "ArtifactClassification",
+    "ArtifactClassificationResult",
     "ArtifactClassificationLabel",
     "ArtifactReference",
     "ArtifactStorageMode",
@@ -58,6 +62,8 @@ __all__ = [
     "ClaimValidation",
     "ClaimValidationMethod",
     "ClaimValidationStatus",
+    "ClassificationConfidence",
+    "ClassificationEvidence",
     "ComparabilityLabel",
     "ComparabilityReason",
     "ComparabilityResult",

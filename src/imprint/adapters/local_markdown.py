@@ -28,6 +28,7 @@ class LocalMarkdownAdapter(SourceAdapter):
                     content=self._normalize_markdown(raw),
                     artifact_type=ArtifactType.DOCUMENT,
                     authorship_origin=AuthorshipOrigin.MISSING_METADATA,
+                    metadata={"artifact_type_hint": ArtifactType.DOCUMENT.value},
                 )
             )
         return artifacts

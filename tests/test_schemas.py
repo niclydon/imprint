@@ -4,7 +4,9 @@ import pytest
 from pydantic import ValidationError
 
 from imprint.schemas import (
+    Artifact,
     ArtifactClassificationLabel,
+    ArtifactClassificationResult,
     ArtifactReference,
     ArtifactStoragePolicy,
     AuthorshipOrigin,
@@ -14,6 +16,7 @@ from imprint.schemas import (
     ClaimValidation,
     ClaimValidationMethod,
     ClaimValidationStatus,
+    ClassificationEvidence,
     ComparabilityLabel,
     ComparabilityResult,
     Confidence,
@@ -184,6 +187,7 @@ def test_unknown_authorship_is_not_a_single_unknown_bucket() -> None:
     assert {
         "unknown_speaker",
         "quoted_or_forwarded",
+        "template_or_notification",
         "missing_metadata",
         "suspected_ai_assisted",
         "parser_uncertain",
@@ -284,6 +288,61 @@ def test_build_manifest_records_profile_affecting_model_invocations() -> None:
     assert invocation["execution_environment"] == "remote"
     assert invocation["decoding_policy"]["temperature"] == 0.0
     assert "json_schema_output" in invocation["capabilities"]
+
+
+def test_artifact_source_hints_reject_filesystem_paths() -> None:
+    with pytest.raises(ValidationError, match="source_hints cannot include raw text or filesystem paths"):
+        Artifact(
+            artifact_id="artifact-with-path-hint",
+            reference=artifact_ref(),
+            storage_policy=ArtifactStoragePolicy(),
+            classification={
+                "classification_id": "classification-1",
+                "label": "included",
+                "authorship_origin": "human_origin",
+                "authorship_confidence": 0.9,
+            },
+            source_hints={"local_path": "/home/user/private.txt"},
+        )
+
+
+def test_classification_result_requires_opaque_source_id() -> None:
+    with pytest.raises(ValidationError, match="classification evidence cannot expose filesystem paths"):
+        ArtifactClassificationResult(
+            artifact_id="artifact-1",
+            source_id="source-1",
+            source_type="local_text",
+            artifact_type="document",
+            classification={
+                "classification_id": "classification-1",
+                "label": "quarantined",
+                "authorship_origin": "missing_metadata",
+                "authorship_confidence": 0.4,
+            },
+            evidence=ClassificationEvidence(
+                artifact_id="artifact-1",
+                source_id="/home/user/private.txt",
+                source_type="local_text",
+                source_hints_considered={"artifact_type_hint": "document"},
+                rule_ids=["test-rule"],
+                limitations=["synthetic limitation"],
+                evidence_summary="Synthetic classification evidence.",
+                quote_or_forward_likelihood=0.0,
+                template_or_notification_likelihood=0.0,
+                assistant_output_likelihood=0.0,
+                contamination_risk=0.4,
+            ),
+            confidence={
+                "model_version": "sprint04-rule-v1",
+                "attribution": 0.95,
+                "authorship_origin": 0.4,
+                "evidence_strength": 0.5,
+                "source_reliability": 0.6,
+                "policy_fit": 1.0,
+                "contamination_penalty": 0.4,
+                "display": 0.45,
+            },
+        )
 
 
 def test_experience_only_roles_do_not_enter_build_manifest_invocations() -> None:
