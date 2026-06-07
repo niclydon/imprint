@@ -202,10 +202,11 @@
 - **CLI command** (`imprint export-profile`): Added local compile-and-export flow for `json`, `markdown`, `first-run`, and `mosvera` formats.
 - **Tests** (`tests/test_exports.py`): Added coverage for determinism, privacy, claim gates, bounded-interpretation policy gates, source opacity, signal-version compatibility, first-run source discipline, Mosvera boundary, and CLI smoke paths.
 - **Documentation**: Added `docs/EXPORT_FORMATS.md`, `docs/FIRST_RUN_OUTPUT.md`, `docs/MOSVERA_INTEGRATION.md`, Sprint 07 narrative, and `docs/SPRINT_07_ARCHITECTURE_REVIEW.md`; updated export, first-run, derived-profile, README, and Sprint 07 docs.
+- **Public narrative** (`web/index.html`): Added a landing-page export-contract section for canonical JSON, Markdown, first-run output, and Mosvera overlay boundaries.
 
 **What remains out of scope:**
 
-- LLM calls, remote APIs, prompt generation, publishing workflows, Broadside integration, Mosvera runtime behavior, web UI changes, demo article generation, and raw evidence export.
+- LLM calls, remote APIs, prompt generation, publishing workflows, Broadside integration, Mosvera runtime behavior, application UI, demo article generation, and raw evidence export.
 
 **Validation:** `pytest -q` passes with 71 tests. Direct CLI smoke was run for all four export formats with `PYTHONPATH=src python3 -m imprint.cli export-profile ...`.
 

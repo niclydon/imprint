@@ -2,6 +2,20 @@
 
 The adversarial review of Sprint 06 profile compiler implementation examined the boundary between artifact-level signal aggregation and profile-level compilation. The compiler successfully enforces strict eligibility gates, preserves the full evidence chain with version metadata, and prevents claim-level violations from silently entering durable support. All seven architectural gates passed; the compiler is ready for Sprint 07 export and first-run experience work.
 
+## Prompt Provenance
+
+This review is anchored to the original Sprint 06 implementation prompt:
+`docs/sprints/SPRINT_06_PROMPT.md`.
+
+The prompt defined the Sprint 06 mission as deterministic profile compilation from durable
+artifact-level signals into conservative, evidence-backed expression profiles. It explicitly forbade
+first-run reports, demo artifacts, publishing prompts, downstream writing instructions, remote APIs,
+LLM calls, embeddings, provider-specific code, psychological inference, and raw private text in
+public-safe output.
+
+The review below evaluates whether the implementation satisfied that original contract rather than
+retroactively judging Sprint 06 against later Sprint 07 export requirements.
+
 ## The Seven Architectural Gates
 
 The Sprint 06 adversarial review focused on seven dimensions, each with explicit pass/fail criteria:
