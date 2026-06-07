@@ -1,5 +1,14 @@
 # Imprint Changelog
 
+## Sprint 10: Forge OG image — 2026-06-07
+
+**Decision:** Replace the ImageMagick-cropped `og.png` with a Forge-generated social card in the Imprint glass aesthetic.
+
+**What changed:**
+
+- `web/og.png` — new 1200×630 image via Forge `openai:gpt-image-2` (img2img from `imprint-hero.png`, strength 0.35).
+- `web/og-gen.json` — generation metadata.
+
 ## Sprint 10: ai-glass-futuristic overlay — 2026-06-07
 
 **Decision:** Apply `ai-glass-futuristic` structural DNA (glassmorphism, atmosphere, cinematic depth, motion) to the Imprint landing page while keeping the existing Imprint palette frozen. Register the result as Mosvera aesthetic `imprint`.

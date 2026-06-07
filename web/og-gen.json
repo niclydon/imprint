@@ -1,0 +1,16 @@
+{
+  "asset": "og.png",
+  "role": "imprint.niclydon.dev Open Graph / Twitter card",
+  "model_used": "openai:gpt-image-2-q8",
+  "dispatch_tier": "cloud-openai",
+  "size_requested": "1536x1024",
+  "size_final": "1200x630",
+  "preference": "quality",
+  "init_img": "docs/assets/imprint-hero.png",
+  "init_strength": 0.35,
+  "aesthetic": "imprint (ai-glass-futuristic overlay, Imprint palette frozen)",
+  "intent": "Abstract glass-futuristic OG card: evidence fragments and provenance lines converging into a layered holographic blueprint structure. Cerulean/cyan glow with amber confidence nodes. No readable text in image.",
+  "route": "Forge /v1/generate -> openai:gpt-image-2; img2img from imprint-hero.png",
+  "generated_at": "2026-06-07",
+  "notes": "Title/description come from HTML meta tags, not rendered in-image."
+}
