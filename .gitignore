@@ -7,6 +7,12 @@ imprint.config.yaml
 *.local.json
 
 # Private/local data
+# Raw corpus exports: block by default, allow synthetic examples
+*.jsonl
+*.ndjson
+!/examples/**/*.jsonl
+!/examples/**/*.ndjson
+
 /data/
 /exports/
 /private/
