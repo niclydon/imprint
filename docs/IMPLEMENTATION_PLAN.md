@@ -131,13 +131,14 @@ Deliverables:
 - canonical Imprint JSON/YAML
 - human-readable Markdown report
 - Mosvera-compatible fragment
-- publishing prompt contract fragment
+- publishing profile contract fragment
 - export validation
 
 Exit gate:
 
 - Consumers can use profile outputs without direct corpus access.
 - Consumer-specific exports are projections, not alternate profile sources of truth.
+- Downstream adapters own prompt assembly and generation behavior.
 
 ## Sprint 09+: Private Connectors
 

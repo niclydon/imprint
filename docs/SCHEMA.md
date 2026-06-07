@@ -8,6 +8,22 @@ The schema is the product contract. Everything else can change behind it.
 
 Downstream systems should be able to consume an Imprint profile without knowing where the source data came from or seeing raw artifacts.
 
+## Sprint 01.5 terminology decision
+
+Schema-level contracts should avoid broad `identity` claims.
+
+Use:
+
+- `expression_profile`
+- `expression_posture`
+- `rhetorical_patterns`
+- `voice`
+- `context_profiles`
+
+Do not use machine-readable `identity.stance`, `identity.recurring_lens`, or personality-like
+fields. Product prose may explain that Imprint serves identity and expression, but schemas should
+model observable expression patterns only.
+
 ## Top-level profile shape
 
 ```json
@@ -16,15 +32,19 @@ Downstream systems should be able to consume an Imprint profile without knowing 
   "profile_id": "example_subject_technical_longform",
   "subject": {},
   "profile_metadata": {},
+  "build_manifest": {},
   "source_summary": {},
-  "identity": {},
-  "expression": {},
+  "artifact_storage": {},
+  "expression_profile": {},
+  "expression_posture": {},
+  "rhetorical_patterns": {},
   "voice": {},
   "reasoning": {},
   "structure": {},
-  "platform_profiles": {},
+  "context_profiles": [],
   "anti_patterns": [],
   "sample_policy": {},
+  "evidence_policy": {},
   "confidence": {},
   "drift": {},
   "exports": {}
@@ -74,19 +94,93 @@ No raw private text required.
 }
 ```
 
-## Identity
+## Expression posture
 
 ```json
 {
-  "identity": {
-    "stance": ["practitioner", "builder", "systems thinker"],
-    "default_posture": "technical peer",
-    "recurring_lens": [
-      "operational reality over theory",
-      "hidden system underneath visible behavior"
-    ],
-    "confidence": 0.84
+  "expression_posture": {
+    "claim_level": "observation",
+    "patterns": [
+      {
+        "name": "evidence_before_generalization",
+        "description": "Often introduces concrete operational evidence before summarizing.",
+        "confidence": {
+          "display": 0.84,
+          "evidence_strength": 0.88,
+          "attribution": 0.92,
+          "extraction": 0.78
+        },
+        "support": {
+          "artifact_count": 42,
+          "source_types": ["technical_note", "article"],
+          "date_range": "2025-01 to 2026-05"
+        }
+      }
+    ]
   }
+}
+```
+
+This shape is intentionally observation-based. It does not claim the subject "is analytical" or
+has a fixed personality stance.
+
+## Build manifest
+
+Every profile build should record enough metadata to distinguish expression drift from compiler or
+corpus drift.
+
+```json
+{
+  "build_manifest": {
+    "schema_version": "0.1",
+    "compiler_version": "0.1.0",
+    "classifier_version": "0.1.0",
+    "extractor_version": "0.1.0",
+    "extractor_prompt_version": "rule-baseline",
+    "model_provider": null,
+    "model_id": null,
+    "source_policy_version": "0.1",
+    "authorship_policy_version": "0.1",
+    "artifact_store_mode": "metadata_only",
+    "config_hash": "example-hash"
+  }
+}
+```
+
+## Artifact storage
+
+Profiles should record whether raw content is locally available for audit and regeneration.
+
+```json
+{
+  "artifact_storage": {
+    "mode": "metadata_only",
+    "raw_content_available": false,
+    "public_safe_export": true
+  }
+}
+```
+
+Allowed modes are planned in `docs/ARTIFACT_STORAGE_POLICY.md`.
+
+## Context profiles
+
+Context profiles are explicit compiled views. They reference a baseline and declare filters rather
+than using hidden inheritance.
+
+```json
+{
+  "context_profiles": [
+    {
+      "profile_id": "example_subject_technical",
+      "baseline_profile_id": "example_subject_master",
+      "context": "technical",
+      "filters": {
+        "artifact_types": ["technical_note", "article"]
+      },
+      "divergences": []
+    }
+  ]
 }
 ```
 
@@ -145,3 +239,11 @@ No raw private text required.
 - Unknown authorship origin must reduce confidence.
 - AI-assisted origin must be represented explicitly.
 - Source weights must be visible in the profile.
+- Every profile must include build manifest metadata.
+- Every signal must include a claim level.
+- Prohibited claims must fail validation or be quarantined before compilation.
+- Derived/context profiles must declare baseline references and filters.
+
+Claim validation is mandatory, not advisory. Canonical and public-safe exports must fail if a
+prohibited claim survives compilation. Private-local workflows may quarantine rejected claims for
+review, but must not export them as profile guidance.

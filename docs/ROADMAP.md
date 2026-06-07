@@ -32,7 +32,7 @@ Deliverables:
 
 - Pydantic schemas for artifacts, classifications, signals, profiles, exports.
 - Local Markdown/text/JSONL source adapters.
-- SQLite artifact registry.
+- SQLite artifact registry with explicit Artifact Store modes.
 - CLI commands: `init`, `harvest`, `classify`, `extract`, `compile`, `export`, `audit`.
 - Rule-based baseline extractors.
 - Optional LLM extractor through OpenAI-compatible endpoint.
@@ -44,6 +44,7 @@ Exit criteria:
 - Synthetic corpus produces stable profile output.
 - Tests validate schemas and privacy defaults.
 - No provider credentials required for basic mode.
+- Profile builds record artifact storage mode and build manifest metadata.
 
 ## Phase 2 — Source weighting and contamination controls
 
@@ -59,12 +60,14 @@ Deliverables:
 - Quarantine and exclusion mechanics.
 - Profile confidence scoring.
 - Drift baseline support.
+- Compiler/corpus/expression drift separation.
 
 Exit criteria:
 
 - Chat-like samples can influence lexical/tone but not long-form structure.
 - AI-assisted samples can be retained as low-weight or reference-only.
 - Quarantined artifacts do not influence compiled profiles.
+- Drift reports do not present model or extractor changes as expression drift.
 
 ## Phase 3 — Export adapters
 
@@ -73,7 +76,7 @@ Goal: make Imprint useful to downstream systems.
 Deliverables:
 
 - Aesthetic pack fragment exporter.
-- Publishing prompt contract exporter.
+- Publishing profile contract exporter.
 - Generic agent persona exporter.
 - Profile diff command.
 - Profile validation command.
@@ -83,6 +86,7 @@ Exit criteria:
 
 - Downstream systems can consume exported profile JSON without direct corpus access.
 - Exported artifacts contain no raw private text by default.
+- Core exports remain profile contracts; downstream adapters own prompt assembly and generation.
 
 ## Phase 4 — Private connector framework
 

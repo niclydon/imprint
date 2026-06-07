@@ -13,17 +13,21 @@ It does not diagnose people.
 It does not infer mental health conditions.
 It does not infer intent.
 
-## Identity -> Expression -> Voice
+## Subject -> Expression -> Voice
 
 Imprint models:
 
-Identity
+Subject
   -> Expression
       -> Voice
 
-Identity is relatively stable.
+The subject is the person, organization, or fictional public example being profiled.
 Expression varies by context.
 Voice is one manifestation of expression.
+
+Imprint may use broad identity language in product prose, but schema-level contracts should not
+claim to model identity, personality, values, or a mind. Schema fields should describe observable
+expression patterns.
 
 ## Allowed Claims
 
@@ -80,3 +84,6 @@ Examples:
 - podcast
 
 Imprint should support a master profile plus derived profiles.
+
+Derived profiles are explicit compiled context views. They should reference a baseline profile and
+declare filters, divergences, and collisions rather than relying on hidden inheritance.

@@ -30,6 +30,10 @@ Examples:
 
 These may be allowed if clearly labeled as interpretations and confidence-scored.
 
+Machine-readable schemas should prefer `bounded_interpretation` for these claims and include
+evidence support. They should avoid schema fields such as `identity.stance`,
+`identity.recurring_lens`, or personality-like labels.
+
 ## Diagnosis
 
 Diagnosis is prohibited.
@@ -43,6 +47,9 @@ Examples:
 - autism spectrum disorder
 
 Imprint is not a diagnostic system.
+
+Diagnostic, personality-typing, and hidden-intent claims should be represented as prohibited and
+must not enter compiled profiles.
 
 ## Intent Attribution
 
@@ -63,3 +70,13 @@ When uncertain:
 Prefer a weaker observation over a stronger interpretation.
 
 Observation > Interpretation > Diagnosis
+
+## Claim Levels
+
+Sprint 02 schemas should represent claim levels explicitly:
+
+- `observation`: directly supported expression pattern
+- `bounded_interpretation`: cautious interpretation with evidence and confidence
+- `prohibited`: diagnosis, personality typing, intent attribution, or unsupported identity claim
+
+Prohibited claims should fail validation or be quarantined before profile compilation.

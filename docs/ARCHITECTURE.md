@@ -19,7 +19,12 @@ Downstream consumers
   aesthetic packs / publishing systems / agent frameworks / writing tools / creative pipelines
 ```
 
-Imprint must not own the full data lake. It reads from configured sources, stores normalized artifact metadata, compiles profiles, and exports structured artifacts.
+Imprint must not own the full data lake. It reads from configured sources, stores normalized
+artifact metadata and optionally local raw artifact text for audit/regeneration, compiles profiles,
+and exports structured artifacts.
+
+The optional local Artifact Store is scoped to profile compilation and auditability. It is not a
+general assistant memory system.
 
 ## Recommended components
 
@@ -79,9 +84,16 @@ Private deployment adapters:
 
 Private adapters should be generic and configured through environment variables or local config. No personal table names, hostnames, source names, emails, or paths should be hard-coded.
 
-### Artifact registry
+### Artifact registry and Artifact Store
 
-Stores normalized artifact metadata and optional content. SQLite should be the default. Postgres can be supported for larger deployments.
+Stores normalized artifact metadata and, when enabled, local raw artifact text. SQLite should be
+the default. Postgres can be supported for larger deployments.
+
+Artifact storage modes:
+
+- metadata-only
+- local artifact store
+- ephemeral
 
 Core tables:
 
@@ -151,6 +163,7 @@ Responsibilities:
 - generate downstream pack sections
 - preserve evidence counts without leaking raw content
 - compute drift against baselines
+- distinguish expression drift, compiler drift, and corpus drift
 
 ### Exporters
 
@@ -159,7 +172,7 @@ Initial exporters:
 - canonical Imprint JSON
 - canonical Imprint YAML
 - aesthetic pack fragment
-- publishing prompt contract fragment
+- publishing profile contract fragment
 - Markdown human-readable report
 
 Future exporters:
@@ -167,7 +180,10 @@ Future exporters:
 - agent persona card
 - character expression profile
 - TTS style guidance
-- eval prompt bundle
+- eval profile bundle
+
+Core Imprint exports profile contracts and projections. Downstream adapters own prompt assembly,
+generation workflows, and publishing behavior.
 
 ## Configuration model
 

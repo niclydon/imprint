@@ -25,6 +25,10 @@ Imprint may process the following data classes in private deployments:
 
 These must never be committed to the public repository.
 
+When local raw artifact storage is enabled, the Artifact Store is protected data. It is allowed
+only under ignored local paths and exists for profile compilation, auditability, and regeneration.
+It must not be exposed as a general memory or corpus search product surface.
+
 ## Public repository rules
 
 ### Never commit
@@ -32,6 +36,7 @@ These must never be committed to the public repository.
 - `.env`
 - local config files
 - database dumps
+- local artifact stores
 - private sample corpora
 - screenshots from private systems
 - exported personal profiles
@@ -206,6 +211,9 @@ Avoid by default:
   "example": "exact private sentence from a message"
 }
 ```
+
+Profiles should record artifact storage mode and raw-content availability without exposing the raw
+content in public-safe exports.
 
 ## Threat model
 

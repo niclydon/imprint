@@ -10,7 +10,7 @@ that produces evidence or every system that consumes the resulting profile.
 | Capability | Owner | Upstream Dependencies | Downstream Consumers | Rationale |
 | --- | --- | --- | --- | --- |
 | Ingestion | Imprint for normalization; source systems for raw records | local files, exports, configured private sources | artifact registry, classifier | Imprint needs normalized artifacts, but source systems remain the raw-data owners. |
-| Storage | Imprint for local artifact/profile registry; external systems for original data | normalized artifacts, classifications, signals | compiler, audit, diff | Imprint stores only what it needs to compile and audit profiles, not a general memory store. |
+| Storage | Imprint for local artifact/profile registry and explicit Artifact Store modes; external systems for original data | normalized artifacts, classifications, signals, optional local raw text | compiler, audit, diff | Imprint stores only what it needs to compile, audit, and regenerate profiles, not a general memory store. |
 | Embeddings | Optional Imprint component or provider adapter | normalized artifacts, configured embedding provider | search, clustering, optional extraction | Embeddings can help, but must not become required for the local MVP. |
 | Classification | Imprint | artifacts, source metadata, speaker hints | extractor, compiler, audit reports | Authorship, speaker confidence, AI assistance, and quote risk are core safety gates. |
 | Signal extraction | Imprint | classified artifacts, source policy, optional LLM provider | profile compiler, first-run report | Extracted observations are the core product material. |
@@ -32,6 +32,9 @@ configured externally and tested with synthetic fixtures.
 
 SQLite as default local storage is reasonable. Postgres support can exist later, but database
 choice must not encode private deployment assumptions.
+
+Raw artifact text may be stored locally only under an explicit Artifact Store policy. It must not
+be exposed as general memory retrieval or downstream raw corpus access.
 
 ### Embeddings
 
