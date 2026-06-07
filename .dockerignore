@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Tests (can remove if you want to run tests in container)
+tests/
+pytest.ini
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble/
+
+# Documentation (optional - remove if you want docs in image)
+docs/
+README.md
+
+# Development
+.remember/
+/notes/
+/scratch/
+/personal/
+*.swp
+*.swo
+*~

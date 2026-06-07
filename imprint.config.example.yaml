@@ -1,0 +1,73 @@
+# Imprint public-safe example config
+# Copy to imprint.config.yaml for local use. Do not commit local configs.
+
+profiles:
+  default:
+    subject_id: example_subject
+    display_name: Example Subject
+    description: Synthetic example profile for public demos
+    target_platforms: [devto, substack]
+    output_policy: public_safe
+
+sources:
+  synthetic_markdown:
+    type: local_markdown
+    enabled: true
+    path: ./examples/synthetic_corpus/markdown
+    default_speaker: example_subject
+    artifact_type: longform_article
+
+  synthetic_chat:
+    type: local_jsonl
+    enabled: true
+    path: ./examples/synthetic_corpus/chat.jsonl
+    default_speaker: example_subject
+    artifact_type: chat_message
+
+privacy:
+  redaction_mode: strict
+  include_raw_examples_in_exports: false
+  redact_names: true
+  redact_emails: true
+  redact_urls: true
+  redact_phone_numbers: true
+  redact_physical_addresses: true
+
+source_policy:
+  chat_message:
+    lexical: 0.9
+    tone: 0.8
+    humor: 0.7
+    reasoning: 0.3
+    structure: 0.1
+    longform: 0.0
+
+  longform_article:
+    lexical: 0.7
+    tone: 0.7
+    reasoning: 1.0
+    structure: 1.0
+    longform: 1.0
+
+authorship_policy:
+  human_origin:
+    multiplier: 1.0
+  human_directed_ai_assisted:
+    multiplier: 0.55
+  assistant_output:
+    multiplier: 0.0
+    quarantine: true
+  quoted_or_forwarded:
+    multiplier: 0.0
+    quarantine: true
+  template_or_notification:
+    multiplier: 0.0
+    exclude: true
+
+exports:
+  imprint_json:
+    enabled: true
+    output_path: ./exports/default.imprint.json
+  mosvera:
+    enabled: true
+    output_path: ./exports/default.mosvera.voice.yaml
