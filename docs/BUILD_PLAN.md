@@ -50,3 +50,23 @@ Sprint 9+
 - Goal: private connectors.
 
 See chat history for the detailed prompts; expand this file later into the full runbook.
+
+# Phase 7 / Sprint 10 - Public Web Presence
+
+Primary Model: GPT 5.4
+Reviewer: GPT 5.5
+
+Goal:
+Create the single-page public web presence for `imprint.niclydon.dev`.
+
+Deliverables:
+- landing page
+- favicon/app icon
+- Open Graph image
+- social metadata
+- README/repo links
+- concise public positioning copy
+
+Boundary:
+This is a public project landing page, not a product UI and not a corpus/profile interface.
+

@@ -179,3 +179,50 @@ Exit criteria:
 - Browser extension for collecting public writing samples.
 - Obsidian plugin.
 - Static-site profile viewer.
+
+## Phase 7 - Public Web Presence
+
+Goal: create a single-page public landing site for Imprint at `imprint.niclydon.dev`.
+
+This phase is for project communication and social sharing only. It is not the Imprint application UI.
+
+Required outputs:
+
+- single-page landing site
+- concise description of what Imprint is and is not
+- README hero image reused or adapted for the site
+- favicon and app icon assets
+- Open Graph image for social sharing
+- Twitter/X card metadata
+- GitHub repository link
+- short usage/status section that makes clear the project is pre-release
+- privacy/local-first positioning
+
+Recommended visual direction:
+
+- use the Imprint aesthetic derived from niclydon.dev structure and niclydon.io colors
+- dark graphite background
+- cerulean/cyan primary accents
+- amber punctuation
+- evidence fragments converging into structured profiles
+- minimal text in imagery
+
+Non-goals:
+
+- no dashboard
+- no corpus upload
+- no authentication
+- no live profile generation
+- no private data integrations
+- no marketing funnel or SaaS conversion flow
+
+Deployment target:
+
+- `imprint.niclydon.dev`
+
+Success criteria:
+
+- link previews render cleanly on LinkedIn, Bluesky, X/Twitter, Discord, and iMessage
+- README and website visual language match
+- the page clearly communicates that Imprint is open-source, pre-release, local-first, and evidence-backed
+

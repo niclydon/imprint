@@ -66,6 +66,8 @@ Most useful next:
 - [Sprint 02.5](sprints/SPRINT_02_5.md) — model provider policy
 - [Sprint 02](sprints/SPRINT_02.md) — schema and contract design
 
+Recent sprint narratives are available under [`narrative/`](narrative/).
+
 ## Reviews and Decision Artifacts
 
 - [Architecture Challenge](ARCHITECTURE_CHALLENGE.md) — Sprint 01 adversarial review

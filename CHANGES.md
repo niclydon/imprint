@@ -55,3 +55,33 @@
 - Added `docs/assets/imprint-brand-board.png` and `docs/assets/imprint-hero.png` for publish-ready documentation context.
 
 **Full story:** `docs/narrative/2026-06-07-schema-model-contract-foundation.md`
+
+## Phase 2: Sprint 05 Adversarial Review and Post-Review Hardening — 2026-06-07
+
+**Decision:** Conduct adversarial review of Signal 05 extraction engine; implement identified minor hardening items rather than deferring to Sprint 06.
+
+**What changed:**
+
+- **Adversarial review completed** (`docs/SPRINT_05_ARCHITECTURE_REVIEW.md`): Engine passed all six architectural gates (claim boundaries, evidence discipline, classification boundary, privacy, determinism, scalability). Verdict: GO for Sprint 06.
+
+- **Signal model version tracking** (schema + engine): Added `signal_model_version` field to `ArtifactSignalEvidence`. Engine populates from `SIGNAL_CONFIDENCE_MODEL_VERSION = "sprint05-rule-v1"`. Future extraction rule changes are now auditable.
+
+- **Source ID validation** (engine): Added `validate_source_id()` function that rejects filesystem paths, path traversal, and file extensions. Runs during signal creation; catches adapter leaks early.
+
+- **Confidence formula documented** (engine): Added 30-line docstring to `_signal_confidence()` explaining weight rationale (0.25×attribution, 0.2×authorship_origin, 0.25×extraction, 0.2×evidence_strength, 0.1×policy_fit). Future tuning discussions now have explicit starting point.
+
+- **Sprint 06 claim-level validation requirement documented** (architecture review): Profile compiler must reject `ClaimLevel.PROHIBITED` signals and validate `BOUNDED_INTERPRETATION` claims. Explicit requirement for Sprint 06 design.
+
+- **Implementation expansion documented**: Discovered and verified that baseline of 8 rules expanded to 17 rules across 8 families. Reasoning (3), Narrative (3), Anti-Pattern (3) now implemented. All additions remain deterministic and artifact-local. Updated architecture review with expansion rationale.
+
+- **Tests added**: `test_signal_model_version_is_tracked()`, `test_source_id_validation_rejects_paths()`. All 44 project tests passing.
+
+**What's unblocked:**
+
+- Evidence export chain is fully versioned (classification model version + signal model version).
+- Privacy boundary actively enforced at signal creation time.
+- Confidence formula is auditable and documented.
+- Sprint 06 profile compiler has explicit claim-level validation requirements.
+- Implementation expansion (17 rules) is documented with rationale.
+
+**Full story:** `docs/narrative/2026-06-07-sprint-05-adversarial-review-and-hardening.md`

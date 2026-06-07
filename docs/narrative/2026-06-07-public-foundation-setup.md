@@ -1,0 +1,150 @@
+# Public-First Foundation Setup
+
+Imprint is designed to be public from day one. The project CLAUDE.md was minimal—a list of non-negotiable privacy rules but no guidance on development commands, architecture, or contribution workflow. The `.gitignore` was functional but incomplete. And there were no `.editorconfig` or `.dockerignore` files to establish consistent tooling and build practices for future contributors.
+
+This session established the foundational structure for a public-first repository.
+
+## The Problem: Minimal Guidance for Contributors
+
+The existing `CLAUDE.md` was 26 lines. It stated the rules (no personal data, keep integrations generic, use synthetic fixtures) and the product boundary (what Imprint owns vs. what it doesn't), but did nothing to onboard someone who wanted to contribute code. Someone cloning the repo would not immediately know:
+
+- How to install dependencies
+- How to run the CLI
+- How to run tests or linting
+- Where code lives and why
+- The actual design principles behind the architecture
+- How to add new features responsibly within the public-first constraint
+
+The `.gitignore` covered the essentials (`.env`, `/data/`, `*.db`, `__pycache__/`, `.venv/`) but was missing Claude Code workspace state (`.claude/`, `.cursor/`, `.remember/`), Python build artifacts (`build/`, `dist/`, `*.egg-info/`), and IDE caches (`.mypy_cache/`, `.coverage/`).
+
+There was no `.editorconfig`, so contributors might not honor the project's line-length rule (Ruff is configured for 100 chars in `pyproject.toml`). There was no `.dockerignore`, and while containerization isn't planned for MVP, deferring this file meant that when a service mode was eventually implemented, the Dockerfile would accidentally bloat with unnecessary files.
+
+## Architecture Documentation: From One Sentence to Chapters
+
+The `CLAUDE.md` enhancement focused on three major additions.
+
+**Setup and Commands** became the first practical section. The reader now sees:
+```bash
+pip install -e ".[test]"
+imprint version
+pytest
+ruff check src/ tests/
+ruff format src/ tests/
+```
+
+These commands are usable immediately. Anyone reading this can check out the repo and run tests without guessing what the test framework is or where to find lint configuration.
+
+**Architecture Overview** moved from implicit (read the ARCHITECTURE.md doc) to explicit as a visual pipeline plus a planned module structure. The six-page ARCHITECTURE.md document describes the conceptual layers, but someone writing code needs to know that `src/imprint/extract/` is where signal extraction logic will live, not where classification happens. The added section shows:
+
+```
+src/imprint/
+  cli.py                 # Typer CLI entry point
+  config.py              # Config loading
+  schemas/               # Pydantic models
+  sources/               # Source adapters
+  classify/              # Classification logic
+  extract/               # Signal extraction
+  compile/               # Profile compilation
+  export/                # Export formatters
+  privacy/               # Redaction and privacy
+  storage/               # Database layer
+  api/                   # Optional FastAPI service
+```
+
+This is not present in the current repo. It is the proposed structure. The `CLAUDE.md` now states "Current status: CLI skeleton complete, storage layer next" so developers understand that most of this tree doesn't exist yet, and their first task will likely be implementing `storage/` or expanding `schemas/`.
+
+**Development Workflow** is a new subsection that walks through the expected shape of work: create schemas first, then CLI commands, then core logic, then tests. This establishes a pattern and a reason for the pattern—schemas drive the contract, tests validate that the contract is held, and CLI is the user-facing proof that it works.
+
+**Key Design Principles** expanded from brief statements to prose explanations. Instead of a one-liner like "voice is multi-dimensional," the doc now explains: "Different artifacts (chat, essays, emails) contribute different signal types. A chat message can be useful for vocabulary and tone but weak for long-form structure." This helps someone deciding whether a signal belongs in the extractor or should be filtered out.
+
+## The `.gitignore` Expansion
+
+The original `.gitignore` was 32 lines and covered the obvious cases. The update added 13 new rules in four categories.
+
+**Claude Code and Copilot workspace files** (3 rules):
+- `.claude/` — Claude Code session history, settings, local state. Not relevant to public contributors; regenerated on each user's machine.
+- `.cursor/` — Cursor IDE workspace state.
+- `.remember/` — AI workspace recall buffers and conversation logs.
+
+These folders can grow large and contain session-specific data (like conversation IDs, local scratch). They should never be committed.
+
+**Python packaging and IDE cache** (4 rules):
+- `build/`, `dist/`, `*.egg-info/` — Generated by `pip install` and packaging tools.
+- `.mypy_cache/`, `.coverage/`, `htmlcov/` — Generated by type checkers and coverage tools.
+
+Contributors can regenerate these. There is no need to version them.
+
+**Editor backups and logs** (4 rules):
+- `*.swp`, `*.swo`, `*~` — Vim and Emacs temporary files.
+- `*.log` — Application logs.
+- `logs/` — Dedicated log directory.
+
+These are machine-local noise; they should not land in the repo.
+
+**OS metadata and development scratch** (2 new rules):
+- `Thumbs.db`, `.AppleDouble/` — Windows and macOS metadata.
+- `/notes/`, `/scratch/`, `/personal/` — Developer notebooks and working notes, not part of the project artifact.
+
+One existing rule was refined: `.vscode/settings.json` was changed to `.vscode/` → `.vscode/settings.json`, which allows contributors to check in a shared VS Code workspace settings file if desired, but ignores the personal IDE state files (*.json aside from settings.json).
+
+The updated `.gitignore` is now 47 lines and covers the full lifecycle of development, testing, deployment, and CI.
+
+## `.editorconfig` for Cross-Editor Consistency
+
+The project uses Ruff with `line-length = 100` (in `pyproject.toml`), but Ruff configuration is Python-specific. An engineer using VS Code, Vim, or JetBrains would not automatically know that Imprint prefers 100-character lines unless the rule was surfaced in `.editorconfig`.
+
+The new `.editorconfig` file specifies:
+
+| Pattern | Rules |
+|---------|-------|
+| `*.py` | indent_size = 4, max_line_length = 100 |
+| `*.{yaml,yml}` | indent_size = 2 |
+| `*.json` | indent_size = 2 |
+| `*.md` | (no trailing whitespace trimming) |
+| All files | charset = utf-8, insert_final_newline = true, trim_trailing_whitespace = true |
+
+This is a 28-line file that costs nothing to maintain and ensures that a contributor's editor will auto-format consistently regardless of their IDE. Many editors (VS Code, JetBrains, Vim with editorconfig plugins) respect `.editorconfig` natively.
+
+The markdown rule (`trim_trailing_whitespace = false`) is intentional: some Markdown processors require two trailing spaces for hard line breaks, and editors should not strip them.
+
+## `.dockerignore` for Future Containerization
+
+Imprint's MVP does not include a containerized service. The architecture doc defers the API service ("The API is optional for the MVP. The CLI and library should work without a service."). However, Imprint will eventually be deployable as a service, and when that happens, a careless `COPY . .` in the Dockerfile will bloat the image with unnecessary files.
+
+The new `.dockerignore` file (56 lines) specifies what should not be copied into a container:
+
+| Category | Contents |
+|----------|----------|
+| Git metadata | `.git`, `.gitignore`, `.gitattributes` |
+| Python detritus | `__pycache__/`, `*.egg-info/`, `.venv/`, `.ruff_cache/`, etc. |
+| IDE files | `.vscode/`, `.idea/`, `.cursor/`, `.claude/` |
+| OS metadata | `.DS_Store`, `Thumbs.db`, `.AppleDouble/` |
+| Development | `notes/`, `scratch/`, `personal/`, `*.swp`, `*~` |
+| Tests (optional) | `tests/`, `pytest.ini` |
+| Documentation (optional) | `docs/`, `README.md` |
+
+The last two categories have comments saying they are optional—a maintainer can decide whether to include tests and docs in the image at build time.
+
+The `.dockerignore` is ready to use as soon as a `Dockerfile` is written. The builder can simply `COPY . .` and the ignore rules will prevent spurious file copies.
+
+## Decision: Deferring `MANIFEST.in`
+
+For Python packages distributed via PyPI, `MANIFEST.in` specifies which non-Python files (configs, examples, docs) should be included in the distribution. Imprint is not yet on PyPI and has no distribution plan.
+
+The decision to defer `MANIFEST.in` is conscious: add it when the distribution workflow is clearer, likely after the CLI stabilizes and the first real users start deploying it.
+
+## Summary
+
+The session completed four deliverables:
+
+1. **CLAUDE.md** (26 → 170 lines): Added setup commands, architecture overview with module structure, development workflow, expanded design principles, current status.
+
+2. **.gitignore** (32 → 47 lines): Added Claude Code workspace files, Python build artifacts, IDE caches, editor backups, logs, OS metadata, and development scratch directories.
+
+3. **.editorconfig** (28 lines, new): Enforces 100-char lines for Python, 2-space indents for YAML/JSON, UTF-8, and final newlines across editors.
+
+4. **.dockerignore** (56 lines, new): Ready for future containerization. Excludes build artifacts, IDE state, tests, docs, and OS metadata.
+
+No code was written. No tests were run. No features landed. The work is foundational: a public repository now has the scaffolding and guidebook that future contributors and maintainers will use. The costs are minimal (four files, about 240 lines of configuration), and the payoff is high—someone reading the enhanced `CLAUDE.md` can clone the repo, run tests, and understand where code should live without reading six separate architecture documents.
+
+See `CHANGES.md` Phase 0 for the chronological summary.
