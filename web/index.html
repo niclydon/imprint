@@ -30,6 +30,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      var stored = localStorage.getItem("imprint-theme");
+      var prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+      var theme = stored === "light" || stored === "dark" ? stored : (prefersLight ? "light" : "dark");
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    })();
+  </script>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -42,15 +51,39 @@
         <img src="/logo-mark.svg" alt="" width="28" height="28">
         Imprint
       </a>
-      <nav class="nav-links" aria-label="Primary">
+      <nav class="nav-links nav-links--desktop" aria-label="Primary">
         <a href="#about">About</a>
         <a href="#pipeline">Pipeline</a>
         <a href="#boundaries">Boundaries</a>
         <a href="#privacy">Privacy</a>
         <a href="https://github.com/niclydon/imprint" class="nav-github">GitHub</a>
       </nav>
-      <span class="status-pill">Pre-release</span>
+      <div class="header-actions">
+        <button type="button" class="icon-btn theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Switch to light mode">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"/>
+          </svg>
+        </button>
+        <button type="button" class="icon-btn nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+        <span class="status-pill">Pre-release</span>
+      </div>
     </div>
+    <div class="nav-backdrop" id="nav-backdrop" aria-hidden="true"></div>
+    <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile" aria-hidden="true">
+      <a href="#about">About</a>
+      <a href="#pipeline">Pipeline</a>
+      <a href="#boundaries">Boundaries</a>
+      <a href="#privacy">Privacy</a>
+      <a href="https://github.com/niclydon/imprint" class="nav-github">GitHub</a>
+    </nav>
   </header>
 
   <main>
@@ -259,5 +292,6 @@
       <p class="footer-copy">imprint.niclydon.dev · Evidence-backed expression profiles</p>
     </div>
   </footer>
+  <script src="/theme.js" defer></script>
 </body>
 </html>

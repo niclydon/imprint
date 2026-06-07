@@ -4,5 +4,5 @@
   <circle cx="28" cy="4" r="1.8" fill="#7ec8e3"/>
   <circle cx="4" cy="28" r="1.8" fill="#d4a853"/>
   <circle cx="28" cy="28" r="1.8" fill="#5ba4cf"/>
-  <text x="16" y="22" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="16" fill="#edf1f5">I</text>
+  <text x="16" y="22" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="16" fill="currentColor">I</text>
 </svg>
