@@ -24,6 +24,10 @@ imprint.config.yaml
 *.dump
 *.parquet
 
+# Vercel local config
+.vercel/
+web/.vercel/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -64,3 +68,4 @@ Thumbs.db
 /notes/
 /scratch/
 /personal/
+.vercel
