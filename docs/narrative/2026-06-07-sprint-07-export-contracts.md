@@ -66,3 +66,9 @@ provider prompts, generation controls, or downstream automation promises.
 
 Sprint 08 can build publishing/downstream projections from the canonical export contract. It should
 not move prompt assembly, model tuning, generation settings, or workflow ownership into core Imprint.
+
+## Delivery Evidence
+
+Sprint 07 export contracts are shipped on `main` after the narrative and website updates. The sprint
+export surface is live at `https://imprint.niclydon.dev` through the public-facing landing page’s
+Sprint 07 narrative section.
