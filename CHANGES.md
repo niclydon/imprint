@@ -26,3 +26,32 @@
 - Future Dockerization has a ready template.
 
 **Full story:** `docs/narrative/2026-06-07-public-foundation-setup.md`
+
+## Phase 1: Schema and Model Policy Contracts — 2026-06-07
+
+**Decision:** Lock first-class schema contracts before runtime work by defining testable model and profile boundaries.
+
+**What changed:**
+
+- Added `src/imprint/schemas/models.py` with 654 lines of canonical `pydantic` models for artifacts, evidence, claims, signals, profiles, and provider-facing metadata.
+- Exported all schema symbols through `src/imprint/schemas/__init__.py` and added `pythonpath` in `pyproject.toml` so tests and tools import schemas consistently.
+- Added `tests/test_schemas.py` with synthetic coverage for Sprint 01.5 gates plus new profile-affecting model invocation contracts.
+- Added and expanded contract docs: `docs/SCHEMA_PHILOSOPHY.md`, `docs/SCHEMA_THREAT_MODEL.md`, `docs/SIGNAL_TAXONOMY.md`, `docs/CONFIDENCE_MODEL.md`, `docs/EXTRACTOR_VERSIONING.md`, `docs/MIGRATION_STRATEGY.md`, `docs/MODEL_CAPABILITY_CONTRACTS.md`, `docs/MODEL_PROVIDER_POLICY.md`, `docs/MODEL_ROLE_TAXONOMY.md`, `docs/MODEL_PRIVACY_BOUNDARIES.md`, and related Sprint 02/02.5 artifacts.
+
+**What was deferred:**
+
+- Runtime inference clients, prompt execution, and provider credentials remain out of scope until contracts are stable.
+- No local connector implementations were introduced in this session.
+
+**What’s unblocked:**
+
+- The architecture now has a source-of-truth contract layer for downstream components.
+- Sprint 03 can proceed with ingestion and export work while remaining provider-neutral.
+- Docs and tests now match the same contract language, reducing design/runtime drift risk.
+
+**What changed in docs only:**
+
+- Updated `README.md` with the Imprint hero visual for the main project narrative.
+- Added `docs/assets/imprint-brand-board.png` and `docs/assets/imprint-hero.png` for publish-ready documentation context.
+
+**Full story:** `docs/narrative/2026-06-07-schema-model-contract-foundation.md`

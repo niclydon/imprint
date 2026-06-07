@@ -1,0 +1,15 @@
+{
+  "transcript_id": "synthetic-transcript-1",
+  "segments": [
+    {
+      "artifact_id": "segment-1",
+      "speaker": "Synthetic Speaker",
+      "timestamp": "2026-06-07T12:00:00Z",
+      "text": "We observed the artifact set before proposing changes."
+    },
+    {
+      "timestamp": "2026-06-07T12:01:00Z",
+      "text": "Speaker metadata is missing in this synthetic segment."
+    }
+  ]
+}
