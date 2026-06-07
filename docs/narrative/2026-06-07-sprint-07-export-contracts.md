@@ -2,13 +2,17 @@
 
 ## Status
 
-Implemented and ready for adversarial review.
+Implemented, reviewed, and public-surface documented.
 
 ## Context
 
 Sprint 06 made compiled expression profiles possible. Sprint 07 made those profiles consumable. The
 core challenge was not serialization itself; it was preserving every upstream safety boundary while
 creating outputs that are useful to humans, machines, and future downstream systems.
+
+Sprint 07 inherits the Sprint 06 compiler boundary defined in
+`docs/sprints/SPRINT_06_PROMPT.md`: exports consume compiled profile data only. They do not reopen
+raw artifacts, reinterpret evidence, weaken claim gates, or introduce provider-specific generation.
 
 ## Shipped Behavior
 
@@ -21,6 +25,8 @@ creating outputs that are useful to humans, machines, and future downstream syst
 - Added deterministic public-safe payload construction from compiled profile data only.
 - Added safety validation for prohibited claims, ungated bounded interpretations, non-durable
   support, mixed signal model versions, path-like source IDs, and generation-control keys.
+- Added a concise public website section that explains the export contracts without turning the
+  landing page into a product UI or implying unsupported runtime behavior.
 
 ## Safety Boundaries
 
@@ -48,6 +54,13 @@ subject.
 - CLI export smoke paths work for all formats
 
 Final validation: `pytest -q` passed.
+
+## Public Narrative Update
+
+The website narrative now includes a Sprint 07 export-contract section covering canonical JSON,
+Markdown summaries, first-run output, and the Mosvera overlay. The copy stays intentionally narrow:
+it describes public-safe profile outputs and avoids raw-evidence access, personality claims,
+provider prompts, generation controls, or downstream automation promises.
 
 ## Handoff to Sprint 08
 

@@ -54,6 +54,7 @@
       <nav class="nav-links nav-links--desktop" aria-label="Primary">
         <a href="#about">About</a>
         <a href="#pipeline">Pipeline</a>
+        <a href="#exports">Exports</a>
         <a href="#boundaries">Boundaries</a>
         <a href="#privacy">Privacy</a>
         <a href="https://github.com/niclydon/imprint" class="nav-github">GitHub</a>
@@ -80,6 +81,7 @@
     <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile" aria-hidden="true">
       <a href="#about">About</a>
       <a href="#pipeline">Pipeline</a>
+      <a href="#exports">Exports</a>
       <a href="#boundaries">Boundaries</a>
       <a href="#privacy">Privacy</a>
       <a href="https://github.com/niclydon/imprint" class="nav-github">GitHub</a>
@@ -142,6 +144,41 @@
           <span class="principle"><strong>Store less</strong> — durable signals over maximal capture</span>
           <span class="principle"><strong>Local-first</strong> — private corpora under your control</span>
           <span class="principle"><strong>Public-safe</strong> — synthetic examples only in git</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="exports" class="section reveal reveal-2">
+      <div class="container">
+        <p class="section-eyebrow">Sprint 07</p>
+        <h2>Public-safe export contracts<span class="amber">,</span> ready for downstream use</h2>
+        <p class="section-intro">
+          Compiled profiles can now export as deterministic JSON, human-readable Markdown,
+          first-run "What Imprint Learned" summaries, and Mosvera expression overlay fragments —
+          all without raw text, provider prompts, or private locators.
+        </p>
+
+        <div class="diff-cards">
+          <article class="diff-card glass lift reveal reveal-2">
+            <span class="sheen" aria-hidden="true"></span>
+            <h3>Canonical JSON</h3>
+            <p>Machine-readable profile contracts with build metadata, support summaries, confidence, and compatibility warnings.</p>
+          </article>
+          <article class="diff-card glass lift reveal reveal-3">
+            <span class="sheen" aria-hidden="true"></span>
+            <h3>Markdown summary</h3>
+            <p>Concise observed-pattern reports that explain what the profile is based on without overstating certainty.</p>
+          </article>
+          <article class="diff-card glass lift reveal reveal-4">
+            <span class="sheen" aria-hidden="true"></span>
+            <h3>First-run output</h3>
+            <p>"What Imprint Learned" turns compiled profile data into a useful first experience, not a personality assessment.</p>
+          </article>
+          <article class="diff-card glass lift reveal reveal-5">
+            <span class="sheen" aria-hidden="true"></span>
+            <h3>Mosvera overlay</h3>
+            <p>A bridge contract for expression summaries and avoid-patterns, while Mosvera keeps aesthetic intent separate.</p>
+          </article>
         </div>
       </div>
     </section>
