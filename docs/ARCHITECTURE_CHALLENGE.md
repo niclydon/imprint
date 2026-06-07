@@ -17,7 +17,7 @@ We must halt and resolve these structural flaws before schema work begins in Spr
 ## 1. Critical Objections
 
 ### 1.1 The "Auditable Evidence" vs. "Privacy Leak" Paradox
-The architecture in [ARCHITECTURE.md](file:///home/niclydon/projects/imprint/docs/ARCHITECTURE.md) and [SECURITY_PRIVACY.md](file:///home/niclydon/projects/imprint/docs/SECURITY_PRIVACY.md) claims that:
+The architecture in [ARCHITECTURE.md](ARCHITECTURE.md) and [SECURITY_PRIVACY.md](SECURITY_PRIVACY.md) claims that:
 1. Imprint does not store a general memory store or raw content.
 2. Every compiled signal must be traceable to audit/support metadata.
 3. Profiles must remain "auditable" so users can verify why a signal was extracted.
@@ -28,18 +28,18 @@ The architecture in [ARCHITECTURE.md](file:///home/niclydon/projects/imprint/doc
 * **Verdict:** Imprint *must* duplicate and store the user's raw, highly sensitive message/email corpus locally. The claim that it "does not own a general data lake" is semantic hand-waving. Imprint's local SQLite database is a high-value security target containing a plaintext archive of the user's communications history.
 
 ### 1.2 LLM-Coupling and the Illusion of Profile Determinism
-The product thesis in [PRODUCT_THESIS.md](file:///home/niclydon/projects/imprint/docs/PRODUCT_THESIS.md) plans for a stable, portable profile contract that tracks "drift" over time.
+The product thesis in [PRODUCT_THESIS.md](PRODUCT_THESIS.md) plans for a stable, portable profile contract that tracks "drift" over time.
 * **The Failure:** Signal extraction for high-level semantic dimensions (e.g., "reasoning patterns", "humor pattern", "rhetorical moves") relies entirely on LLM prompting. LLM outputs are non-deterministic, model-dependent, and highly sensitive to model version upgrades.
 * If a profile is compiled using Claude 3.5 Sonnet and then re-compiled using Llama-3 locally, the profile changes completely. The tracked "drift" will reflect the change in the extractor model, not the user's actual expression drift.
 * By coupling the profile schema to LLM-interpreted categories, the profile is not a portable, stable contract; it is a volatile artifact tied to a specific API provider and prompt version.
 
 ### 1.3 Boundary Contamination: The Ghostwriting and Prompting Slip
-The ownership matrix in [OWNERSHIP_MATRIX.md](file:///home/niclydon/projects/imprint/docs/OWNERSHIP_MATRIX.md) asserts that Imprint does not own drafting or publishing workflows. Yet, the roadmap in [ROADMAP.md](file:///home/niclydon/projects/imprint/docs/ROADMAP.md) Phase 3 requires a "publishing prompt contract exporter."
+The ownership matrix in [OWNERSHIP_MATRIX.md](OWNERSHIP_MATRIX.md) asserts that Imprint does not own drafting or publishing workflows. Yet, the roadmap in [ROADMAP.md](ROADMAP.md) Phase 3 requires a "publishing prompt contract exporter."
 * **The Failure:** A "prompt contract" is inherently an instruction set for text generation. Writing style cannot be abstracted into a static prompt fragment without knowing the downstream LLM's system prompt, context window, and decoding parameters.
 * By exporting generation-ready prompt segments, Imprint is encroaching directly on the drafting and generation workflow it claims to avoid. This leaks downstream application dependencies into the core schemas.
 
 ### 1.4 Stance and Recurring Lens as Diagnostic Traps
-The proposed schema in [SCHEMA.md](file:///home/niclydon/projects/imprint/docs/SCHEMA.md) defines `identity` with fields like:
+The proposed schema in [SCHEMA.md](SCHEMA.md) defines `identity` with fields like:
 ```json
 "identity": {
   "stance": ["practitioner", "builder", "systems thinker"],
@@ -50,7 +50,7 @@ The proposed schema in [SCHEMA.md](file:///home/niclydon/projects/imprint/docs/S
   ]
 }
 ```
-* **The Failure:** This violates the rules in [INTERPRETATION_BOUNDARIES.md](file:///home/niclydon/projects/imprint/docs/INTERPRETATION_BOUNDARIES.md). Classifying someone's "stance" or "lens" requires highly subjective LLM interpretation.
+* **The Failure:** This violates the rules in [INTERPRETATION_BOUNDARIES.md](INTERPRETATION_BOUNDARIES.md). Classifying someone's "stance" or "lens" requires highly subjective LLM interpretation.
 * How do you validate an open-ended list of "lenses" in Pydantic? How does a downstream system programmatically parse "operational reality over theory" to modify a writing style? 
 * If you restrict these to a fixed enum, you have built a pseudo-scientific personality typing system (e.g., MBTI). If you leave them open-ended, they are useless to downstream systems and invite wild, non-deterministic LLM hallucinations.
 
@@ -72,7 +72,7 @@ The architecture plans for a "master profile" and "derived profiles by context" 
 * Current AI detectors are highly inaccurate, particularly for technical writing or non-native English speakers. If the classifier fails, the user's voice profile will silently ingest AI-generated style structures, compounding the "AI feedback loop" in downstream writing.
 
 ### 2.4 Schema Rigidity vs. Junk Drawer Table Design
-In [ROADMAP.md](file:///home/niclydon/projects/imprint/docs/ROADMAP.md), SQLite is the default store.
+In [ROADMAP.md](ROADMAP.md), SQLite is the default store.
 * **The Failure:** If the database schemas hardcode specific signal types (lexical, tone, humor) as columns or explicit tables, adding a new signal type requires a database migration.
 * If the database stores signals as a generic JSON blob, we lose indexing, query capability, and validation. The architecture has not resolved how to balance schema strictness for stable contracts with the flexibility needed to evolve signal taxonomy.
 
@@ -81,7 +81,7 @@ In [ROADMAP.md](file:///home/niclydon/projects/imprint/docs/ROADMAP.md), SQLite 
 ## 3. Minor Objections
 
 ### 3.1 Terminology Collision
-The documents use `identity`, `expression`, and `voice` interchangeably in some places, but as a hierarchical pipeline in others. In [SCHEMA.md](file:///home/niclydon/projects/imprint/docs/SCHEMA.md), they are flat sibling keys in the JSON shape. This makes the conceptual model confusing for external contributors.
+The documents use `identity`, `expression`, and `voice` interchangeably in some places, but as a hierarchical pipeline in others. In [SCHEMA.md](SCHEMA.md), they are flat sibling keys in the JSON shape. This makes the conceptual model confusing for external contributors.
 
 ### 3.2 Vague Drift Definition
 "Drift" is listed as a core concept but lacks any operational definition. How is drift measured? Is it a distance metric between two embeddings, a percentage shift in token distributions, or qualitative text diffs? Without a concrete math/heuristic definition, "drift" is just a buzzword.
@@ -114,4 +114,4 @@ The preflight checklist and sprint prompts refer to files that do not exist (e.g
 2. **Explicitly Store Raw Text locally (and Encrypt):** Acknowledge that local regeneration requires storing raw text. Define a local database encryption mechanism (e.g., SQLCipher) or a strict local-only filesystem path, and remove the misleading claim that Imprint "does not store raw text."
 3. **Decouple Exporters from Prompt Generation:** Exporters should only output *descriptions* of style (adjectives, statistics, structural rules). Downstream adapters (not the core Imprint engine) should compile these descriptions into prompts.
 4. **Define the Drift Metric:** Before writing schemas, specify that drift is a comparison of two profile versions using a specific distance metric (e.g., cosine similarity of signal vectors).
-5. **Clean up Dead References:** Delete all references to `MEMORY_DISCIPLINE.md`, `EVIDENCE_AND_CONFIDENCE.md`, and other unwritten files from [GAP_ANALYSIS.md](file:///home/niclydon/projects/imprint/docs/GAP_ANALYSIS.md) and [PUBLIC_ADOPTION_REVIEW.md](file:///home/niclydon/projects/imprint/docs/PUBLIC_ADOPTION_REVIEW.md).
+5. **Clean up Dead References:** Delete all references to `MEMORY_DISCIPLINE.md`, `EVIDENCE_AND_CONFIDENCE.md`, and other unwritten files from [GAP_ANALYSIS.md](GAP_ANALYSIS.md) and [PUBLIC_ADOPTION_REVIEW.md](PUBLIC_ADOPTION_REVIEW.md).

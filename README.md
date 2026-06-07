@@ -12,9 +12,9 @@ Imprint is currently in architecture and schema planning. The repository is publ
 
 Current focus:
 
-1. Sprint 01: architecture and product definition
-2. Sprint 02: schema and contract design
-3. Sprint 03: local-only ingestion adapters
+1. Schema and model-provider foundation complete
+2. Preparing Sprint 03: local-only ingestion adapters
+3. Keeping all examples synthetic and all private corpora out of git
 
 ## What Imprint is
 
@@ -65,15 +65,14 @@ Imprint observes expression patterns. It does not diagnose people or infer menta
 
 ## Start here
 
-- `docs/PROJECT_STRATEGY.md`
-- `docs/PRODUCT_POSITIONING.md`
-- `docs/PROFILE_THEORY.md`
-- `docs/FIRST_RUN_EXPERIENCE.md`
-- `docs/COMPETITIVE_ANALYSIS.md`
-- `docs/ARCHITECTURE.md`
-- `docs/SECURITY_PRIVACY.md`
-- `docs/sprints/SPRINT_01.md`
-- `docs/sprints/SPRINT_01_PROMPT.md`
+- `docs/README.md` — documentation map
+- `docs/PROJECT_STRATEGY.md` — project strategy
+- `docs/PRODUCT_POSITIONING.md` — what Imprint is and is not
+- `docs/PROFILE_THEORY.md` — expression profile theory and claim boundaries
+- `docs/SCHEMA.md` — canonical schema overview
+- `docs/MODEL_PROVIDER_POLICY.md` — BYOM/BYOP model policy
+- `docs/PRIVACY_AND_LOCAL_MODE.md` — privacy and local-first posture
+- `docs/sprints/SPRINT_03.md` — next sprint
 
 ## Privacy stance
 
