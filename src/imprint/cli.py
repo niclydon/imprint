@@ -15,6 +15,11 @@ from imprint.consumers import (
     human_cli_consumer_contract,
     mosvera_consumer_contract,
 )
+from imprint.connectors import (
+    ConnectorConfigError,
+    build_default_connector_registry,
+    load_connector_config,
+)
 from imprint.exports import (
     ExportSafetyError,
     canonical_profile_json,
@@ -167,6 +172,36 @@ def extract_signals(
     typer.echo(f"signals={len(signals)}")
     typer.echo(f"durable={durable}")
     typer.echo(f"quarantined={quarantined}")
+
+
+@app.command(name="connectors-dry-run")
+def connectors_dry_run(
+    config_path: Path = typer.Option(
+        ...,
+        "--config",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        help="Connector config file with synthetic or local connector declarations.",
+    ),
+) -> None:
+    """Discover configured connector artifacts without ingesting normalized artifacts."""
+    try:
+        config = load_connector_config(config_path)
+        discoveries = build_default_connector_registry().discover_config(config)
+    except ConnectorConfigError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    for discovery in discoveries:
+        typer.echo(f"connector={discovery.connector_name}")
+        typer.echo(f"type={discovery.connector_type}")
+        typer.echo(f"enabled={str(discovery.enabled).lower()}")
+        typer.echo(f"adapters={','.join(discovery.adapter_types)}")
+        typer.echo(f"artifacts={discovery.artifact_count}")
+        typer.echo(f"storage_mode={discovery.storage_mode}")
+        if discovery.warnings:
+            typer.echo(f"warnings={';'.join(discovery.warnings)}")
 
 
 @app.command(name="compile")

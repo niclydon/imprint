@@ -1,0 +1,10 @@
+version: sprint09-manifest-v1
+entries:
+  - name: markdown_fixture
+    adapter: local_markdown
+    path: ../local_markdown/synthetic-brief.md
+    tags: [synthetic]
+  - name: transcript_fixture
+    adapter: local_transcript_json
+    path: ../local_transcript_json/synthetic-transcript.json
+    tags: [synthetic]

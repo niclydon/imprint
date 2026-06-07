@@ -9,6 +9,44 @@ profiles:
     target_platforms: [devto, substack]
     output_policy: public_safe
 
+connectors:
+  - name: synthetic_markdown
+    type: local_directory
+    enabled: true
+    adapter: local_markdown
+    path: ./examples/synthetic_corpus/markdown
+    storage_mode: metadata_only
+    source_policy_version: sprint09-source-policy-v1
+    tags: [synthetic]
+    local_only: true
+    private: false
+
+  - name: synthetic_chat
+    type: local_directory
+    enabled: true
+    adapter: local_jsonl
+    path: ./examples/synthetic_corpus/chat.jsonl
+    storage_mode: metadata_only
+    source_policy_version: sprint09-source-policy-v1
+    tags: [synthetic]
+    local_only: true
+    private: false
+
+  - name: disabled_private_example
+    type: local_directory
+    enabled: false
+    adapter: local_jsonl
+    path: ./private/example-export.jsonl
+    storage_mode: metadata_only
+    source_policy_version: sprint09-source-policy-v1
+    credentials:
+      source_token:
+        env: IMPRINT_PRIVATE_SOURCE_TOKEN
+        required: false
+    tags: [private-example]
+    local_only: true
+    private: true
+
 sources:
   synthetic_markdown:
     type: local_markdown
@@ -70,4 +108,4 @@ exports:
     output_path: ./exports/default.imprint.json
   mosvera:
     enabled: true
-    output_path: ./exports/default.mosvera.voice.yaml
+    output_path: ./exports/default.mosvera.expression.yaml

@@ -1,47 +1,100 @@
 # Connector Guide
 
-Status: planning
+Status: Sprint 09 baseline
 
-## Connector purpose
+## Connector Purpose
 
-Connectors turn external source records into normalized Imprint artifacts. They should not compile voice, decide final weights, or embed private assumptions.
+Connectors turn configured source locations into normalized Imprint artifacts through existing
+adapters. They should not compile expression, decide final weights, call models, or embed private
+assumptions.
 
-## Connector contract
+## Connector Contract
 
-A connector emits `NormalizedArtifact` records.
+A Sprint 09 connector:
 
-Required fields:
+- validates its configuration
+- reports capability metadata
+- supports dry-run discovery
+- optionally ingests artifacts through an allowlisted adapter
+- returns normalized `Artifact` records through the existing adapter registry
 
-- `artifact_id`
-- `source_id`
-- `source_type`
-- `artifact_type`
-- `text`
-- `occurred_at`
-- `speaker_id` or `speaker_label`
-- `speaker_confidence`
-- `metadata`
+Adapters continue to own `ArtifactEnvelope` normalization. Connector metadata is advisory source
+context only.
 
-## Public connector rules
+## Built-In Public Connectors
 
-- Do not hard-code private paths.
-- Do not hard-code private table names.
-- Do not hard-code emails, names, or phone numbers.
-- Do not require private services for tests.
-- Provide synthetic fixtures.
-- Use env vars for credentials.
-- Use query files for SQL rather than inline private queries.
+- `local_directory`: one configured file or directory plus one adapter
+- `manifest`: a synthetic manifest listing one or more adapter/path entries
 
-## Built-in public connectors
+Built-in adapters available to those connectors:
 
 - `local_text`
 - `local_markdown`
 - `local_jsonl`
 - `local_transcript_json`
 
-## Private connector examples
+## Example Local Directory Connector
 
-Private deployments may configure connectors such as:
+```yaml
+connectors:
+  - name: synthetic_markdown
+    type: local_directory
+    enabled: true
+    adapter: local_markdown
+    path: ./examples/synthetic_corpus/markdown
+    storage_mode: metadata_only
+    tags: [synthetic]
+```
+
+## Example Manifest Connector
+
+```yaml
+connectors:
+  - name: synthetic_manifest
+    type: manifest
+    enabled: true
+    manifest_path: ./examples/synthetic_corpus/connector-manifest.yaml
+    storage_mode: metadata_only
+```
+
+Manifest file:
+
+```yaml
+version: sprint09-manifest-v1
+entries:
+  - name: markdown_examples
+    adapter: local_markdown
+    path: ./markdown
+  - name: chat_export
+    adapter: local_jsonl
+    path: ./chat.jsonl
+```
+
+Relative manifest entry paths resolve relative to the manifest file.
+
+## Dry Run
+
+```bash
+imprint connectors-dry-run --config imprint.config.example.yaml
+```
+
+Dry-run mode discovers artifact counts and adapter types. It does not emit normalized artifacts,
+persist artifacts, print raw text, or print configured paths.
+
+## Public Connector Rules
+
+- Do not hard-code private paths.
+- Do not hard-code private table names.
+- Do not hard-code emails, names, phone numbers, account IDs, or service hostnames.
+- Do not require private services for tests.
+- Provide synthetic fixtures.
+- Use env var references for credentials.
+- Keep raw local corpus paths in ignored config only.
+- Keep source IDs opaque after normalization.
+
+## Private Connector Examples
+
+Private deployments may eventually configure connectors such as:
 
 - sent email connector
 - chat export connector
@@ -50,9 +103,9 @@ Private deployments may configure connectors such as:
 - SQL connector
 - API connector
 
-These should be documented generically.
+These remain future private connector work. They are not implemented in Sprint 09 public core.
 
-## AI conversation exports
+## AI Conversation Exports
 
 AI conversation connectors must separate:
 
@@ -66,15 +119,18 @@ Default policy:
 
 - user messages can contribute lexical/tone signal.
 - assistant messages must not contribute voice signal.
-- assistant messages may contribute topic context only if explicitly allowed.
+- assistant messages may contribute topic context only if explicitly allowed by a later policy.
 - tool outputs must not contribute voice signal.
 
-## Connector review checklist
+## Connector Review Checklist
 
 - [ ] No private names or paths in code.
-- [ ] Credentials loaded only from env or local config.
+- [ ] Credentials loaded only from env or ignored local config.
 - [ ] Tests use synthetic data.
-- [ ] Speaker attribution is explicit.
-- [ ] Quoted/forwarded content is handled.
+- [ ] Speaker attribution is explicit and advisory.
+- [ ] Quoted/forwarded content is handled by adapters/classification.
 - [ ] Connector can be disabled.
-- [ ] Failure does not leak secrets in logs.
+- [ ] Disabled connectors are inert.
+- [ ] Dry-run avoids persistence.
+- [ ] Failure does not leak secrets or paths in logs.
+- [ ] No remote/provider/LLM calls are introduced.

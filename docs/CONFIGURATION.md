@@ -1,17 +1,18 @@
-# Configuration Plan
+# Configuration
 
-Status: planning
+Status: Sprint 09 baseline
 
-## Configuration goals
+## Configuration Goals
 
 - Keep public code generic.
 - Keep private deployments externalized.
-- Make all source systems configurable.
-- Make all output paths configurable.
-- Make LLM providers optional and replaceable.
+- Make source systems configurable.
+- Keep connector examples synthetic.
+- Make output paths configurable.
+- Make model providers optional and replaceable.
 - Make privacy defaults strict.
 
-## Config files
+## Config Files
 
 Committed:
 
@@ -29,17 +30,77 @@ imprint.config.yaml
 *.local.json
 ```
 
-## Environment variables
+Private data and generated outputs should stay under ignored paths such as `data/`, `exports/`,
+`private/`, or deployment-specific ignored directories.
+
+## Environment Variables
 
 ```bash
 IMPRINT_CONFIG_FILE=./imprint.config.yaml
-IMPRINT_DB_URL=sqlite:///./data/imprint.db
 IMPRINT_OUTPUT_DIR=./exports
 IMPRINT_REDACTION_MODE=strict
 IMPRINT_LOG_LEVEL=INFO
 ```
 
-## Source policy config
+Optional local model/provider variables remain local configuration. They are not required for default
+synthetic runs or Sprint 09 connector tests.
+
+Connector credentials must be referenced by env var name from config:
+
+```yaml
+credentials:
+  source_token:
+    env: IMPRINT_PRIVATE_SOURCE_TOKEN
+    required: false
+```
+
+Do not put credential values directly in YAML.
+
+## Connector Config
+
+Sprint 09 connector declarations live under `connectors`:
+
+```yaml
+connectors:
+  - name: synthetic_markdown
+    type: local_directory
+    enabled: true
+    adapter: local_markdown
+    path: ./examples/synthetic_corpus/markdown
+    storage_mode: metadata_only
+    source_policy_version: sprint09-source-policy-v1
+    tags: [synthetic]
+    local_only: true
+    private: false
+
+  - name: synthetic_manifest
+    type: manifest
+    enabled: true
+    manifest_path: ./examples/synthetic_corpus/connector-manifest.yaml
+    storage_mode: metadata_only
+    tags: [synthetic]
+```
+
+Supported Sprint 09 connector types:
+
+- `local_directory`
+- `manifest`
+
+Deferred connector types such as Gmail, iMessage, Plaud, Looki, databases, cloud storage, and live
+APIs must stay out of public core until a future private connector sprint.
+
+## Dry Run
+
+Run connector discovery without artifact ingestion:
+
+```bash
+imprint connectors-dry-run --config imprint.config.example.yaml
+```
+
+The dry-run output reports counts and connector metadata. It must not print raw artifact text or local
+paths.
+
+## Source Policy Config
 
 ```yaml
 source_policy:
@@ -51,20 +112,6 @@ source_policy:
     structure: 0.1
     longform: 0.0
 
-  sent_email:
-    lexical: 0.7
-    tone: 0.6
-    reasoning: 0.5
-    structure: 0.3
-    longform: 0.2
-
-  longform_article:
-    lexical: 0.7
-    tone: 0.7
-    reasoning: 1.0
-    structure: 1.0
-    longform: 1.0
-
   transcript_segment:
     lexical: 0.6
     tone: 0.8
@@ -74,7 +121,10 @@ source_policy:
     spoken_style: 1.0
 ```
 
-## Authorship policy config
+Connector-level `source_policy_version` records which source policy applies. It does not make
+connector metadata durable truth; classification and compilation still re-assess artifact hints.
+
+## Authorship Policy Config
 
 ```yaml
 authorship_policy:
@@ -83,9 +133,6 @@ authorship_policy:
   human_directed_ai_assisted:
     multiplier: 0.55
     allowed_dimensions: [reasoning, structure, topic_context]
-  ai_origin_human_edited:
-    multiplier: 0.35
-    allowed_dimensions: [topic_context]
   assistant_output:
     multiplier: 0.0
     quarantine: true
@@ -97,25 +144,26 @@ authorship_policy:
     exclude: true
 ```
 
-## Config validation
+## Validation
 
-Startup should fail closed when:
+Startup and connector loading fail closed when:
 
-- redaction mode is missing
-- output path points inside tracked example directories
-- private source is enabled without required env var
-- public-safe export includes raw examples
-- source policy references unknown dimensions
-- connector config includes inline secrets instead of env var references
+- connector shape is invalid
+- enabled paths or manifests are missing
+- required connector env vars are unset
+- config includes inline secret-like labels
+- redaction mode is unsafe or missing in future runtime config
+- public-safe exports attempt to include raw examples
+- source policy references unknown dimensions in future source-policy validation
 
-## Recommended default
+## Recommended Default
 
-Default mode should be boring and safe:
+Default mode should remain boring and safe:
 
-- SQLite local database
-- synthetic local source
+- synthetic local sources
 - strict redaction
-- raw examples disabled
+- `metadata_only` artifact storage
+- raw examples disabled in public-safe exports
 - no network connectors
 - no cloud providers
-- exports written to ignored directory
+- exports written to ignored directories
