@@ -2,11 +2,11 @@
 
 ## Sprint 10: Forge OG image — 2026-06-07
 
-**Decision:** Replace the ImageMagick-cropped `og.png` with a Forge-generated social card in the Imprint glass aesthetic.
+**Decision:** Use a pure OpenAI `gpt-image-2` text-to-image OG card for social previews.
 
 **What changed:**
 
-- `web/og.png` — new 1200×630 image via Forge `openai:gpt-image-2` (img2img from `imprint-hero.png`, strength 0.35).
+- `web/og.png` — 1200×630 image via Forge `openai:gpt-image-2` (txt2img, no hero reference).
 - `web/og-gen.json` — generation metadata.
 
 ## Sprint 10: ai-glass-futuristic overlay — 2026-06-07
