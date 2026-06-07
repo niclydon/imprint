@@ -1,5 +1,7 @@
 # Imprint
 
+![Imprint hero: evidence fragments converging into a structured expression profile](docs/assets/imprint-hero.png)
+
 > Public-first identity and expression profile compiler.
 
 Imprint analyzes human-authored artifacts such as writing, messages, transcripts, notes, and documents, then compiles structured expression profiles that downstream systems can use without reading the raw private corpus.
