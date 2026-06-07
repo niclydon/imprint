@@ -1,391 +1,274 @@
-# Sprint 04 Architecture Review: Classification Engine Design
+# Sprint 04 Architecture Review: Classification Engine Implementation
 
 **Reviewer:** Gemini Antigravity (Adversarial Principal Architect)  
-**Status:** Gate decision for baseline implementation  
-**Context:** Evaluation of Sprint 04 classification design against evidence boundaries and signal extraction readiness
+**Status:** Post-implementation gate review  
+**Context:** Evaluation of the implemented Sprint 04 classification engine against evidence boundaries, explainability, and Sprint 05 readiness
 
 ---
 
 ## Executive Summary
 
-Sprint 04 has specified a **conservative, rule-based classification engine** that respects adapter independence and maintains evidence boundaries.
+Sprint 04 now has a real implemented classifier, not just a design. The implementation remains
+conservative, local-first, and artifact-scoped. It preserves the Sprint 03.5 ingestion boundary by
+treating adapter metadata as advisory evidence rather than classification truth.
 
-The design is architecturally sound. However, it has introduced operational assumptions that will cause problems if not enforced during implementation:
+The implementation also closes the major pre-implementation gaps:
 
-1. **Rule evaluation is deterministic but incomplete.** Known pathological cases (mixed languages, corrupted data, edge timezones) are not addressed.
-2. **Confidence scoring lacks guidance.** The spec says "confidence components" but doesn't specify how to compute them.
-3. **Quarantine vs. exclusion logic is vague.** When uncertain, should an artifact be quarantined (preserved for review) or excluded (removed from profile)?
-4. **Scaling assumptions are untested.** Rule evaluation on 1M artifacts is assumed to be O(n) but might have hidden quadratic paths.
+1. **Confidence scoring is now explicit and versioned.**
+2. **Quarantine vs. exclusion behavior is now defined and testable.**
+3. **Pathological-case handling is documented for the baseline rule set.**
+4. **Performance targets and scaling assumptions are documented.**
 
-**Verdict: CONDITIONAL GO for Implementation**
+**Verdict: GO for Sprint 05**
 
-The design can be built. But four constraints must be enforced during Sprint 04 coding:
-
-1. Define confidence component scoring explicitly (not just "explainable")
-2. Specify quarantine vs. exclusion decision rules
-3. Document known pathological cases and how they're handled
-4. Establish performance targets for 1M-artifact scaling
-
-If these are locked in, the classifier is production-ready.
+Sprint 05 can begin. The remaining concerns are not architectural blockers; they are follow-on
+productization items such as large-scale benchmarking, broader source-family coverage, and future
+audit-path design.
 
 ---
 
-## Strengths: What Sprint 04 Design Got Right
+## Strengths: What Sprint 04 Implemented Correctly
 
-### 1. Adapter Hints Are Treated as Evidence, Not Truth
-
-**Status: ✅ Excellent**
-
-`CLASSIFICATION_DESIGN.md` states:
-
-> "Adapter-provided metadata is treated as ingestion evidence, not final truth."
-
-And `CLASSIFICATION_RULES.md` reinforces:
-
-> "JSONL-supplied authorship, confidence, inclusion, and artifact-type values remain advisory source hints. They do not automatically become final classification truth."
-
-**Check:** Can an adapter assert high-confidence human authorship and have it auto-included?
-
-No. The rule states: "Uncorroborated human-origin hints degrade to lower-confidence provisional outcomes rather than silently including the artifact."
-
-This is correct and enforces the Sprint 03.5 boundary.
-
-### 2. Deterministic Local Classification
-
-**Status: ✅ Good**
-
-The design specifies:
-
-> "The baseline classifier is deterministic and local-first. It uses rule evaluation over opaque source identifiers, safe metadata hints, and source-shape signals derived during normalization."
-
-This is:
-- ✅ Deterministic (reproducible across runs)
-- ✅ Local (no API calls or LLM)
-- ✅ Rule-based (explainable)
-- ✅ Evidence-driven (metadata + source signals)
-
-No surprises, no provider lock-in.
-
-### 3. Clear Scope Boundaries
+### 1. Adapter Hints Remain Evidence, Not Truth
 
 **Status: ✅ Excellent**
 
-The design explicitly declares what it does NOT do:
+The classifier consumes normalized `Artifact` objects and re-assesses:
 
-- ❌ Extract signals
-- ❌ Compile profiles
-- ❌ Infer personality, intent, or diagnosis
-- ❌ Use provider APIs, LLMs, or embeddings
+- adapter-provided authorship hints
+- adapter-provided confidence hints
+- adapter-provided inclusion/exclusion hints
+- adapter-provided artifact-type hints
 
-This is correct. Classification is a precursor to extraction, not extraction itself.
+The JSONL path is especially important here: record-level metadata is preserved as `source_hints`
+but does not automatically become final classification output.
 
-### 4. Explainability as a First-Class Requirement
+**Result:** Sprint 03.5’s safety boundary holds in code, not just in docs.
+
+### 2. Classification Remains Deterministic and Local-Only
+
+**Status: ✅ Excellent**
+
+The implemented classifier in `src/imprint/classification/engine.py`:
+
+- is rule-based,
+- has no provider or network dependency,
+- keeps artifact decisions local to each artifact,
+- does not invoke LLMs, embeddings, or remote APIs.
+
+This preserves reproducibility and avoids provider drift inside the classification layer.
+
+### 3. Confidence Scoring Is Now Explicit and Versioned
+
+**Status: ✅ Resolved**
+
+Sprint 04 now defines a versioned confidence contract:
+
+- `model_version`
+- `attribution`
+- `authorship_origin`
+- `evidence_strength`
+- `source_reliability`
+- `policy_fit`
+- `contamination_penalty`
+- `display`
+
+The scoring model is deterministic, documented, and emitted as structured output. This is the
+minimum needed to keep future changes visible instead of silently redefining confidence semantics.
+
+### 4. Quarantine vs. Exclusion Is Operationally Defined
+
+**Status: ✅ Resolved**
+
+The implementation now follows a clear policy:
+
+- **Exclude** artifacts that are confidently non-subject or low-value for profile construction
+  (`assistant_output`, `template_or_notification`)
+- **Quarantine** artifacts that may still matter contextually but have uncertain authorship,
+  contamination, or parsing risk (`quoted_or_forwarded`, `unknown_speaker`, `missing_metadata`,
+  `parser_uncertain`, `mixed_authorship`, `suspected_ai_assisted`,
+  `human_directed_ai_assisted`, oversized artifacts)
+- **Include** only artifacts that are low-contamination, confidently human-origin, and above the
+  confidence floor
+
+This closes a major ambiguity from the pre-implementation review.
+
+### 5. Explainability Is First-Class in the Result Contract
 
 **Status: ✅ Good**
 
-Every classification result includes:
+Each classification result includes:
 
 - artifact ID
 - opaque source ID
 - source type
-- source hints considered
-- rule IDs applied
+- considered source hints
+- rule IDs
 - limitations
 - evidence summary
-- likelihoods (quote/forward, template/notification, assistant output, contamination)
+- quote/forward likelihood
+- template/notification likelihood
+- assistant-output likelihood
+- contamination risk
+- structured confidence
 
-This allows downstream systems and users to understand why an artifact was classified as it was.
+This is sufficient for downstream review, debugging, and future audit tooling.
 
-### 5. Conservative Defaults for Uncertainty
+### 6. Privacy Boundary Still Holds
 
 **Status: ✅ Good**
 
-Examples from rules:
-- "Missing transcript speaker metadata classifies to `unknown_speaker` and quarantines."
-- "Quote or forward markers raise quote/forward likelihood and quarantine the artifact."
-- "Uncorroborated human-origin hints degrade to lower-confidence provisional outcomes."
+The classifier does not reconstruct local filesystem paths from opaque `source_id` values, and the
+schema rejects path-like or raw-text fields in `source_hints`.
 
-When uncertain, the system does not assume. It quarantines or downgrades confidence.
+**Result:** The classification layer does not reopen the privacy leak fixed in Sprint 03.5.
 
 ---
 
-## Unresolved Design Questions (Must Be Answered During Implementation)
+## Remaining Risks (Not Sprint 05 Blockers)
 
-### 1. Confidence Component Scoring Is Undefined
+### 1. Performance Targets Are Documented, Not Yet Benchmarked
 
-**Status: ⚠️ Critical Specification Gap**
+**Status: ⚠️ Needs follow-through**
 
-The design says classification produces "explicit evidence with rule IDs, considered hints, confidence, and contamination/quote/template likelihoods."
+Sprint 04 now documents targets such as:
 
-But how are these likelihoods computed?
+- 1M artifacts in under 1 hour
+- under 2GB steady-state memory
+- linear scaling in artifact count
+- under 1KB explainability output per artifact
 
-**Example:** An artifact has a forward marker. The rule says "raise quote/forward likelihood." To what value? 0.8? 0.9? And the other likelihoods (template/notification, assistant_output)—are they 0.1 each?
+However, these are still targets and assumptions, not measured benchmark results.
 
-**The problem:** If confidence scoring is not precisely defined, different implementations will diverge and profiles will be inconsistent.
+**Assessment:** Acceptable for Sprint 05 start. Not sufficient for production-scale claims.
 
-**Recommendation:** Define a confidence model for Sprint 04 implementation:
+### 2. Pathological Case Coverage Is Curated, Not Exhaustive
 
-```
-forward_likelihood = has_forward_marker ? 0.85 : 0.1
-template_likelihood = has_template_marker ? 0.9 : 0.05
-assistant_likelihood = has_assistant_marker ? 0.9 : 0.05
-contamination_likelihood = max(forward, template, assistant)
+**Status: ⚠️ Acceptable**
 
-confidence = {
-    attribution: 0.95,  # opaque_source_id is stable
-    authorship_origin: (1 - contamination_likelihood),
-    extraction: 0.5,  # rule-based is less reliable than LLM
-    evidence_strength: (if_corroborated ? 0.8 : 0.4),
-    source_diversity: (source_type_count / total_types),
-    policy_fit: 1.0,
-    display: mean([authorship_origin, extraction, evidence_strength])
-}
-```
+Sprint 04 now documents and partially handles:
 
-Without this, "confidence" is meaningless.
+- oversized artifacts
+- malformed/weak metadata
+- unsupported source-shape heuristics
+- mixed-language or contradictory-marker uncertainty
 
-### 2. Quarantine vs. Exclusion Decision Logic Is Vague
+But several families remain deferred:
 
-**Status: ⚠️ Specification Ambiguity**
+- implicit email forwarding without markers
+- translation detection
+- system/log/auto-generated content families
+- cross-artifact context reconstruction
 
-The rules say:
-- "Quote markers...quarantine"
-- "Template markers...exclude"
-- "Assistant markers...exclude"
+**Assessment:** This is a bounded MVP rule inventory, not an architectural failure.
 
-But what's the difference? And when is quarantine used vs. exclusion?
+### 3. Confidence Model Stability Now Depends on Version Discipline
 
-**The problem:** If an artifact is excluded, it disappears from the profile entirely. If it's quarantined, it's preserved for review. These are very different outcomes.
+**Status: ⚠️ Watch item**
 
-**Questions that need answers:**
+The implementation is materially better because confidence is versioned. But this creates a new
+operational requirement: future changes must actually bump the model version and treat old/new
+results as potentially non-comparable.
 
-1. Is quarantine temporary (user reviews, then accepts/rejects) or permanent (quarantined artifacts never become signals)?
-2. When should an artifact be quarantined vs. excluded?
-   - Quote: quarantine (user might want to keep their own analysis) or exclude (it's not their words)?
-   - Template: exclude (not valuable) or quarantine (might be useful for context)?
-   - Assistant: exclude (not human-origin) or quarantine (might be evidence of their process)?
-3. If quarantined, do they contribute to profile evidence at all?
+**Assessment:** Manageable, but only if future work is disciplined.
 
-**Recommendation:** Define a decision tree:
+### 4. No Full Local Audit Mapping Yet
 
-```
-if template_or_notification:
-    action = EXCLUDE  # Not human-original, not valuable for profile
-elif assistant_output:
-    action = EXCLUDE  # Not human-original, could indicate AI feedback loop
-elif quote_or_forward:
-    action = QUARANTINE  # Preserve but don't include; user might explain why they shared it
-elif unknown_speaker:
-    action = QUARANTINE  # Preserve for review; uncertain about who wrote it
-elif contamination_likelihood > 0.7:
-    action = QUARANTINE  # Preserve but flag high contamination risk
-else:
-    action = INCLUDE  # Low contamination, presumed human-origin
-```
+**Status: ⚠️ Deferred**
 
-### 3. Pathological Cases Are Not Addressed
+Opaque source IDs protect privacy, but there is still no dedicated private-local audit surface that
+maps those IDs back to original local file locators when a user explicitly needs review.
 
-**Status: ⚠️ Known Unknowns**
-
-The design covers common cases (transcripts, templates, assistant markers) but what about:
-
-1. **Mixed language artifacts:** An email with English + Spanish + machine translation. How is speaker origin classified?
-2. **Corrupted encoding:** A file with mojibake or encoding errors. Does rule evaluation break?
-3. **Timestamps from the future or distant past:** A file dated year 2300 or 1800. How does this affect time-window logic?
-4. **Massive artifacts (10MB+ text):** Does rule evaluation scale linearly or blow up on memory?
-5. **Synthetic or generated content:** An artifact that's a dump of a language model's parameters. Not human-origin, not assistant-generated.
-
-**Recommendation:** Document known pathological cases and how they're handled:
-
-```
-PATHOLOGICAL_CASES = [
-    ("mixed_language", "Email with multiple languages", "Quarantine with mixed_language flag"),
-    ("encoding_corruption", "Mojibake or encoding errors", "Exclude with encoding_error flag"),
-    ("future_timestamp", "File dated > 2 years in future", "Exclude with timestamp_invalid flag"),
-    ("massive_artifact", "> 10MB text", "Process but flag size; split if needed"),
-    ("synthetic_content", "Parameter dumps or generated data", "Exclude with synthetic_flag"),
-]
-```
-
-### 4. Scaling Assumptions Are Untested
-
-**Status: ⚠️ Performance Assumption**
-
-The design assumes "deterministic rule evaluation" scales linearly (O(n) with n artifacts).
-
-But are there hidden quadratic loops?
-
-**Examples:**
-- Does comparing an artifact to all previous artifacts to detect duplicates become O(n²)?
-- Does computing source diversity across all sources become O(n * num_sources)?
-- Does storing rule-evaluation results for explainability grow unbounded in memory?
-
-**Recommendation:** Establish performance targets and test before scale-up:
-
-```
-Performance targets:
-- Classify 1M artifacts in < 1 hour (< 1ms per artifact)
-- Memory footprint < 2GB for classification state
-- No quadratic loops in rule evaluation
-- Explainability output < 1KB per artifact
-```
-
-### 5. Rule Completeness Is Unknown
-
-**Status: ⚠️ Unknown Coverage**
-
-The rules cover:
-- ✅ Transcripts (speaker metadata)
-- ✅ Templates and notifications
-- ✅ Assistant output
-- ✅ Quotes and forwards
-- ✅ Unknown speaker
-
-But what about:
-- Email BCC/CC fields (forwarding without explicit markers)?
-- Slack replies vs. threads (implicit conversation context)?
-- Translated content (how to detect and classify)?
-- Headers and metadata from email/calendar that aren't content?
-- Auto-generated logs and system messages?
-
-**Recommendation:** Build a rule inventory and explicitly document what's covered and what's deferred:
-
-```
-RULE_INVENTORY = {
-    "Covered in Sprint 04": [
-        "explicit_speaker_label",
-        "template_notification_marker",
-        "assistant_output_marker",
-        "quote_forward_marker",
-    ],
-    "Deferred to Sprint 05+": [
-        "implicit_cc_forwarding",
-        "thread_context_detection",
-        "translation_detection",
-        "auto_generated_content",
-        "system_logs",
-    ]
-}
-```
+**Assessment:** Not a blocker for Sprint 05 classification/extraction work. Relevant for later
+review tooling.
 
 ---
 
-## Critical Path Items for Sprint 04 Implementation
+## Sprint 05 Readiness
 
-### 1. Lock Down Confidence Scoring Model
+### What Sprint 05 Can Reliably Assume
 
-**Action:** Before implementing the classifier, specify:
-- How each confidence component is computed
-- What values they take (0.0-1.0?)
-- How display confidence is derived
-- How unknown authorship reduces confidence
+- classification output is deterministic and local-first
+- adapter hints do not bypass classification
+- quarantine/exclusion semantics are explicit
+- confidence output has a stable versioned shape
+- opaque source IDs remain opaque
+- explainability output exists for every classification result
 
-### 2. Define Quarantine vs. Exclusion Decision Tree
+### What Sprint 05 Should Not Assume
 
-**Action:** Specify when each action is taken and document the logic clearly.
-
-### 3. Document Pathological Cases
-
-**Action:** For each known edge case (mixed language, encoding corruption, etc.), document how it's handled.
-
-### 4. Establish Scaling Performance Targets
-
-**Action:** Set explicit targets (1M artifacts in <1 hour, <2GB memory) and plan test strategy.
-
-### 5. Build Rule Inventory
-
-**Action:** Document what's covered in Sprint 04 and what's deferred.
-
----
-
-## Long-Term Stability Assessment
-
-### Five-Year Outlook
-
-The classification design will hold **if**:
-
-1. **Rule set remains curated.** If rules proliferate (every user can add custom rules), the system becomes unpredictable. Keep rules minimal and vetted.
-
-2. **Confidence scoring stays stable.** If Sprint 05 changes how confidence is computed, all Sprint 04 profiles become incomparable. Version the scoring model.
-
-3. **Pathological cases don't multiply.** If every edge case requires a new rule, the system becomes unmaintainable. Handle edge cases at the boundary (reject/quarantine) rather than with more rules.
-
-4. **Performance scales linearly.** If rule evaluation becomes quadratic at 10M artifacts, the system fails at scale. Monitor performance early.
+- large-scale throughput has been benchmarked
+- every real-world source family is covered by rules
+- quarantined artifacts are automatically resolvable without future review tooling
+- confidence formulas may change silently
 
 ---
 
 ## Findings by Severity
 
-### Blockers (None)
+### Blockers
 
-The design is architecturally sound and can be implemented.
+None.
 
-### Majors (Must Specify Before Implementation Begins)
+### Majors
 
-1. **Confidence Component Scoring Model**
-   - Design explicitly specifies "confidence" but not how to compute it
-   - Implementation will make ad-hoc decisions if this isn't locked down
-   - Impacts profile comparability and downstream weighting
+1. **Benchmark gap**
+   - Performance targets are documented but not yet validated at scale
+   - Matters for deployment claims, not for Sprint 05 feature work
 
-2. **Quarantine vs. Exclusion Decision Logic**
-   - Rules mention both but don't specify when to use each
-   - Different implementations will diverge
-   - Impacts what gets preserved vs. discarded
+2. **Coverage gap**
+   - Deferred source families still need explicit future rules
+   - Matters for breadth, not baseline architecture
 
-3. **Scaling Performance Targets**
-   - No targets specified for 1M artifacts
-   - Unknown if rule evaluation is actually O(n) or has hidden quadratic loops
-   - Blocks production deployment decisions
+### Minors
 
-### Minors (Acceptable to Defer or Document in Code)
+3. **Audit-path deferral**
+   - No private-local opaque-ID-to-path mapping yet
 
-4. **Pathological Case Inventory**
-   - Known edge cases (mixed language, encoding corruption) are not documented
-   - Acceptable: can be added during Sprint 04 implementation as discovered
-
-5. **Rule Completeness Inventory**
-   - Not clear what's covered vs. deferred
-   - Acceptable: document in code comments what's implemented and what's future work
+4. **Version-governance dependency**
+   - Confidence stability now depends on disciplined model-version updates
 
 ---
 
 ## Go / No-Go Decision
 
-### ✅ CONDITIONAL GO for Sprint 04 Implementation
+### ✅ GO for Sprint 05
 
-**Verdict:** The classification design is ready for implementation, PROVIDED that the major specification gaps are closed first.
+**Verdict:** Sprint 04 implementation is architecturally sound and sufficiently specified for the
+next sprint.
 
-**Mandatory before Sprint 04 coding begins:**
+**Recommended carry-forward constraints for Sprint 05:**
 
-1. **Define confidence component scoring model** — exact formulas, not "explainable"
-2. **Define quarantine vs. exclusion decision logic** — explicit tree, not suggestions
-3. **Establish performance scaling targets** — 1M artifacts in <1 hour, <2GB memory
-4. **Document rule completeness** — what's in Sprint 04, what's future work
-
-**If these are locked in,** Sprint 04 implementation can proceed with confidence that classifier behavior will be predictable and consistent.
+1. Treat `ClassificationConfidence.model_version` as a compatibility boundary.
+2. Do not add cross-artifact quadratic logic to the baseline classifier path.
+3. Keep quarantined artifacts out of durable signal support unless a later review stage explicitly
+   promotes them.
+4. If Sprint 05 broadens source-family coverage, update the documented rule inventory and
+   pathological-case list at the same time.
 
 ---
 
 ## Closing
 
-Sprint 04 design is philosophically sound: conservative, rule-based, evidence-driven, explainable. The implementation challenges are operational, not architectural.
+Sprint 04 is no longer waiting on specification closure. The major design gaps from the earlier
+review have been addressed in code, schema, tests, and docs.
 
-The gaps aren't blockers—they're specification work that needs to happen before coding. Lock them down, and the classifier is production-ready.
+The remaining work is practical hardening: benchmark the current implementation, widen rule
+coverage carefully, and add private-local audit tooling when needed.
+
+That is a healthy place to start Sprint 05.
 
 ---
 
-## Appendix: Sprint 04 Implementation Checklist
+## Appendix: Sprint 05 Carry-Forward Checklist
 
-Before shipping Sprint 04 classifier, verify:
+Before shipping Sprint 05 work that depends on classification, verify:
 
-- [ ] Confidence component scoring model defined and implemented?
-- [ ] Quarantine vs. exclusion decision logic explicit and tested?
-- [ ] Performance targets met (1M artifacts in <1 hour)?
-- [ ] Pathological cases documented and handled?
-- [ ] Rule set curated and minimal?
-- [ ] Explainability output < 1KB per artifact?
-- [ ] Tests prove adapter hints don't bypass logic?
-- [ ] No diagnostic or personality claims in rules?
-- [ ] Classification boundary preserved (no signal extraction)?
-
-Use this checklist when reviewing Sprint 04 implementation.
+- [x] Confidence component scoring model defined and implemented
+- [x] Quarantine vs. exclusion logic explicit and tested
+- [ ] Performance targets benchmarked at meaningful scale
+- [x] Pathological cases documented for current baseline
+- [x] Rule inventory distinguishes covered vs deferred behavior
+- [x] Tests prove adapter hints do not bypass logic
+- [x] No diagnostic or personality claims in rules
+- [x] Classification boundary preserved (no signal extraction)
