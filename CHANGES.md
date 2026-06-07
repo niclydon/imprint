@@ -6,6 +6,45 @@ Chronological per-phase record of significant work. See `docs/narrative/` for de
 
 ## 2026-06-07
 
+### Sprint 10: Pipeline diagram assets
+
+**Decision:** Replace the monospace `configured sources -> harvest -> …` text box in “Evidence in, portable profiles out” with paired dark/light pipeline illustrations that follow the navbar theme toggle.
+
+**What changed:**
+
+- **Asset source:** Anvil `Public/DropBox/` via SSH/SCP — `3DD46FBC-9A8A-4D95-86D4-C68D67FA8237.png` (dark), `D753F74F-26A0-4656-B4E0-C241BC1EE336.png` (light); 1717×916 each
+- **Web delivery** (`4aa5d41`): `pipeline-dark.webp` (50 KB), `pipeline-light.webp` (39 KB); theme swap via `data-theme` CSS in `web/index.html` + `web/styles.css`
+- **`web/.gitignore`:** exclude source UUID PNGs and raw OG artifacts; commit WebP only
+
+**Commits:** `4aa5d41`
+
+**What's unblocked:** About-section pipeline matches hero/OG visual fidelity; paired light/dark asset pattern documented for future illustrations.
+
+**Still pending:** Optional Mosvera `imagery.pipeline_*` registry entries; optional mobile-specific crop if label legibility needs it at narrow widths.
+
+**Full story:** `docs/narrative/2026-06-07-pipeline-diagram-theme-assets.md`
+
+### Sprint 10: Public Web Presence — delivered
+
+**Decision:** Ship `imprint.niclydon.dev` as a static, glass-styled public front door — not an application UI — with credible social previews, mobile navigation, and a dual light/dark theme registered in Mosvera aesthetic `imprint`.
+
+**What changed:**
+
+- **`web/` landing site** (`32f4faf`): `index.html`, `styles.css`, favicon, touch icon, logo mark, social metadata, `DEPLOYMENT.md`; README links to https://imprint.niclydon.dev
+- **Deploy path** (`e56d1b1`): repo-root `vercel.json` `outputDirectory: "web"`; Vercel project `imprint`, Cloudflare CNAME `imprint` → `cname.vercel-dns.com` (DNS only)
+- **Glass overlay** (`b082536`): `ai-glass-futuristic` structure on frozen Imprint palette; Mosvera `template.imprint-base.json` + `composition.imprint.json` (local registry)
+- **OG image** (`97d3ee6`): pure Forge `openai:gpt-image-2-q8` txt2img at 1536×832, cropped to 1200×630 (`web/og.png`, 970 KB); metadata in `web/og-gen.json` — no in-image text
+- **Hero background** (`667d7e9`): `hero.webp` WebP derivative of OG (58 KB); `object-position: 58% 42%` — fixes baked-in "IMPRINT" text collision with centered glass card
+- **Mobile + dual theme** (`b60506b`): slide-out nav drawer (≤900px), sun/moon toggle, `localStorage` + system preference, light palette on frost paper (`#e8edf2`); `web/theme.js`; Mosvera `palette_light` / `effects_light` on aesthetic `imprint`
+
+**Commits:** `32f4faf`, `e56d1b1`, `b082536`, `c083c41` (superseded OG), `97d3ee6`, `667d7e9`, `b60506b`
+
+**What's unblocked:** Stable public URL and social preview chain for README/docs; Mosvera `imprint` documents dark + light palettes for downstream branded generation.
+
+**Still pending:** Social cache re-scrape (LinkedIn/X); optional font self-hosting; optional Mosvera pack export to repo.
+
+**Full story:** `docs/narrative/2026-06-07-sprint-10-public-web-presence.md`
+
 ### Phase: Sprint 07 Adversarial Review — Export Layer and First-Run Experience Readiness
 
 **Verdict:** GO for Sprint 08

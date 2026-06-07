@@ -93,6 +93,6 @@ Sprint is complete when:
 - page communicates pre-release/open-source/local-first posture — **done**
 - no private data or private infrastructure details are exposed — **done**
 
-**Beyond original exit criteria (same day):** mobile nav drawer (`b60506b`), light/dark theme toggle, Mosvera `palette_light` on aesthetic `imprint`.
+**Beyond original exit criteria (same day):** mobile nav drawer (`b60506b`), light/dark theme toggle, Mosvera `palette_light` on aesthetic `imprint`, theme-aware pipeline diagrams replacing text box (`4aa5d41`).
 
-**Full story:** `docs/narrative/2026-06-07-sprint-10-public-web-presence.md`
+**Full story:** `docs/narrative/2026-06-07-sprint-10-public-web-presence.md` (site delivery), `docs/narrative/2026-06-07-pipeline-diagram-theme-assets.md` (pipeline visual)
