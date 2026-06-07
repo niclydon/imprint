@@ -1,33 +1,25 @@
 # Imprint Changelog
 
-## Sprint 10: Forge OG image — 2026-06-07
+## Sprint 10: Public Web Presence — delivered 2026-06-07
 
-**Decision:** Use a pure OpenAI `gpt-image-2` text-to-image OG card for social previews.
-
-**What changed:**
-
-- `web/og.png` — 1200×630 image via Forge `openai:gpt-image-2` (txt2img, no hero reference).
-- `web/og-gen.json` — generation metadata.
-
-## Sprint 10: ai-glass-futuristic overlay — 2026-06-07
-
-**Decision:** Apply `ai-glass-futuristic` structural DNA (glassmorphism, atmosphere, cinematic depth, motion) to the Imprint landing page while keeping the existing Imprint palette frozen. Register the result as Mosvera aesthetic `imprint`.
+**Decision:** Ship `imprint.niclydon.dev` as a static, glass-styled public front door — not an application UI — with credible social previews, mobile navigation, and a dual light/dark theme registered in Mosvera aesthetic `imprint`.
 
 **What changed:**
 
-- `web/styles.css` and `web/index.html`: glass surfaces, cerulean/amber atmosphere mesh, grain, spotlit hero, lift/sheen hovers, staggered reveal.
-- Mosvera registry: `~/.config/mosvera/registry/template.imprint-base.json` and `composition.imprint.json`.
+- **`web/` landing site** (`32f4faf`): `index.html`, `styles.css`, favicon, touch icon, logo mark, social metadata, `DEPLOYMENT.md`; README links to https://imprint.niclydon.dev
+- **Deploy path** (`e56d1b1`): repo-root `vercel.json` `outputDirectory: "web"`; Vercel project `imprint`, Cloudflare CNAME `imprint` → `cname.vercel-dns.com` (DNS only)
+- **Glass overlay** (`b082536`): `ai-glass-futuristic` structure on frozen Imprint palette; Mosvera `template.imprint-base.json` + `composition.imprint.json` (local registry)
+- **OG image** (`97d3ee6`): pure Forge `openai:gpt-image-2-q8` txt2img at 1536×832, cropped to 1200×630 (`web/og.png`, 970 KB); metadata in `web/og-gen.json` — no in-image text
+- **Hero background** (`667d7e9`): `hero.webp` WebP derivative of OG (58 KB); `object-position: 58% 42%` — fixes baked-in "IMPRINT" text collision with centered glass card
+- **Mobile + dual theme** (`b60506b`): slide-out nav drawer (≤900px), sun/moon toggle, `localStorage` + system preference, light palette on frost paper (`#e8edf2`); `web/theme.js`; Mosvera `palette_light` / `effects_light` on aesthetic `imprint`
 
-## Sprint 10: Public Web Presence — 2026-06-07
+**Commits:** `32f4faf`, `e56d1b1`, `b082536`, `c083c41` (superseded OG), `97d3ee6`, `667d7e9`, `b60506b`
 
-**Decision:** Ship a single-page static landing site at `imprint.niclydon.dev` for project communication and social sharing — not an application UI.
+**What's unblocked:** Stable public URL and social preview chain for README/docs; Mosvera `imprint` documents dark + light palettes for downstream branded generation.
 
-**What changed:**
+**Still pending:** Social cache re-scrape (LinkedIn/X); optional font self-hosting; optional Mosvera pack export to repo.
 
-- Added `web/` static site: `index.html`, `styles.css`, brand assets (favicon, OG image, hero), social metadata, and `DEPLOYMENT.md`.
-- Updated `README.md` with website link and refreshed pre-release status.
-
-**Deploy:** Vercel project with root directory `web/`, Cloudflare CNAME `imprint` → `cname.vercel-dns.com`.
+**Full story:** `docs/narrative/2026-06-07-sprint-10-public-web-presence.md`
 
 ## Phase 0: Public-First Foundation Setup — 2026-06-07
 

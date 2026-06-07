@@ -55,18 +55,22 @@ See chat history for the detailed prompts; expand this file later into the full 
 
 Primary Model: GPT 5.4
 Reviewer: GPT 5.5
+Status: **Complete** — 2026-06-07
 
 Goal:
 Create the single-page public web presence for `imprint.niclydon.dev`.
 
 Deliverables:
-- landing page
-- favicon/app icon
-- Open Graph image
-- social metadata
-- README/repo links
-- concise public positioning copy
+- landing page — **shipped** (`web/`, https://imprint.niclydon.dev)
+- favicon/app icon — **shipped**
+- Open Graph image — **shipped** (Forge `gpt-image-2` txt2img, `web/og-gen.json`)
+- social metadata — **shipped**
+- README/repo links — **shipped**
+- concise public positioning copy — **shipped**
+- mobile navigation + light/dark theme — **shipped** (`b60506b`, stretch goal)
 
 Boundary:
 This is a public project landing page, not a product UI and not a corpus/profile interface.
+
+Narrative: `docs/narrative/2026-06-07-sprint-10-public-web-presence.md`
 

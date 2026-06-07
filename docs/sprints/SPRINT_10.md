@@ -2,7 +2,7 @@
 
 Primary Model: GPT 5.4
 Reviewer: GPT 5.5
-Status: Future phase after the core profile/export path is stable
+Status: **Complete** — 2026-06-07 (`imprint.niclydon.dev` live; glass overlay, Forge OG, mobile nav, dual theme)
 
 ## Mission
 
@@ -86,9 +86,13 @@ Do not implement:
 
 Sprint is complete when:
 
-- `imprint.niclydon.dev` renders publicly
-- GitHub README links to the site
-- social cards render correctly
-- favicon and OG assets work
-- page communicates pre-release/open-source/local-first posture
-- no private data or private infrastructure details are exposed
+- `imprint.niclydon.dev` renders publicly — **done 2026-06-07** (`32f4faf`, Vercel project `imprint`)
+- GitHub README links to the site — **done**
+- social cards render correctly — **done** (`web/og.png` via Forge `gpt-image-2` txt2img; re-scrape recommended after OG swap)
+- favicon and OG assets work — **done**
+- page communicates pre-release/open-source/local-first posture — **done**
+- no private data or private infrastructure details are exposed — **done**
+
+**Beyond original exit criteria (same day):** mobile nav drawer (`b60506b`), light/dark theme toggle, Mosvera `palette_light` on aesthetic `imprint`.
+
+**Full story:** `docs/narrative/2026-06-07-sprint-10-public-web-presence.md`
