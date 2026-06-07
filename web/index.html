@@ -140,12 +140,12 @@
         </figure>
 
         <ul class="outcomes">
-          <li class="glass lift reveal reveal-2"><span class="sheen" aria-hidden="true"></span>Writing tools and drafting assistants</li>
-          <li class="glass lift reveal reveal-3"><span class="sheen" aria-hidden="true"></span>Publishing systems and content workflows</li>
-          <li class="glass lift reveal reveal-4"><span class="sheen" aria-hidden="true"></span>Agent personas and downstream consumers</li>
-          <li class="glass lift reveal reveal-5"><span class="sheen" aria-hidden="true"></span>Aesthetic and identity packs</li>
-          <li class="glass lift reveal reveal-6"><span class="sheen" aria-hidden="true"></span>Profile comparison and drift analysis</li>
-          <li class="glass lift reveal reveal-6"><span class="sheen" aria-hidden="true"></span>First-run "What Imprint Learned" reports</li>
+          <li class="glass lift reveal reveal-2"><span class="sheen" aria-hidden="true"></span>Local ingestion and private connector framework</li>
+          <li class="glass lift reveal reveal-3"><span class="sheen" aria-hidden="true"></span>Deterministic classification and signal extraction</li>
+          <li class="glass lift reveal reveal-4"><span class="sheen" aria-hidden="true"></span>Versioned profile compiler</li>
+          <li class="glass lift reveal reveal-5"><span class="sheen" aria-hidden="true"></span>Public-safe JSON, Markdown, and first-run exports</li>
+          <li class="glass lift reveal reveal-6"><span class="sheen" aria-hidden="true"></span>Mosvera, Broadside, agent, and CLI consumer contracts</li>
+          <li class="glass lift reveal reveal-6"><span class="sheen" aria-hidden="true"></span>No-raw-text privacy and compatibility warnings</li>
         </ul>
 
         <div class="principles">
@@ -163,9 +163,10 @@
         <p class="section-eyebrow">Sprint 07</p>
         <h2>Public-safe export contracts<span class="amber">,</span> ready for downstream use</h2>
         <p class="section-intro">
-          Compiled profiles can now export as deterministic JSON, human-readable Markdown,
-          first-run "What Imprint Learned" summaries, and Mosvera expression overlay fragments —
-          all without raw text, provider prompts, or private locators.
+          Compiled profiles export as deterministic JSON, human-readable Markdown,
+          first-run "What Imprint Learned" summaries, Mosvera expression overlays, and
+          consumer-safe projections — all with compatibility warnings and no raw text,
+          provider prompts, or private locators.
         </p>
 
         <div class="diff-cards">
@@ -275,6 +276,44 @@
       </div>
     </section>
 
+
+    <section class="section reveal reveal-3">
+      <div class="container">
+        <p class="section-eyebrow">Current status</p>
+        <h2>Built<span class="amber">,</span> reviewed, and running</h2>
+        <p class="section-intro">
+          Imprint is no longer just a project thesis. The repository now contains the full evidence
+          pipeline: ingestion, classification, signal extraction, profile compilation, public-safe
+          exports, consumer contracts, and a private connector framework.
+        </p>
+
+        <div class="diff-cards">
+          <article class="diff-card glass lift reveal reveal-2"><span class="sheen" aria-hidden="true"></span><h3>Implemented pipeline</h3><p>Adapters, connectors, classifiers, signal extractors, compiler, exporters, and consumer projections are implemented and tested.</p></article>
+          <article class="diff-card glass lift reveal reveal-3"><span class="sheen" aria-hidden="true"></span><h3>Trust boundaries</h3><p>Opaque source IDs, no-raw-text public exports, evidence-backed claims, version metadata, and compatibility warnings are built in.</p></article>
+          <article class="diff-card glass lift reveal reveal-4"><span class="sheen" aria-hidden="true"></span><h3>Architecture reviews</h3><p>Each major layer has been reviewed adversarially for privacy, scope creep, versioning, and boundary failures.</p></article>
+          <article class="diff-card glass lift reveal reveal-5"><span class="sheen" aria-hidden="true"></span><h3>Current focus</h3><p>Public web polish, future private-source adapters, profile comparison, and downstream integrations built on existing contracts.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal reveal-3">
+      <div class="container">
+        <p class="section-eyebrow">Integration surfaces</p>
+        <h2>Contracts first<span class="amber">,</span> integrations second</h2>
+        <p class="section-intro">
+          Imprint exports canonical profile contracts. Other systems consume projections of those
+          contracts without owning profile inference, raw corpus access, prompt assembly, or runtime behavior.
+        </p>
+
+        <div class="diff-cards">
+          <article class="diff-card glass lift reveal reveal-2"><span class="sheen" aria-hidden="true"></span><h3>Mosvera</h3><p>Consumes expression overlays. Imprint compiles expression; Mosvera compiles aesthetic intent.</p></article>
+          <article class="diff-card glass lift reveal reveal-3"><span class="sheen" aria-hidden="true"></span><h3>Broadside</h3><p>Consumes publishing constraints and expression summaries, not prompts, workflows, schedules, or generation settings.</p></article>
+          <article class="diff-card glass lift reveal reveal-4"><span class="sheen" aria-hidden="true"></span><h3>Agents & apps</h3><p>Consume safe profile projections, evidence summaries, limitations, and compatibility warnings.</p></article>
+          <article class="diff-card glass lift reveal reveal-5"><span class="sheen" aria-hidden="true"></span><h3>Private sources</h3><p>Generic connectors support future private adapters while keeping real credentials, corpora, and source paths out of the public repo.</p></article>
+        </div>
+      </div>
+    </section>
+
     <section id="privacy" class="section reveal reveal-4">
       <div class="container">
         <p class="section-eyebrow">Privacy</p>
@@ -313,15 +352,15 @@
       <div class="container">
         <div class="status-banner glass">
           <p class="section-eyebrow" style="margin-bottom: 0.5rem;">Status</p>
-          <h2>Pre-release / active development</h2>
+          <h2>Open-source architecture<span class="amber">,</span> pre-release packaging</h2>
           <p>
-            Imprint is open-source and public-first by design, but not yet ready for production use.
-            Schema foundations, local ingestion, classification, and signal extraction are in progress.
-            All examples and tests use synthetic data only.
+            Imprint is public-first and usable as an architecture today. The core pipeline and contract
+            layers are implemented, reviewed, and tested. Production packaging, richer private adapters,
+            and downstream integrations are still evolving.
           </p>
           <div class="status-meta">
             <span>MIT License</span>
-            <span>Open source</span>
+            <span>Public-safe exports</span>
             <span>Synthetic fixtures only</span>
           </div>
         </div>
