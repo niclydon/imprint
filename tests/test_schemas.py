@@ -8,6 +8,8 @@ from imprint.schemas import (
     ArtifactClassificationLabel,
     ArtifactClassificationResult,
     ArtifactReference,
+    ArtifactSignalCandidate,
+    ArtifactSignalEvidence,
     ArtifactStoragePolicy,
     AuthorshipOrigin,
     BuildManifest,
@@ -33,6 +35,7 @@ from imprint.schemas import (
     ProviderKind,
     ProviderPolicyStatus,
     SignalSupport,
+    SignalEvidencePolicy,
     SourcePolicy,
 )
 
@@ -342,6 +345,35 @@ def test_classification_result_requires_opaque_source_id() -> None:
                 "contamination_penalty": 0.4,
                 "display": 0.45,
             },
+        )
+
+
+def test_artifact_signal_candidate_rejects_personality_claims() -> None:
+    with pytest.raises(ValidationError, match="artifact signal candidates cannot contain personality"):
+        ArtifactSignalCandidate(
+            signal_id="signal-1",
+            artifact_id="artifact-1",
+            source_id="source-1",
+            source_type="local_text",
+            family="lexical",
+            name="analytical_style",
+            observed_feature="The subject is analytical.",
+            claim_level="observation",
+            confidence=confidence(),
+            evidence=ArtifactSignalEvidence(
+                signal_id="signal-1",
+                artifact_id="artifact-1",
+                source_id="source-1",
+                source_type="local_text",
+                classification_id="classification-1",
+                classification_label="included",
+                classification_model_version="sprint04-rule-v1",
+                signal_model_version="sprint05-rule-v1",
+                rule_id="lexical-test",
+                observed_feature="Synthetic feature",
+                evidence_policy=SignalEvidencePolicy.NO_RAW_TEXT,
+            ),
+            durable=True,
         )
 
 

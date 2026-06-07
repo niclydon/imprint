@@ -8,6 +8,8 @@ A signal is an evidence-backed expression pattern. Signal names should describe 
 
 **Definition:** word choice, phrase recurrence, jargon, register, contractions, and terminology patterns.
 
+**Sprint 05 baseline:** deterministic contraction-presence detection at artifact level.
+
 **Evidence requirements:** artifact references, source-type counts, time window, authorship-origin confidence, extraction method, and examples as hashes or private-local references rather than public raw text.
 
 **Non-examples:** "is smart", "is technical", "has high openness".
@@ -24,6 +26,8 @@ A signal is an evidence-backed expression pattern. Signal names should describe 
 
 **Confidence guidance:** lower confidence when artifacts are short, quoted, forwarded, template-driven, or mixed-authorship.
 
+**Sprint 05 baseline:** punctuation-level tone markers only (`?`, `!`), not semantic affect inference.
+
 ## Humor
 
 **Definition:** observable humor devices such as understatement, callbacks, absurd comparisons, self-deprecation, or irony markers.
@@ -33,6 +37,8 @@ A signal is an evidence-backed expression pattern. Signal names should describe 
 **Non-examples:** "is funny", "is sarcastic by nature", inferred social intent.
 
 **Confidence guidance:** require multiple artifacts unless the context profile explicitly covers a narrow performance or publication genre.
+
+**Sprint 05.5 status:** still deferred.
 
 ## Reasoning
 
@@ -44,6 +50,9 @@ A signal is an evidence-backed expression pattern. Signal names should describe 
 
 **Confidence guidance:** sensitive to source type; chat fragments are weak for long-form reasoning unless the source policy gives them explicit weight.
 
+**Sprint 05.5 extension:** deterministic artifact-local markers for causal explanation, tradeoff
+framing, and caveat or uncertainty handling.
+
 ## Structure
 
 **Definition:** formatting and organization patterns such as paragraph length, bullet usage, section order, conclusion placement, and transition style.
@@ -53,6 +62,8 @@ A signal is an evidence-backed expression pattern. Signal names should describe 
 **Non-examples:** quality ranking, professionalism score, competence inference.
 
 **Confidence guidance:** high when source type is stable; lower when source types mix chats, transcripts, and edited publications without context profiles.
+
+**Sprint 05 baseline:** short-paragraph and direct-opening observations.
 
 ## Narrative
 
@@ -64,6 +75,21 @@ A signal is an evidence-backed expression pattern. Signal names should describe 
 
 **Confidence guidance:** cross-model semantic extraction is not comparable unless explicitly migrated.
 
+**Sprint 05 baseline:** simple contrast framing only (`not X, but Y`) via deterministic artifact-local rules.
+
+**Sprint 05.5 extension:** ordered sequence markers, before/after transitions, and explicit example
+grounding.
+
+## Formatting
+
+**Definition:** presentational markers such as headings and bullet usage.
+
+**Evidence requirements:** artifact-local formatting counts, classification eligibility, and no-raw-text evidence summaries.
+
+**Non-examples:** quality judgments, professionalism scores, or editorial approval.
+
+**Confidence guidance:** high for explicit markers because the rule path is deterministic.
+
 ## Anti-Patterns
 
 **Definition:** patterns the profile says downstream consumers should avoid because they are unsupported, generic, misleading, or inconsistent with observed expression.
@@ -73,3 +99,6 @@ A signal is an evidence-backed expression pattern. Signal names should describe 
 **Non-examples:** prompt instructions, provider settings, editorial workflow steps.
 
 **Confidence guidance:** anti-patterns require the same evidence discipline as positive signals and must not become prompt-generation controls.
+
+**Sprint 05.5 extension:** question bursts, punctuation-emphasis bursts, and formatting without
+enough explanatory prose.

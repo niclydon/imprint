@@ -1,0 +1,23 @@
+{
+  "transcript_id": "signal-transcript-5-5",
+  "segments": [
+    {
+      "artifact_id": "signal-5-5-segment-1",
+      "speaker": "Synthetic Speaker",
+      "timestamp": "2026-06-07T12:05:00Z",
+      "text": "First, capture the facts. Then weigh the tradeoff, because speed matters. In exchange, we keep one extra review step."
+    },
+    {
+      "artifact_id": "signal-5-5-segment-2",
+      "speaker": "Synthetic Speaker",
+      "timestamp": "2026-06-07T12:06:00Z",
+      "text": "Before the cleanup, the notes were scattered. After the cleanup, the path was direct. For example, one checklist became one stable runbook."
+    },
+    {
+      "artifact_id": "signal-5-5-segment-3",
+      "speaker": "Synthetic Speaker",
+      "timestamp": "2026-06-07T12:07:00Z",
+      "text": "Why now? Why this path? Why not later?!"
+    }
+  ]
+}

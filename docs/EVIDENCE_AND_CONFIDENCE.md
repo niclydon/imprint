@@ -62,6 +62,10 @@ components are attribution, authorship-origin confidence, evidence strength, sou
 policy fit, contamination penalty, and a derived display score. If these formulas change, the
 classifier should version the model rather than silently redefining old results.
 
+Sprint 05 artifact-level signal extraction derives signal confidence from classification confidence
+plus deterministic rule reliability and evidence strength. Quarantined or excluded artifacts must
+not silently become durable signal support.
+
 ## Authorship-Origin Policy
 
 Authorship origin means the best-supported classification from available evidence.

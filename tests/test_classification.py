@@ -132,7 +132,7 @@ def test_cli_classify_reports_classification_summary() -> None:
             "--source-type",
             "local_transcript_json",
             "--path",
-            str(FIXTURES / "local_transcript_json"),
+            str(FIXTURES / "local_transcript_json" / "synthetic-transcript.json"),
         ],
     )
 

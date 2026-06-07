@@ -71,6 +71,10 @@ Prefer a weaker observation over a stronger interpretation.
 
 Observation > Interpretation > Diagnosis
 
+Sprint 05 baseline signal extraction should overwhelmingly emit `observation` claims. If an
+artifact is not cleanly eligible for durable support, prefer a quarantined candidate signal over a
+stronger interpretation.
+
 ## Claim Levels
 
 Sprint 02 schemas should represent claim levels explicitly:

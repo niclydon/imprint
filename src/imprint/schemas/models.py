@@ -71,6 +71,17 @@ class SignalFamily(StrEnum):
     ANTI_PATTERN = "anti_pattern"
 
 
+class ArtifactSignalFamily(StrEnum):
+    STRUCTURE = "structure"
+    LEXICAL = "lexical"
+    RHETORICAL_PATTERN = "rhetorical_pattern"
+    FORMATTING = "formatting"
+    TONE_MARKER = "tone_marker"
+    REASONING = "reasoning"
+    NARRATIVE = "narrative"
+    ANTI_PATTERN = "anti_pattern"
+
+
 class ExtractorFamily(StrEnum):
     RULE_BASELINE = "rule_baseline"
     SEMANTIC_LLM = "semantic_llm"
@@ -330,6 +341,66 @@ class ArtifactClassificationResult(ImprintSchemaModel):
             raise ValueError("classification result and evidence artifact_id must match")
         if self.source_id != self.evidence.source_id:
             raise ValueError("classification result and evidence source_id must match")
+        return self
+
+
+class SignalEvidencePolicy(StrEnum):
+    NO_RAW_TEXT = "no_raw_text"
+
+
+class ArtifactSignalEvidence(ImprintSchemaModel):
+    signal_id: str = Field(min_length=1)
+    artifact_id: str = Field(min_length=1)
+    source_id: str = Field(min_length=1)
+    source_type: str = Field(min_length=1)
+    classification_id: str = Field(min_length=1)
+    classification_label: ArtifactClassificationLabel
+    classification_model_version: str = Field(min_length=1)
+    signal_model_version: str = Field(min_length=1)
+    rule_id: str = Field(min_length=1)
+    observed_feature: str = Field(min_length=1)
+    evidence_policy: SignalEvidencePolicy = SignalEvidencePolicy.NO_RAW_TEXT
+    limitations: list[str] = Field(default_factory=list)
+    no_raw_text: Literal[True] = True
+
+    @model_validator(mode="after")
+    def evidence_remains_public_safe(self) -> ArtifactSignalEvidence:
+        if self.source_id.startswith("/") or re.match(r"^[A-Za-z]:[\\/]", self.source_id):
+            raise ValueError("artifact signal evidence cannot expose filesystem paths")
+        return self
+
+
+class ArtifactSignalCandidate(ImprintSchemaModel):
+    signal_id: str = Field(min_length=1)
+    artifact_id: str = Field(min_length=1)
+    source_id: str = Field(min_length=1)
+    source_type: str = Field(min_length=1)
+    family: ArtifactSignalFamily
+    name: str = Field(min_length=1)
+    observed_feature: str = Field(min_length=1)
+    claim_level: ClaimLevel
+    confidence: Confidence
+    evidence: ArtifactSignalEvidence
+    durable: bool
+
+    @model_validator(mode="after")
+    def signal_candidate_is_bounded(self) -> ArtifactSignalCandidate:
+        prohibited_terms = (
+            "introvert",
+            "analytical",
+            "anxious",
+            "depressed",
+            "bipolar",
+            "adhd",
+            "prefers written communication",
+        )
+        haystack = f"{self.name} {self.observed_feature}".lower()
+        if any(term in haystack for term in prohibited_terms):
+            raise ValueError("artifact signal candidates cannot contain personality or diagnostic claims")
+        if self.claim_level == ClaimLevel.PROHIBITED:
+            raise ValueError("artifact signal candidates must not emit prohibited claims")
+        if self.durable and self.claim_level == ClaimLevel.QUARANTINED:
+            raise ValueError("quarantined signal candidates cannot be durable")
         return self
 
 
