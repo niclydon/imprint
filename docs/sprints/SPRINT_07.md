@@ -3,6 +3,7 @@
 Primary Model: GPT 5.5 for design, GPT 5.4 for implementation
 Adversarial Reviewer: GPT 5.5 or Gemini Antigravity
 Status: Ready after Sprint 06 profile compiler review
+Implementation Status: Sprint 07 baseline implemented
 
 ## Mission
 
@@ -249,6 +250,17 @@ Sprint 07 is complete only if:
 - no provider assumptions are introduced
 - docs describe export formats and boundaries
 - all tests pass
+
+## Implemented Baseline
+
+- `src/imprint/exports/` provides canonical JSON, Markdown, first-run, and Mosvera overlay exports.
+- Shared export safety validation preserves claim boundaries, source opacity, version boundaries,
+  no-raw-text policy, and provider neutrality.
+- `imprint export-profile` compiles a local profile and emits a selected public-safe format.
+- `docs/EXPORT_FORMATS.md`, `docs/FIRST_RUN_OUTPUT.md`, and `docs/MOSVERA_INTEGRATION.md` describe
+  the implemented export contracts.
+- `tests/test_exports.py` covers determinism, privacy, claim gates, version gates, first-run source
+  discipline, Mosvera boundary, and CLI smoke paths.
 
 At the end, summarize:
 

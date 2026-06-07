@@ -26,6 +26,9 @@ Examples:
 - notable writing shifts over time
 - confidence-backed observations
 
+Sprint 07 baseline: `first_run_summary(profile)` generates this output from compiled profile data
+only. It does not read raw artifacts or generate demo prose.
+
 ## Deliverable 2
 
 Expression Reflection
@@ -71,3 +74,5 @@ Do not:
 - generate personality tests
 - generate diagnoses
 - pretend certainty where evidence is weak
+- emit provider prompts, writing instructions, or downstream workflow steps
+- use raw artifact text in the public-safe first-run output

@@ -53,6 +53,9 @@ Imprint is still pre-release. The docs are intentionally detailed because the pr
 ## Derived Profiles, Exports, and Integrations
 
 - [Derived Profile Model](DERIVED_PROFILE_MODEL.md) — master/context profile composition
+- [Export Formats](EXPORT_FORMATS.md) — public-safe JSON, Markdown, first-run, and Mosvera export contracts
+- [First-Run Output](FIRST_RUN_OUTPUT.md) — What Imprint Learned output contract
+- [Mosvera Integration](MOSVERA_INTEGRATION.md) — expression overlay boundary
 - [Export Boundaries](EXPORT_BOUNDARIES.md) — what core Imprint can and cannot export
 - [Downstream Integrations](DOWNSTREAM_INTEGRATIONS.md) — integration posture
 - [Connector Guide](CONNECTOR_GUIDE.md) — connector design rules

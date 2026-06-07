@@ -160,7 +160,7 @@
 - Confidence model tuning against labeled ground truth
 - Advanced multi-voice profile support (casual vs. technical vs. published)
 
-**Full story:** (narrative doc to be written at end-of-phase)
+**Full story:** `docs/narrative/2026-06-07-sprint-06-compiler-verification-and-gates.md`
 
 ---
 
@@ -190,3 +190,25 @@
 5. Preserve explicit filter/divergence model in context profiles
 
 **Full story:** `docs/SPRINT_06_ARCHITECTURE_REVIEW.md`
+
+## Phase 4: Sprint 07 Export Contracts and First-Run Experience — 2026-06-07
+
+**Decision:** Implement the public-safe export layer for compiled profiles and create the first user-facing “What Imprint Learned” output without weakening compiler safety boundaries.
+
+**What changed:**
+
+- **Export package** (`src/imprint/exports/`): Added deterministic exporters for canonical JSON, human-readable Markdown, first-run summary, and Mosvera expression overlay.
+- **Shared export safety**: Added validation that rejects prohibited claims, ungated bounded interpretations, non-durable support exported as durable evidence, mixed signal model versions, non-opaque source IDs, path-like data, and generation-control keys.
+- **CLI command** (`imprint export-profile`): Added local compile-and-export flow for `json`, `markdown`, `first-run`, and `mosvera` formats.
+- **Tests** (`tests/test_exports.py`): Added coverage for determinism, privacy, claim gates, bounded-interpretation policy gates, source opacity, signal-version compatibility, first-run source discipline, Mosvera boundary, and CLI smoke paths.
+- **Documentation**: Added `docs/EXPORT_FORMATS.md`, `docs/FIRST_RUN_OUTPUT.md`, `docs/MOSVERA_INTEGRATION.md`, Sprint 07 narrative, and `docs/SPRINT_07_ARCHITECTURE_REVIEW.md`; updated export, first-run, derived-profile, README, and Sprint 07 docs.
+
+**What remains out of scope:**
+
+- LLM calls, remote APIs, prompt generation, publishing workflows, Broadside integration, Mosvera runtime behavior, web UI changes, demo article generation, and raw evidence export.
+
+**Validation:** `pytest -q` passes with 71 tests. Direct CLI smoke was run for all four export formats with `PYTHONPATH=src python3 -m imprint.cli export-profile ...`.
+
+**Review verdict:** GO for Sprint 08. No blockers.
+
+**Full story:** `docs/narrative/2026-06-07-sprint-07-export-contracts.md`

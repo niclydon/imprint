@@ -18,6 +18,8 @@ Allowed core exports:
 - canonical Imprint YAML
 - human-readable report
 - expression profile fragment for another system
+- first-run "What Imprint Learned" summary derived from compiled profile data
+- Mosvera expression overlay contract fragment
 - source summary and confidence metadata
 - anti-pattern guidance
 - platform/context fit notes
@@ -76,6 +78,18 @@ Disallowed core exporter behavior:
 - encode editorial workflow steps
 - decide sampling or decoding behavior
 - generate drafts
+
+## Sprint 07 Baseline
+
+Sprint 07 implements public-safe JSON, Markdown, first-run, and Mosvera overlay exports from
+compiled `ExpressionProfile` objects.
+
+These exporters are deterministic and local. They validate that prohibited claims, ungated bounded
+interpretations, non-durable support, mixed signal model versions, path-like source IDs, raw text,
+private locators, and generation-control fields do not enter public-safe exports.
+
+The Mosvera overlay remains a bridge contract only. It summarizes expression patterns and
+anti-patterns; it does not compile aesthetic intent or runtime provider behavior.
 
 ## Rejected Alternatives
 

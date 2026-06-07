@@ -138,6 +138,12 @@ Not allowed:
 Cost tradeoff: context compilation is roughly proportional to the number of requested contexts.
 The MVP should keep the number of context profiles small and explicit.
 
+## Export Policy
+
+Sprint 07 exports context profiles as explicit metadata views only: profile ID, baseline reference,
+context label, filters, counts, compilation strategy, and divergence count. Exporters must not infer
+hidden inheritance or fill context values from the master profile at runtime.
+
 ## Rejected Alternatives
 
 ### Implicit Inheritance
