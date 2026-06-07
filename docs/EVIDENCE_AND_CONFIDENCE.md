@@ -66,6 +66,11 @@ Sprint 05 artifact-level signal extraction derives signal confidence from classi
 plus deterministic rule reliability and evidence strength. Quarantined or excluded artifacts must
 not silently become durable signal support.
 
+Sprint 06 profile compilation derives profile confidence from durable observation signals only.
+The `sprint06-confidence-v1` summary averages candidate confidence components, includes source
+diversity, applies a bounded support-count factor, and records classifier/signal model versions in
+support metadata. Display confidence remains a support-strength summary, not truth about a person.
+
 ## Authorship-Origin Policy
 
 Authorship origin means the best-supported classification from available evidence.

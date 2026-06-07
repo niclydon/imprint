@@ -70,6 +70,20 @@ Good:
 Bad:
 "This person is analytical."
 
+## Profile Compilation Boundary
+
+Compiled profiles may summarize recurring expression patterns across included artifacts. They must
+not upgrade artifact observations into personality, diagnosis, intent, value, capability, or hidden
+state claims.
+
+The safest compiled claim shape is aggregate and evidence-scoped:
+
+- "Across included artifacts, explicit contrast framing appears in multiple artifacts."
+- "Across included artifacts, short paragraph structure appears in the supported corpus."
+
+The compiler should omit weak or contaminated patterns rather than strengthen them into unsupported
+interpretations.
+
 ## Multi-Voice Principle
 
 A subject may have multiple expression profiles.

@@ -85,3 +85,79 @@
 - Implementation expansion (17 rules) is documented with rationale.
 
 **Full story:** `docs/narrative/2026-06-07-sprint-05-adversarial-review-and-hardening.md`
+
+## Phase 3: Sprint 06 Profile Compilation Implementation — 2026-06-07
+
+**Decision:** Implement deterministic profile compiler that aggregates artifact-level signals into expression profiles while enforcing strict signal eligibility, evidence preservation, and claim boundaries.
+
+**What changed:**
+
+- **Profile compiler engine** (`src/imprint/compiler/engine.py`, 464 lines): Deterministic rule-based compiler that:
+  - Groups signals by pattern (family, name, observed feature, rule ID)
+  - Projects artifact-level families into profile-level families (structure+formatting→structure, lexical→lexical, tone_marker→tone, rhetorical+reasoning→reasoning, narrative→narrative, anti_pattern→anti_pattern)
+  - Enforces signal eligibility: only durable OBSERVATION claims from INCLUDED artifacts support durable profiles
+  - Rejects PROHIBITED claims and incompatible signal model versions
+  - Preserves full evidence chain: signal IDs, artifact IDs, source IDs (opaque), classification IDs, rule IDs, version metadata
+  - Compiles claim text as "Across included artifacts, {observed_feature} appears in N artifacts"
+  - Computes profile-level confidence from aggregated artifact-level components with support-count factor
+
+- **Design and policy docs** (4 docs, 12.1 KB):
+  - `COMPILER_DESIGN.md`: Aggregation pipeline, family projection, version boundaries, validation gates
+  - `PROFILE_COMPILATION_RULES.md`: Eligibility criteria, evidence policy, confidence policy, build manifest policy, safety rules
+  - `PROFILE_THEORY.md`: Expression-analysis core principle, subject→expression→voice model, allowed vs. forbidden claims, compilation boundary
+  - `VERSIONING_POLICY.md`: Versioned surfaces, semantic roles, drift categories, comparability rules
+
+- **Tests** (17 tests, 326 lines): Complete coverage of eligibility paths (durable, quarantined, excluded, non-durable, prohibited, bounded_interpretation), evidence preservation, version handling (mixed classifier versions, incompatible signal versions), privacy (no raw text, no paths), determinism, and error paths
+
+- **CLI command** (`src/imprint/cli.py`): Added `compile` command that ingests artifacts, classifies, extracts signals, compiles profile, and reports summary
+
+- **Adversarial review** (`SPRINT_06_ARCHITECTURE_REVIEW.md`): Post-implementation gate review across 7 dimensions (claim boundaries, signal eligibility, evidence discipline, version compatibility, privacy, determinism, scalability). Verdict: GO for Sprint 07.
+
+**What's unblocked:**
+
+- Expression profiles are now computable from ingested and classified artifacts and extracted signals.
+- Profile evidence chains are fully versioned and traceable back to source artifacts and extraction rules.
+- Claim-level validation is enforced: PROHIBITED claims rejected, BOUNDED_INTERPRETATION policy-gated, OBSERVATION-only for durable support.
+- Incompatible extraction rule changes are detected and rejected (signal model version mismatch causes compilation error).
+- Profile privacy is enforced: no raw text, opaque source IDs, validated against path leakage.
+- Sprint 07 can proceed with export formats, report generation, and first-run experience design.
+
+**Deferred to Sprint 07 and beyond:**
+
+- Report generation and export formats (Markdown, JSON schemas for downstream systems)
+- Publishing contracts and downstream prompts (how profiles are consumed by applications)
+- Context profile enrichment (multi-voice separation, divergence tracking, inheritance policies)
+- Bounded interpretation review workflow UI/tooling
+- Confidence model tuning against labeled ground truth
+- Advanced multi-voice profile support (casual vs. technical vs. published)
+
+**Full story:** (narrative doc to be written at end-of-phase)
+
+---
+
+## Phase 3.5: Sprint 06 Adversarial Review — 2026-06-07
+
+**Decision:** Conduct hostile principal architect review of Sprint 06 profile compilation against seven architectural gates.
+
+**Review verdict:** GO for Sprint 07. No blockers.
+
+**Key findings:**
+
+- ✅ Claim boundaries enforced by design (expression patterns only, no diagnostic or personality claims)
+- ✅ Signal eligibility strict (durable OBSERVATION only, PROHIBITED rejected, BOUNDED_INTERPRETATION gated)
+- ✅ Evidence discipline excellent (full support chain preserved, opaque source IDs, version metadata throughout)
+- ✅ Version compatibility enforced (incompatible signal versions rejected, classifier versions recorded)
+- ✅ Privacy by design (no raw text, no paths, opaque source IDs validated)
+- ✅ Determinism guaranteed (byte-for-byte reproducible, no LLMs/embeddings/providers)
+- ✅ Scalability O(n log n) (no cross-signal quadratic logic)
+
+**Test coverage:** 17 tests, all passing. Coverage includes happy path, all eligibility boundaries, version handling (mixed classifiers, incompatible signals), privacy verification, determinism, and error paths.
+
+**Recommended carry-forward:**
+1. Do not weaken claim-level validation
+2. Do not merge incompatible signal versions without migration layer
+3. Keep source IDs opaque in exports
+4. Maintain no-raw-text policy
+5. Preserve explicit filter/divergence model in context profiles
+
+**Full story:** `docs/SPRINT_06_ARCHITECTURE_REVIEW.md`

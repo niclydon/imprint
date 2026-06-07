@@ -33,6 +33,8 @@ Imprint is still pre-release. The docs are intentionally detailed because the pr
 - [Schema](SCHEMA.md) — canonical schema overview
 - [Schema Philosophy](SCHEMA_PHILOSOPHY.md) — why the schema layer exists
 - [Signal Taxonomy](SIGNAL_TAXONOMY.md) — signal categories and definitions
+- [Compiler Design](COMPILER_DESIGN.md) — deterministic profile compiler behavior
+- [Profile Compilation Rules](PROFILE_COMPILATION_RULES.md) — eligibility, evidence, confidence, and safety rules
 - [Confidence Model](CONFIDENCE_MODEL.md) — confidence semantics
 - [Versioning Policy](VERSIONING_POLICY.md) — schema/profile/export versioning
 - [Migration Strategy](MIGRATION_STRATEGY.md) — migration approach

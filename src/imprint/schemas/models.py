@@ -436,6 +436,11 @@ class EvidenceReference(ImprintSchemaModel):
 
 class SignalSupport(ImprintSchemaModel):
     evidence_refs: list[EvidenceReference] = Field(default_factory=list)
+    signal_ids: list[str] = Field(default_factory=list)
+    classification_model_versions: list[str] = Field(default_factory=list)
+    signal_model_versions: list[str] = Field(default_factory=list)
+    rule_ids: list[str] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
     artifact_count: NonNegativeInt
     included_count: NonNegativeInt
     excluded_count: NonNegativeInt = 0

@@ -10,6 +10,7 @@ An Imprint profile is stable only relative to its build manifest, source policy,
 
 Regenerate a profile when:
 
+- compiler version or compiler confidence model changes
 - extractor family, major version, prompt version, or code version changes materially
 - classifier or authorship policy changes
 - source policy or context filters change
@@ -26,6 +27,8 @@ Create a drift report when two builds are comparable or partially comparable and
 MVP thresholds are schema-level constraints, not runtime extraction logic:
 
 - every signal needs at least one evidence reference or aggregate support count
+- compiled profile signals must preserve contributing signal IDs, rule IDs, and classifier/signal
+  model versions
 - bounded interpretations require explicit rationale and confidence components
 - context divergences require baseline and context support counts
 - weak authorship, unknown speaker, mixed authorship, or suspected AI-assisted evidence lowers confidence or triggers quarantine according to source policy

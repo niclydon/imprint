@@ -8,6 +8,7 @@ Build manifests record separate versions for:
 
 - schema
 - compiler
+- compiler confidence formula
 - classifier
 - extractor family, major, minor, prompt, and code
 - model provider, name, and version
@@ -20,6 +21,8 @@ Build manifests record separate versions for:
 
 - **Schema version** controls field compatibility.
 - **Compiler version** controls aggregation and validation behavior.
+- **Compiler confidence formula** controls how artifact-level support strength is summarized in
+  compiled profile confidence.
 - **Classifier version** controls artifact classification and authorship-origin labels.
 - **Extractor versions** control signal semantics.
 - **Prompt version** applies only to extractor prompts, not core export prompts.
