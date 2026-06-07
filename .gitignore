@@ -1,0 +1,63 @@
+# Environment and local config
+.env
+.env.*
+!.env.example
+imprint.config.yaml
+*.local.yaml
+*.local.json
+
+# Private/local data
+/data/
+/exports/
+/private/
+/corpus/
+/tmp/
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+.mypy_cache/
+build/
+dist/
+*.egg-info/
+
+# Claude Code and AI workspace
+.claude/
+.cursor/
+.remember/
+
+# Logs
+*.log
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Editor backups
+*.swp
+*.swo
+*~
+
+# OS/editor
+.DS_Store
+.vscode/settings.json
+.idea/
+Thumbs.db
+.AppleDouble/
+
+# Development scratch
+/notes/
+/scratch/
+/personal/
+
+# Internal project records (Broadside ingestion, not for public repo)
+/docs/narrative/
