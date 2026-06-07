@@ -1,5 +1,34 @@
 # Imprint Changelog
 
+## Sprint 10: Forge OG image — 2026-06-07
+
+**Decision:** Replace the ImageMagick-cropped `og.png` with a Forge-generated social card in the Imprint glass aesthetic.
+
+**What changed:**
+
+- `web/og.png` — new 1200×630 image via Forge `openai:gpt-image-2` (img2img from `imprint-hero.png`, strength 0.35).
+- `web/og-gen.json` — generation metadata.
+
+## Sprint 10: ai-glass-futuristic overlay — 2026-06-07
+
+**Decision:** Apply `ai-glass-futuristic` structural DNA (glassmorphism, atmosphere, cinematic depth, motion) to the Imprint landing page while keeping the existing Imprint palette frozen. Register the result as Mosvera aesthetic `imprint`.
+
+**What changed:**
+
+- `web/styles.css` and `web/index.html`: glass surfaces, cerulean/amber atmosphere mesh, grain, spotlit hero, lift/sheen hovers, staggered reveal.
+- Mosvera registry: `~/.config/mosvera/registry/template.imprint-base.json` and `composition.imprint.json`.
+
+## Sprint 10: Public Web Presence — 2026-06-07
+
+**Decision:** Ship a single-page static landing site at `imprint.niclydon.dev` for project communication and social sharing — not an application UI.
+
+**What changed:**
+
+- Added `web/` static site: `index.html`, `styles.css`, brand assets (favicon, OG image, hero), social metadata, and `DEPLOYMENT.md`.
+- Updated `README.md` with website link and refreshed pre-release status.
+
+**Deploy:** Vercel project with root directory `web/`, Cloudflare CNAME `imprint` → `cname.vercel-dns.com`.
+
 ## Phase 0: Public-First Foundation Setup — 2026-06-07
 
 **Decision:** Establish minimal but complete scaffolding for a public repository—developer guidance, build configuration, and editor consistency rules.
