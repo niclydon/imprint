@@ -1,5 +1,7 @@
 # Imprint
 
+**Website:** [imprint.niclydon.dev](https://imprint.niclydon.dev)
+
 ![Imprint hero: evidence fragments converging into a structured expression profile](docs/assets/imprint-hero.png)
 
 > Public-first identity and expression profile compiler.
@@ -8,14 +10,14 @@ Imprint analyzes human-authored artifacts such as writing, messages, transcripts
 
 ## Status
 
-🚧 **Pre-release / active design**
+🚧 **Pre-release / active development**
 
-Imprint is currently in architecture and schema planning. The repository is public-first by design, but the project is not yet ready for production use.
+Imprint is open-source and public-first by design, but not yet ready for production use.
 
 Current focus:
 
-1. Schema and model-provider foundation complete
-2. Preparing Sprint 03: local-only ingestion adapters
+1. Schema, model-provider, ingestion, classification, and signal extraction foundations
+2. Public landing site at [imprint.niclydon.dev](https://imprint.niclydon.dev)
 3. Keeping all examples synthetic and all private corpora out of git
 
 ## What Imprint is

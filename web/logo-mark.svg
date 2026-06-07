@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-hidden="true">
+  <rect x="4" y="4" width="24" height="24" rx="3" fill="none" stroke="#5ba4cf" stroke-width="1.2" opacity="0.7"/>
+  <circle cx="4" cy="4" r="1.8" fill="#5ba4cf"/>
+  <circle cx="28" cy="4" r="1.8" fill="#7ec8e3"/>
+  <circle cx="4" cy="28" r="1.8" fill="#d4a853"/>
+  <circle cx="28" cy="28" r="1.8" fill="#5ba4cf"/>
+  <text x="16" y="22" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="16" fill="#edf1f5">I</text>
+</svg>

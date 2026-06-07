@@ -1,5 +1,16 @@
 # Imprint Changelog
 
+## Sprint 10: Public Web Presence — 2026-06-07
+
+**Decision:** Ship a single-page static landing site at `imprint.niclydon.dev` for project communication and social sharing — not an application UI.
+
+**What changed:**
+
+- Added `web/` static site: `index.html`, `styles.css`, brand assets (favicon, OG image, hero), social metadata, and `DEPLOYMENT.md`.
+- Updated `README.md` with website link and refreshed pre-release status.
+
+**Deploy:** Vercel project with root directory `web/`, Cloudflare CNAME `imprint` → `cname.vercel-dns.com`.
+
 ## Phase 0: Public-First Foundation Setup — 2026-06-07
 
 **Decision:** Establish minimal but complete scaffolding for a public repository—developer guidance, build configuration, and editor consistency rules.
