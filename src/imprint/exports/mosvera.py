@@ -21,6 +21,7 @@ def mosvera_expression_overlay(profile: ExpressionProfile) -> dict[str, Any]:
             "confidence": pattern["confidence"]["display"],
             "support_artifact_count": pattern["support"]["included_count"],
             "source_types": pattern["support"]["source_types"],
+            "source_ids": pattern["support"]["source_ids"],
         }
         if pattern["family"] == "anti_pattern":
             avoid_patterns.append(summary)
@@ -37,9 +38,12 @@ def mosvera_expression_overlay(profile: ExpressionProfile) -> dict[str, Any]:
         },
         "evidence_policy": {
             "raw_text_included": False,
-            "source_references": "opaque_metadata_only",
+            "source_references": "opaque_source_ids_only",
+            "path_references_included": False,
+            "private_locators_included": False,
             "generation_controls_included": False,
         },
+        "compatibility": _compatibility_policy(payload),
         "expression_summaries": expression_summaries,
         "avoid_patterns": avoid_patterns,
         "boundary": (
@@ -48,3 +52,23 @@ def mosvera_expression_overlay(profile: ExpressionProfile) -> dict[str, Any]:
     }
     assert_public_safe_payload(overlay)
     return overlay
+
+
+def _compatibility_policy(payload: dict[str, Any]) -> dict[str, Any]:
+    compatibility = payload["compatibility"]
+    warnings = list(compatibility.get("warnings", []))
+    if payload["profile"].get("artifact_storage", {}).get("mode") == "metadata_only":
+        warnings.append("metadata-only audit limitations apply; raw artifact text is not included")
+    warnings.append("bounded interpretations are policy-gated and must not be treated as facts")
+    warnings.append("confidence summarizes support strength, not identity truth")
+    if len(compatibility.get("signal_model_versions", [])) > 1:
+        warnings.append("multiple signal model versions are represented across profile patterns")
+    return {
+        "mandatory_in_consumer_projection": True,
+        "compiler_version": compatibility["compiler_version"],
+        "classifier_versions": compatibility["classifier_versions"],
+        "signal_model_versions": compatibility["signal_model_versions"],
+        "schema_version": compatibility["schema_version"],
+        "export_schema_version": compatibility["export_schema_version"],
+        "warnings": sorted(set(warnings)),
+    }

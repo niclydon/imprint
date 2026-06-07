@@ -9,6 +9,12 @@ from imprint.adapters import build_default_registry
 from imprint.adapters.protocol import AdapterError
 from imprint.classification import RuleBasedArtifactClassifier
 from imprint.compiler import CompilerError, ProfileCompiler
+from imprint.consumers import (
+    agent_consumer_contract,
+    broadside_consumer_contract,
+    human_cli_consumer_contract,
+    mosvera_consumer_contract,
+)
 from imprint.exports import (
     ExportSafetyError,
     canonical_profile_json,
@@ -198,7 +204,7 @@ def export_profile(
     export_format: str = typer.Option(
         "json",
         "--format",
-        help="Export format: json, markdown, first-run, or mosvera.",
+        help="Export format: json, markdown, first-run, mosvera, mosvera-consumer, broadside, agent, or human-cli.",
     ),
     storage_mode: ArtifactStorageMode = typer.Option(
         ArtifactStorageMode.METADATA_ONLY,
@@ -216,8 +222,19 @@ def export_profile(
             typer.echo(first_run_summary(profile), nl=False)
         elif export_format == "mosvera":
             typer.echo(json.dumps(mosvera_expression_overlay(profile), indent=2, sort_keys=True))
+        elif export_format == "mosvera-consumer":
+            typer.echo(json.dumps(mosvera_consumer_contract(profile), indent=2, sort_keys=True))
+        elif export_format == "broadside":
+            typer.echo(json.dumps(broadside_consumer_contract(profile), indent=2, sort_keys=True))
+        elif export_format == "agent":
+            typer.echo(json.dumps(agent_consumer_contract(profile), indent=2, sort_keys=True))
+        elif export_format == "human-cli":
+            typer.echo(json.dumps(human_cli_consumer_contract(profile), indent=2, sort_keys=True))
         else:
-            raise typer.BadParameter("format must be one of: json, markdown, first-run, mosvera")
+            raise typer.BadParameter(
+                "format must be one of: json, markdown, first-run, mosvera, "
+                "mosvera-consumer, broadside, agent, human-cli"
+            )
     except ExportSafetyError as exc:
         raise typer.BadParameter(str(exc)) from exc
 

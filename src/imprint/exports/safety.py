@@ -12,6 +12,7 @@ FORBIDDEN_EXPORT_KEYS = {
     "temperature",
     "decoding",
     "model_hint",
+    "provider",
     "top_p",
     "frequency_penalty",
     "presence_penalty",
