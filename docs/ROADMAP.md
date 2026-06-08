@@ -51,26 +51,29 @@ Exit criteria:
 
 Goal: make the public developer preview easy for a stranger to install and run against synthetic data.
 
-Status: complete as of Sprint 11.
+Status: **complete and adversarial-review-verified as of Sprint 11** — 2026-06-07.
 
 Deliverables:
 
-- verified clean install path
-- package metadata cleanup
-- quickstart command sequence
-- `imprint init` or equivalent bootstrap UX
-- synthetic sample project / corpus
-- documented run path from synthetic artifacts to profile export
-- clear CLI help output
-- GitHub Actions CI for tests and lint/type checks if appropriate
-- release checklist for `v0.1.0`
+- ✅ verified clean install path
+- ✅ package metadata cleanup
+- ✅ quickstart command sequence
+- ✅ `imprint example` command for synthetic demo
+- ✅ synthetic sample project / corpus (transcript, chat, Markdown)
+- ✅ documented run path from synthetic artifacts to profile export
+- ✅ clear CLI help output
+- ✅ GitHub Actions CI for Python 3.12 install, compile, and tests
+- ✅ release checklist for `v0.1.0`
+- ✅ adversarial review gate (`docs/SPRINT_11_ARCHITECTURE_REVIEW.md`, verdict: **GO**)
 
-Exit criteria:
+Exit criteria met:
 
-- a new user can clone, install, run the synthetic example, and inspect exports without private infrastructure
-- all examples are synthetic
-- no provider credentials are required for baseline operation
-- README quickstart works copy-paste
+- ✅ a new user can clone, install, run the synthetic example, and inspect exports without private infrastructure
+- ✅ all examples are synthetic
+- ✅ no provider credentials are required for baseline operation
+- ✅ README quickstart works copy-paste
+- ✅ 100/100 tests passing
+- ✅ all 6 architecture focus areas passed hostile review (installability, demo integrity, CLI usability, packaging quality, public safety, release readiness)
 
 ### Phase 12 — Evaluation and quality gates
 

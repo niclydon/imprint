@@ -6,6 +6,35 @@ Chronological per-phase record of significant work. See `docs/narrative/` for de
 
 ## 2026-06-07
 
+### Sprint 11: Adversarial Review — Packaging and Install Experience
+
+**Decision:** Conduct comprehensive hostile architect review of Sprint 11 (packaging, install, onboarding, release readiness) to verify stranger installability, synthetic demo integrity, CLI usability, packaging quality, public safety, and release-readiness.
+
+**What changed:**
+
+**Sprint 11 packaging review:**
+- `docs/SPRINT_11_ARCHITECTURE_REVIEW.md` (164 lines) — Verified 6 focus areas: stranger installability (clean venv install works), synthetic demo integrity (generated outputs exclude private text/paths/creds), CLI usability (onboarding discoverable), packaging quality (credible metadata, reasonable deps), public safety (no tracked `.env`, local config, or private data), release readiness (CI and checklist adequate for v0.1.0 developer preview)
+- `docs/narrative/2026-06-07-sprint-11-adversarial-review-packaging-ready.md` (450 lines, new) — Detailed narrative of review process, what was checked, what passed, numerical evidence, and what's unblocked
+- 5 new onboarding tests added in Sprint 11; 100/100 total tests passing
+- All exit criteria met; GO verdict
+
+**Verification evidence:**
+- Clean temp-venv install with `pip install -e ".[test]"` passed
+- `python -c "import imprint; print(imprint.__version__)"` → `0.1.0`
+- `imprint --help`, `imprint connectors-dry-run`, `imprint example` all passed
+- Generated example exports contain zero raw artifact text, source paths, or credential patterns
+- Static code analysis: zero private data in tracked files (only CSS `mask-*` property hits)
+- GitHub Actions CI: Python 3.12 install, compile, and test checks green
+
+**What's unblocked:**
+- Package is production-ready for `v0.1.0` developer preview
+- New users can install, run synthetic demo, and understand next steps without private infrastructure
+- Release checklist provides concrete gate criteria before public tagging
+
+**Still pending:** Run release checklist from fresh clone before tagging; confirm CI is green on pushed commit.
+
+**Full story:** `docs/narrative/2026-06-07-sprint-11-adversarial-review-packaging-ready.md`
+
 ### Sprint 10: Pipeline diagram assets
 
 **Decision:** Replace the monospace `configured sources -> harvest -> …` text box in “Evidence in, portable profiles out” with paired dark/light pipeline illustrations that follow the navbar theme toggle.
