@@ -1,0 +1,2 @@
+{"artifact_id":"jsonl-artifact-1","source_id":"synthetic-jsonl-1","text":"Synthetic JSONL artifact one.","timestamp":"2026-06-07T12:00:00Z","authorship_origin":"human_origin"}
+{"source_id":"synthetic-jsonl-2","body":"Synthetic JSONL artifact two.","artifact_type":"technical_note","classification_label":"included","authorship_origin":"human_directed_ai_assisted","authorship_confidence":0.7}

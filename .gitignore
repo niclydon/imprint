@@ -13,6 +13,10 @@ imprint.config.yaml
 !/examples/**/*.jsonl
 !/examples/**/*.ndjson
 
+# Keep synthetic test fixture data tracked even though real JSONL corpora are ignored
+!/tests/**/*.jsonl
+!/tests/**/*.ndjson
+
 /data/
 /exports/
 /private/
