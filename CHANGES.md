@@ -6,6 +6,45 @@ Chronological per-phase record of significant work. See `docs/narrative/` for de
 
 ## 2026-06-07
 
+### Sprint 12: Adversarial Review — Evaluation and Quality Gates
+
+**Decision:** Hostile security architect review of Sprint 12 quality-layer work (validation, comparison, privacy gates, release criteria) identified 3 critical blockers requiring fixes before v0.1.0 release.
+
+**What changed:**
+
+- `docs/SPRINT_12_ARCHITECTURE_REVIEW.md` (new) — adversarial security review; identified 3 critical blockers (JWT credentials not detected, base64-encoded credentials bypass, percent-encoded paths evade detection), 4 major recommendations, and explicit go/no-go criteria.
+- `docs/QUALITY_GATES.md`, `docs/PROFILE_COMPARISON.md`, `docs/VALIDATION.md`, `docs/REGRESSION_CORPUS.md` — formalize release checks for public-safe exports and comparability analysis.
+- `tests/test_quality_gates.py` — 9 tests covering export validation, privacy leak detection, comparability states, and drift detection.
+
+**Blockers identified:**
+1. ✗ JWT credentials (e.g., `eyJ...eyJ...[-_A-Za-z0-9]{20,}`) not detected by `CREDENTIAL_PATTERN` — allows valid JWTs to leak
+2. ✗ Base64-encoded credentials (e.g., `c2stQWJDZGVG...`) bypass `_walk_privacy()` since decoding is not attempted before pattern matching
+3. ✗ Percent-encoded paths (e.g., `%2Fprivate%2Fdata`) evade `PATH_PATTERN` since neither `quality.py` nor `safety.py` checks for `%2[Ff]` or `%5[Cc]`
+
+**Verification evidence:**
+- Adversarial test suite (custom) exposed the 3 credential/path-detection gaps
+- Full regression suite: `pytest -q` passed (109 tests)
+- `pytest -q tests/test_quality_gates.py` passed (9 tests)
+- Smoke checks: `imprint example`, `imprint validate-export`, `imprint diff` all executed without error
+- No new false failures; existing gates remain sound
+
+**Recommendations added (non-blocking):**
+1. Underscore-prefixed fields (_metadata, _internals) should be rejected at root level (HIGH priority for v0.1.0)
+2. Compatibility metadata should include optional provider/model tracking for future drift detection (MEDIUM priority for Sprint 13+)
+3. Regression corpus should expand to cover mixed classifier versions (MEDIUM priority for v0.1.0)
+4. Release gate output should be machine-readable for CI/CD integration (LOW priority for v0.2.0)
+
+**Gate status:** CONDITIONAL NO-GO — Proceed to Sprint 13 or v0.1.0 only after fixing 3 critical blockers. No release until:
+- JWT pattern added to `CREDENTIAL_PATTERN` in both `quality.py` and `safety.py`
+- Base64 decoding and re-scanning implemented in `_walk_privacy()`
+- Percent-encoding detection added to `PATH_PATTERN`
+- New unit tests added and passing for all 3 fixes
+- All 109 existing tests still passing
+
+Full story: `docs/SPRINT_12_ARCHITECTURE_REVIEW.md`
+
+## 2026-06-07
+
 ### Sprint 11: Adversarial Review — Packaging and Install Experience
 
 **Decision:** Conduct comprehensive hostile architect review of Sprint 11 (packaging, install, onboarding, release readiness) to verify stranger installability, synthetic demo integrity, CLI usability, packaging quality, public safety, and release-readiness.
