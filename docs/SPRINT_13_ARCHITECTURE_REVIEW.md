@@ -1,151 +1,178 @@
-# Sprint 13 Architecture Review: Private Adapter Strategy
+# Sprint 13 Architecture Review: Private Adapter Strategy and Threat Models
 
-**Review Date:** 2026-06-08
-**Reviewer Role:** Hostile Privacy/Security Architect
-**Status:** GO FOR PRIVATE ADAPTER IMPLEMENTATION PLANNING
-**Go/No-Go:** **GO** for source-specific private adapter implementation planning; **NO-GO** for building real adapters without the documented gates
+**Review Date:** 2026-06-07  
+**Reviewer Role:** Hostile Privacy/Security Architect  
+**Status:** IDENTIFIED GAPS & RECOMMENDATIONS  
+**Go/No-Go:** **CONDITIONAL GO** — Proceed with implementations only after addressing critical gaps
 
 ---
 
 ## Executive Summary
 
-Sprint 13 correctly stays in strategy and threat-model territory. It does not add Gmail, iMessage,
-Plaud, Looki, database, OAuth, live API, cloud, service-mode, raw corpus storage, or UI review-flow
-implementations. Instead, it creates the missing source-specific threat models and cross-cutting
-standards required before private adapters can safely exist.
+Sprint 13 successfully established a comprehensive threat-model framework for future private adapters without implementing any real connectors. Nine strategy documents cover credential storage, consent, implementation standards, and synthetic fixtures.
 
-The public/private boundary remains intact: public core still contains only generic local connector
-framework behavior and synthetic examples. The new docs explicitly block implementation until each
-source has threat modeling, credential handling, consent boundaries, replay/audit policy, and
-synthetic fixture tests.
+Adversarial analysis identified **2 critical gaps** and **5 major recommendations** that must be addressed before real private adapter implementations (Gmail, iMessage, database, transcript):
 
-## Reviewed Artifacts
+- Consent enforcement mechanisms are specified in policy but not enforced in code or tests
+- Redaction patterns miss several credential formats common in real deployments (refresh tokens, database DSNs, API keys in URLs, JWT tokens)
+- Replay/rebuild semantics lack explicit versioning contracts
+- Multi-person content contamination risks are identified but boundaries are not tested
+- Public/private repository leakage lacks automated detection
+- Audit requirements are defined but logging interfaces don't exist
+- Adapter authority boundaries are described but not validated by tests
 
-- `docs/GMAIL_CONNECTOR_THREAT_MODEL.md`
-- `docs/IMESSAGE_CONNECTOR_THREAT_MODEL.md`
-- `docs/TRANSCRIPT_CONNECTOR_THREAT_MODEL.md`
-- `docs/DATABASE_CONNECTOR_THREAT_MODEL.md`
-- `docs/CREDENTIAL_STORAGE_POLICY.md`
-- `docs/CONSENT_AND_MULTI_PERSON_POLICY.md`
-- `docs/CONNECTOR_IMPLEMENTATION_STANDARD.md`
-- `docs/CONNECTOR_SYNTHETIC_FIXTURE_STANDARD.md`
-- `docs/CONNECTOR_FRAMEWORK.md`
-- `docs/PRIVATE_CONNECTOR_POLICY.md`
-- `docs/CONFIGURATION.md`
-- `docs/ROADMAP.md`
-- `src/imprint/connectors/`
-- `tests/test_connectors.py`
+These gaps are acceptable for a strategy sprint but must be closed before implementation. The framework is sound; gaps are about enforcement.
 
-## Findings
+---
 
-### 1. Consent Failures
+## Part 1: Critical Gaps
 
-**Decision:** Addressed for planning.
+### Gap 1: Consent Enforcement Mechanisms Do Not Exist
 
-The consent policy states that source possession is not enough and that only subject-authored content
-is eligible by default. Gmail, chat, transcript, and database threat models all identify third-party,
-unknown, quoted, forwarded, generated, system, and group-context contamination. Ambiguous authorship
-falls to quarantine rather than inclusion.
+**Severity:** CRITICAL — Privacy boundary failure vector
 
-**Residual risk:** Future implementations must prove these rules in tests. The docs are sufficient to
-start implementation planning, not to waive implementation review.
+**Evidence:** Threat models specify consent classes (owner-authored vs. third-party) and exclude rules, but:
+- No code validates consent before including content
+- No tests prove third-party content is actually excluded
+- Classification layer is not connected to threat-model consent rules
+- Compiler does not enforce source-specific authorship policies
 
-### 2. Credential Storage Mistakes
+**Impact:** A Gmail connector could inadvertently include received mail or quoted replies. An iMessage connector could include group-chat participants' messages. Consent is a legal and ethical boundary; accidental inclusion violates user trust.
 
-**Decision:** Addressed for planning.
+**Fix Priority:** Define before implementation. Required:
 
-The credential policy forbids inline secrets in config, docs, fixtures, exports, logs, and build
-metadata. It allows env var references and requires fail-closed behavior, redaction, scope
-minimization, rotation, and revocation planning. Source threat models add specific constraints for
-OAuth, local databases/backups, transcript vendor credentials, and database DSNs.
+1. Define abstract `ConsentBoundary` contract that classifiers and compilers consult
+2. Map each threat model to a concrete `ConsentBoundary` instance
+3. Add tests proving enforcement (e.g., `test_gmail_excludes_received_mail`)
 
-**Residual risk:** A future credential provider must be reviewed as private infrastructure and must
-not become a public-core dependency by accident.
+**Timeline:** Before any private connector implementation.
 
-### 3. Multi-Person Data Contamination
+---
 
-**Decision:** Addressed for planning.
+### Gap 2: Redaction Patterns Are Incomplete
 
-Each source-family threat model explicitly separates subject-authored material from other speakers,
-participants, recipients, database subjects, generated summaries, and system messages. The connector
-standard preserves the existing architecture: connector hints are advisory and classification remains
-responsible for authorship and inclusion decisions.
+**Severity:** CRITICAL — Credential leakage vector
 
-**Residual risk:** Group chat and transcript diarization are high-risk implementation areas and should
-be test-first if implemented.
+**Evidence:** Redaction catches basic secret keys and Bearer tokens, but misses:
+- OAuth refresh tokens
+- Database DSNs with embedded passwords (postgres://user:password@host:5432/db)
+- API keys in URL parameters (?api_key=abc123)
+- JWT tokens (format: eyJ...eyJ...sig)
+- AWS access keys, Azure connection strings, refresh tokens in various formats
 
-### 4. Replay and Audit Gaps
+**Impact:** Error messages, dry-run summaries, and audit logs could expose credentials from future database/API connectors. A postgres connection string would pass unredacted.
 
-**Decision:** Addressed for planning.
+**Fix Priority:** Expand `SECRET_VALUE_PATTERN` before any credentialed connector. Include:
+- Database DSN patterns (postgres://, mysql://, mongodb://, etc.)
+- URL parameter credential patterns (?api_key=, ?token=, &auth=)
+- JWT token format (eyJ...eyJ...sig)
+- AWS access key format (AKIA...)
+- Refresh token patterns
 
-Each threat model defines replay metadata and local audit summary requirements. The implementation
-standard requires connector/parser versions, source policy versions, storage mode, counts,
-credential-reference names, skipped source classes, and replay limitations.
+Add tests verifying redaction of real-world credentials.
 
-**Residual risk:** Replay from live mutable sources remains weaker than replay from pinned synthetic
-or ignored local snapshots. Future connectors must disclose that limitation in build manifests or
-local audit output.
+**Timeline:** Before any credentialed connector (Gmail, database, transcript API).
 
-### 5. Public/Private Repo Leakage
+---
 
-**Decision:** Addressed.
+## Part 2: Major Recommendations
 
-The private connector policy and fixture standard forbid real credentials, real source paths, real
-account IDs, real corpora, real provider responses, private schemas, local databases, exports, and
-credential-shaped placeholders in public docs and fixtures. Public-core admission is limited to
-generic, synthetic-testable code that runs without private infrastructure.
+### Recommendation 1: Replay Versioning Semantics Unclear
 
-**Residual risk:** Future docs for source-specific setup can accidentally expose private provider or
-machine details. Those docs require the same public-release scan discipline as code.
+**Severity:** HIGH — Reproducibility risk
 
-### 6. Adapter Authority Creep
+**Evidence:** Threat models say "deterministic for same connector version" but don't define what happens when versions change or how to detect version mismatches in comparisons.
 
-**Decision:** Addressed.
+**Recommendation:** Define `ProfileReplayManifest` capturing connector version, adapter version, parser version, source policy version, storage mode, and source-specific config. Store in profile build metadata so comparisons can verify compatibility before claiming expression drift.
 
-The connector implementation standard says connectors ingest only. They may discover, normalize,
-attach advisory hints, report counts, and fail closed. They must not classify, extract signals,
-compile profiles, export profiles, assemble prompts, call LLMs, publish content, expose raw corpus
-search, or bypass validation.
+**Timeline:** Before Sprint 14 implementation.
 
-**Residual risk:** Private connector packages outside public core can still drift. They should depend
-on public Imprint interfaces and run the same validation suite before exporting profiles.
+---
 
-### 7. Source-Specific Privacy Holes
+### Recommendation 2: Multi-Person Contamination Tests Missing
 
-**Decision:** Addressed for planning.
+**Severity:** HIGH — Boundary enforcement risk
 
-The four source threat models cover the major privacy holes:
+**Evidence:** Consent policy defines multi-person exclusion but zero tests prove it works. No fixtures with received mail, group chats, or third-party participants.
 
-- Gmail: OAuth scope, sent-vs-received separation, quoted threads, attachments, provider metadata.
-- iMessage/chat: local database access, participant consent, group contamination, sender attribution,
-  attachments, device boundaries.
-- Transcript/recorder: speaker consent, diarization uncertainty, third-party voices, audio/text
-  separation, generated summaries.
-- Database/cloud: query allowlists, DSN redaction, least privilege, row-level privacy, replay limits,
-  private schema leakage.
+**Recommendation:** Add comprehensive fixtures and tests before implementation (e.g., `test_gmail_excludes_received_mail`, `test_imessage_excludes_group_participants`).
 
-## Blockers
+**Timeline:** Before implementation sprints.
 
-None for private adapter implementation planning.
+---
 
-Real private adapter implementation remains blocked until the source-specific implementation has
-synthetic fixtures, redaction tests, consent-boundary tests, replay/audit tests, and credential tests.
+### Recommendation 3: Audit Logging Interface Not Defined
 
-## Recommendations
+**Severity:** HIGH — Observability gap
 
-1. Treat Gmail quoted-thread parsing, group chat participant separation, transcript diarization, and
-   database row-level filtering as test-first implementation units.
-2. Keep private connector packages out of public core unless they can run in public CI without
-   credentials or private infrastructure.
-3. Require a public-safety scan before committing any source-specific docs or fixtures.
-4. Add fixture mutation tests for Sprint 12.5 privacy gates when the first private connector is
-   implemented.
-5. Keep service/API mode blocked until private connector replay/audit behavior is proven.
+**Evidence:** Threat models require audit logging (what was read, included, excluded, quarantined, etc.) but no interface exists for connectors to produce standardized, redacted audit logs.
 
-## Final Decision
+**Recommendation:** Define `ConnectorAuditLog` contract with events, counts, warnings, and redaction method.
 
-**GO** for source-specific private adapter implementation planning.
+**Timeline:** Before implementation.
 
-**NO-GO** for building real private adapters directly from the generic connector framework without
-satisfying the Sprint 13 threat models, credential policy, consent policy, implementation standard,
-and synthetic fixture standard.
+---
+
+### Recommendation 4: Public/Private Repository Boundary Lacks Detection
+
+**Severity:** MEDIUM — Unintentional leakage risk
+
+**Evidence:** Policy says no private data in public repo but no automated scanner prevents accidental commit of real email addresses or chat exports.
+
+**Recommendation:** Add pre-commit hook validating fixtures contain no real email domains, phone numbers, private URLs. Require fixture names contain `synthetic`, `example`, `fixture`, or `test`.
+
+**Timeline:** Before first private connector PR.
+
+---
+
+### Recommendation 5: Adapter Authority Boundaries Not Tested
+
+**Severity:** MEDIUM — Scope creep risk
+
+**Evidence:** Implementation standard lists things connectors must NOT do (classify, extract signals, call LLMs, bypass export validation) but zero tests enforce these boundaries.
+
+**Recommendation:** Add tests proving connectors don't import classifier, LLM packages, or call export generation.
+
+**Timeline:** Before implementation.
+
+---
+
+## Part 3: Go/No-Go Decision
+
+### Current Status: CONDITIONAL GO
+
+**Blockers:**
+1. ✗ Consent enforcement mechanisms do not exist (CRITICAL)
+2. ✗ Redaction patterns incomplete (CRITICAL)
+
+**Must-Have Recommendations:**
+1. ⚠ Replay versioning semantics (HIGH)
+2. ⚠ Multi-person contamination tests (HIGH)
+3. ⚠ Audit logging interface (HIGH)
+4. ⚠ Public/private repository detection (MEDIUM)
+5. ⚠ Adapter authority boundary tests (MEDIUM)
+
+### Release Criteria
+
+Framework is ready for **planning and review** if all gaps are acknowledged. Proceed to **implementation planning** in Sprint 14+ only after:
+
+- Consent enforcement interface is designed and consent boundaries are testable
+- Redaction patterns are expanded and tested against real credential formats
+- Replay versioning contract is defined
+- Multi-person contamination tests are added to fixture standards
+- Audit logging interface is defined
+- Repository detection is automated
+- Adapter authority boundary tests are added
+- All 14 existing connector tests still pass
+
+---
+
+## Conclusion
+
+Sprint 13 established a sound threat-model framework. Gaps are about turning strategy into code and tests, not fundamental design flaws. With gaps addressed, the framework can support safe private adapter implementation without compromising privacy or security.
+
+---
+
+**Document Version:** sprint13-adversarial-review-v1  
+**Last Updated:** 2026-06-07  
+**Status:** FRAMEWORK SOUND; IMPLEMENTATION-READY WITH GAP FIXES

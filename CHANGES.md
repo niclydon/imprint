@@ -6,6 +6,42 @@ Chronological per-phase record of significant work. See `docs/narrative/` for de
 
 ## 2026-06-07
 
+### Sprint 13: Adversarial Review — Private Adapter Strategy and Threat Models
+
+**Decision:** Hostile privacy/security architect review of Sprint 13 strategy documents. Framework is sound; 2 critical gaps identified that must be closed before implementation begins.
+
+**What changed:**
+
+- `docs/SPRINT_13_ARCHITECTURE_REVIEW.md` (new) — Adversarial analysis of threat models, policies, and standards. Identified 2 critical gaps (consent enforcement, incomplete redaction) and 5 major recommendations.
+- 9 threat model and policy documents delivered: `GMAIL_CONNECTOR_THREAT_MODEL.md`, `IMESSAGE_CONNECTOR_THREAT_MODEL.md`, `TRANSCRIPT_CONNECTOR_THREAT_MODEL.md`, `DATABASE_CONNECTOR_THREAT_MODEL.md`, `CREDENTIAL_STORAGE_POLICY.md`, `CONSENT_AND_MULTI_PERSON_POLICY.md`, `CONNECTOR_IMPLEMENTATION_STANDARD.md`, `CONNECTOR_SYNTHETIC_FIXTURE_STANDARD.md`, plus related updates to framework and configuration docs.
+- 14 connector tests passing; all existing tests continue to pass.
+
+**Critical gaps identified:**
+1. ✗ Consent enforcement mechanisms specified in policy but not enforced in code or tests — future connectors could accidentally include third-party content
+2. ✗ Redaction patterns incomplete — miss OAuth refresh tokens, database DSNs with passwords, API keys in URLs, JWT tokens, AWS keys
+
+**Major recommendations (non-blocking for strategy sprint):**
+1. ⚠ Replay versioning semantics must be explicit before implementation
+2. ⚠ Multi-person contamination tests must be added to fixture standards
+3. ⚠ Audit logging interface must be defined before implementation
+4. ⚠ Public/private repository boundary needs automated detection
+5. ⚠ Adapter authority boundaries must be validated by tests
+
+**Verification evidence:**
+- Framework documents reviewed and assessed for threats
+- Redaction patterns tested against common credential formats
+- Consent policy analysis against threat models
+- 14 connector tests reviewed and passing
+- No code vulnerabilities in public core
+
+**Gate status:** CONDITIONAL GO — Framework ready for planning; implementation planning in Sprint 14+ only after gaps are addressed.
+
+**Full story:** `docs/SPRINT_13_ARCHITECTURE_REVIEW.md`
+
+---
+
+## 2026-06-07
+
 ### Sprint 12: Adversarial Review — Evaluation and Quality Gates
 
 **Decision:** Hostile security architect review of Sprint 12 quality-layer work (validation, comparison, privacy gates, release criteria) identified 3 critical blockers requiring fixes before v0.1.0 release.
