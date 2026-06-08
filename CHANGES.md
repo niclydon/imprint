@@ -4,6 +4,14 @@ Chronological per-phase record of significant work. See `docs/narrative/` for de
 
 ---
 
+## Sprints 12–13.5: Quality Gates and Privacy Enforcement Arc (2026-06-07 to 2026-06-08)
+
+**Narrative:** `docs/narrative/2026-06-08-quality-and-privacy-enforcement-arc.md`
+
+Imprint moved from unverified quality guarantees to an enforced privacy and security contract framework. Three adversarial review sprints (12, 13, 13.5) closed critical gaps in validation, consent enforcement, credential redaction, replay versioning, audit logging, and adapter authority boundaries. Result: public core ready to support safe private adapter implementations without adding real connectors.
+
+---
+
 ## 2026-06-08
 
 ### Sprint 13.5: Adversarial Review — Private Adapter Enforcement Foundation
