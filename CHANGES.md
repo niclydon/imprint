@@ -56,6 +56,47 @@ Imprint moved from unverified quality guarantees to an enforced privacy and secu
 
 ---
 
+## 2026-06-08
+
+### Sprint 14 & 14.5: Service and Automation — Local/Private Facade
+
+**Decision:** Service mode is justified as a disabled-by-default local/private facade for trusted downstream tools. Hostile architect review identified 2 blockers (disabled-mode enforcement, Markdown shape validation) addressed in Sprint 14.5. GO for v0.1.0 release.
+
+**What changed:**
+
+- `docs/SERVICE_DECISION_RECORD.md` (new) — Justifies service need and consumer scope; why CLI/file-drop alone is insufficient for local operators wanting stable runtime contract
+- `docs/SERVICE_MODE_DESIGN.md` (new) — Explicit boundaries: runtime inputs (export dir only), path validation (fixed filenames, symlink escape prevention), export validation (public-safe JSON + generated Markdown proof), job scope (dry-run only)
+- `docs/API_CONTRACT.md` (new) — Eight endpoints (health, version, status, profiles/latest, exports/latest.json, exports/latest.md, warnings/latest, jobs/dry-run); error contract; no raw text, paths, credentials, or provider settings in responses
+- `docs/SERVICE_AUTH_POLICY.md` (new) — Four modes (disabled, localhost read-only, bearer-token, reverse-proxy); default localhost; jobs require auth; external binds require `external_protection=True` + token
+- `docs/SERVICE_AUTOMATION_PLAN.md` (new) — Dry-run-only first cut; defers rebuild scheduling until replay manifests and audit authority are clear
+- `docs/SERVICE_METRICS_AND_AUDIT.md` (new) — Public-safe observability model; disallows raw text, paths, credentials, account identifiers
+- `docs/BATCH_SERVICE_PARITY.md` (new) — Service delivers same canonical JSON as CLI or fails closed; not a separate profile class
+- `src/imprint/service.py` (new, 365 lines) — Core helpers, config validation, public-safe payload validation, optional FastAPI integration
+- `tests/test_service.py` (new, 210 lines) — 13 tests: disabled-mode enforcement, public-safe output, auth, config validation, parity, FastAPI integration; 12 pass + 1 optional
+- `docs/SPRINT_14_ARCHITECTURE_REVIEW.md` (new) — Adversarial review with GO decision after blockers B1/B2 fixed and hardening recommendations H1/H2 addressed
+
+**Critical blockers fixed (Sprint 14.5):**
+1. ✓ Disabled-mode enforcement — `_require_enabled_for_data()` guard added; all data/job endpoints fail closed when `enabled=False`; tests prove disabled config blocks version, status, latest profile/exports/warnings
+2. ✓ Markdown shape validation — Added `_validate_markdown_export_shape()` requiring generated Imprint profile headers and sections; rejects raw/private field markers (raw_text, source_path, etc.)
+
+**Hardening improvements (Sprint 14.5):**
+1. ✓ Bounded FastAPI error responses — Exception handlers for `ServiceError` and `QualityGateError`; error payloads are public-safe and bounded
+2. ✓ Protected reverse-proxy config — Added `external_protection` flag; non-localhost binds rejected unless `external_protection=True` + `job_auth_token` set
+
+**Verification evidence:**
+- Security testing: raw corpus exposure, credential leakage, path leakage, auth failures, disabled-mode bypass, SaaS creep, prompt assembly, downstream coupling — all vectors blocked
+- Auth: bearer token uses `secrets.compare_digest()` for timing-safe comparison; error messages sanitized before return
+- Config: prevents non-localhost exposure without explicit protection + auth
+- Batch/service parity: CLI-generated JSON byte-for-byte matches service delivery or fails closed
+- Full test suite: 151 tests pass (up from 139 after Sprint 13.5)
+- Code quality: 365 lines service code with comprehensive public-safe validation gates
+
+**Gate status:** GO for v0.1.0 release. Service is production-ready as optional, disabled-by-default local/private facade.
+
+**Full story:** `docs/narrative/2026-06-08-sprint-14-service-automation.md`
+
+---
+
 ## 2026-06-07
 
 ### Sprint 13: Adversarial Review — Private Adapter Strategy and Threat Models
