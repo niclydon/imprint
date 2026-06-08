@@ -45,6 +45,42 @@ Chronological per-phase record of significant work. See `docs/narrative/` for de
 
 **Full story:** `docs/narrative/2026-06-07-sprint-10-public-web-presence.md`
 
+### Sprints 08–10: Adversarial Architecture Reviews — Boundary Verification
+
+**Decision:** Conduct comprehensive hostile architect reviews of Sprints 08 (consumer contracts), 09 (connector framework), and 10 (web presence) to verify boundaries are preserved, non-goals remain deferred, and test coverage is comprehensive.
+
+**What changed:**
+
+**Sprint 08 consumer contracts review:**
+- `docs/SPRINT_08_ARCHITECTURE_REVIEW.md` (155 lines) — Verified 6 focus areas: boundary preservation (no prompt assembly, publishing, runtime adapters), Mosvera boundary (expression overlay only), Broadside boundary (constraints only), agent safety (warnings mandatory), version compatibility (mixed versions warn), privacy (no raw text, opaque IDs)
+- 11 new tests added; 82/82 total tests passing
+- All exit criteria met; GO verdict
+
+**Sprint 09 connector framework review:**
+- `docs/SPRINT_09_ARCHITECTURE_REVIEW.md` (143 lines) — Verified 6 focus areas: public/private boundary (synthetic examples only, no real credentials), connector authority (discovery/ingest only, no classification bypass), secret handling (env var refs, fail-closed validation, redaction in errors), source privacy (opaque IDs, no path leaks), scope control (no live APIs, OAuth, LLMs), operational safety (dry-run safe, disabled connectors inert)
+- 14 new tests added; 96/96 total tests passing
+- All exit criteria met; GO verdict
+
+**Sprint 10 web presence review:**
+- `docs/SPRINT_10_ARCHITECTURE_REVIEW.md` (570 lines, new) — Verified 10 focus areas: public/private boundary (no creds, no private data), content accuracy (claims verified, no overstatement), visual alignment (brand language, no dashboard mockups), social metadata (OG cards correct, provenance tracked), accessibility (mobile nav, dual theme), performance (1.5 KB code, optimized assets), security (no XSS, injection, leaks), deployment integrity (Vercel + Cloudflare verified), non-goals (no corpus upload, app UI), documentation (comprehensive, traceable)
+- Pre-existing site verified against 10 gates; all passed
+- All exit criteria met + 2 stretch goals delivered; GO verdict
+
+**Verification evidence:**
+- `docs/narrative/2026-06-07-sprints-08-10-adversarial-reviews.md` (570 lines) — Detailed narrative of the review process, what was checked, what was rejected, numerical observations, and what's unblocked
+- Static code analysis: zero remote/provider/LLM calls, zero credential leaks across all three sprints
+- Test suite: 82 → 96 → verified; all hostile vectors tested
+- Boundary integrity: public/private separation holds; no scope creep
+
+**What's unblocked:**
+- Downstream systems can safely consume Sprint 08 consumer contracts
+- Private deployments can add real connectors via ignored local config (Sprint 09)
+- Imprint has a credible public front door with working social metadata (Sprint 10)
+
+**Commits:** `6a33538` (Sprint 10 review document)
+
+**Full story:** `docs/narrative/2026-06-07-sprints-08-10-adversarial-reviews.md`
+
 ### Phase: Sprint 07 Adversarial Review — Export Layer and First-Run Experience Readiness
 
 **Verdict:** GO for Sprint 08
