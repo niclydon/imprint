@@ -7,13 +7,19 @@ from typer.testing import CliRunner
 
 from imprint.cli import app
 from imprint.connectors import (
+    ConnectorAuditLog,
     ConnectorConfigError,
     ConnectorDeclaration,
+    ConnectorReplayManifest,
     ImprintConnectorConfig,
     build_default_connector_registry,
+    connector_config_hash,
     load_connector_config,
     redact_text,
+    replay_manifests_compatible,
     safe_error,
+    scan_fixture_path,
+    scan_fixture_tree,
 )
 from imprint.schemas import ArtifactStorageMode
 
@@ -213,6 +219,231 @@ def test_redaction_removes_secrets_and_paths() -> None:
     assert "/Users/example/private" not in safe_error("failed at /Users/example/private/source")
 
 
+def test_redaction_covers_real_world_credential_shapes() -> None:
+    jwt_value = (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJzdWIiOiJzdWJqZWN0IiwiaWF0IjoxNzAwMDAwMDAwfQ."
+        "c2lnbmF0dXJl"
+    )
+    aws_key = "A" "KIA" + "ABCDEFGHIJKLMNOP"
+    dsn = "postgres://subject:synthetic-password@example.com:5432/imprint"
+    url_key = "https://example.com/callback?api_key=" + "syntheticapikeyvalue123"
+    azure = (
+        "DefaultEndpointsProtocol=https;AccountName=synthetic;"
+        "AccountKey=syntheticaccountkeyvalue123;EndpointSuffix=core.windows.net"
+    )
+    refresh = "refresh_token=" + "syntheticrefreshtokenvalue123"
+    basic = "Basic " + "c3ludGhldGljOnNlY3JldA=="
+    bearer = "Bearer " + "syntheticbearertokenvalue123"
+
+    sensitive_values = [jwt_value, aws_key, dsn, url_key, azure, refresh, basic, bearer]
+    redacted = redact_text(" ".join(sensitive_values))
+
+    for value in sensitive_values:
+        assert value not in redacted
+    assert redacted.count("[REDACTED]") >= len(sensitive_values)
+
+
+def test_safe_error_redacts_nested_env_values_but_preserves_env_var_names() -> None:
+    message = safe_error(
+        "credential failure",
+        {
+            "env": "IMPRINT_SYNTHETIC_TOKEN",
+            "nested": {"env": {"API_TOKEN": "syntheticapikeyvalue123"}},
+        },
+    )
+
+    assert "IMPRINT_SYNTHETIC_TOKEN" in message
+    assert "syntheticapikeyvalue123" not in message
+    assert "API_TOKEN" not in message
+
+
+def test_connector_replay_manifest_detects_version_incompatibility() -> None:
+    baseline = ConnectorReplayManifest(
+        connector_name="synthetic_gmail",
+        connector_type="gmail",
+        connector_version="sprint13.5-connector-v1",
+        adapter_version="synthetic-adapter-v1",
+        parser_version="parser-v1",
+        source_policy_version="source-policy-v1",
+        storage_mode=ArtifactStorageMode.METADATA_ONLY,
+        config_hash=connector_config_hash({"mode": "sent-only"}),
+        synthetic_fixture=True,
+    )
+    candidate = ConnectorReplayManifest(
+        connector_name="synthetic_gmail",
+        connector_type="gmail",
+        connector_version="sprint13.5-connector-v1",
+        adapter_version="synthetic-adapter-v1",
+        parser_version="parser-v2",
+        source_policy_version="source-policy-v1",
+        storage_mode=ArtifactStorageMode.METADATA_ONLY,
+        config_hash=connector_config_hash({"mode": "sent-only"}),
+        synthetic_fixture=True,
+    )
+
+    assert baseline.replay_id.startswith("replay-")
+    assert replay_manifests_compatible(baseline, baseline) is True
+    assert replay_manifests_compatible(baseline, candidate) is False
+
+
+def test_connector_replay_manifest_detects_manifest_version_drift() -> None:
+    baseline = ConnectorReplayManifest(
+        connector_name="synthetic_gmail",
+        connector_type="gmail",
+        connector_version="sprint13.5-connector-v1",
+        adapter_version="synthetic-adapter-v1",
+        parser_version="parser-v1",
+        source_policy_version="source-policy-v1",
+        storage_mode=ArtifactStorageMode.METADATA_ONLY,
+        config_hash=connector_config_hash({"mode": "sent-only"}),
+        synthetic_fixture=True,
+    )
+    candidate = ConnectorReplayManifest(
+        connector_name="synthetic_gmail",
+        connector_type="gmail",
+        connector_version="sprint13.5-connector-v1",
+        adapter_version="synthetic-adapter-v1",
+        parser_version="parser-v1",
+        source_policy_version="source-policy-v1",
+        storage_mode=ArtifactStorageMode.METADATA_ONLY,
+        config_hash=connector_config_hash({"mode": "sent-only"}),
+        synthetic_fixture=True,
+        manifest_version="future-replay-manifest-v2",
+    )
+
+    assert replay_manifests_compatible(baseline, candidate) is False
+
+
+def test_connector_config_hash_redacts_secret_values_before_hashing() -> None:
+    plain = connector_config_hash({"credential": "[REDACTED]", "path": "[REDACTED]"})
+    sensitive = connector_config_hash(
+        {
+            "credential": "syntheticapikeyvalue123",
+            "path": "/Users/example/private/source",
+        }
+    )
+
+    assert sensitive == plain
+
+
+def test_connector_audit_log_redacts_errors_and_references_replay_manifest() -> None:
+    manifest = ConnectorReplayManifest(
+        connector_name="synthetic_database",
+        connector_type="database",
+        connector_version="sprint13.5-connector-v1",
+        adapter_version="synthetic-adapter-v1",
+        parser_version="parser-v1",
+        source_policy_version="source-policy-v1",
+        storage_mode=ArtifactStorageMode.METADATA_ONLY,
+        config_hash=connector_config_hash({"query": "synthetic_subject_rows"}),
+        synthetic_fixture=True,
+    )
+    log = ConnectorAuditLog(
+        connector_run_id="run-synthetic-database",
+        connector_name="synthetic_database",
+        connector_type="database",
+        source_policy_version="source-policy-v1",
+        discovered_count=4,
+        included_count=1,
+        excluded_count=2,
+        quarantined_count=1,
+        storage_mode="metadata_only",
+        replay_manifest=manifest,
+        warnings=["synthetic warning"],
+        errors=["failed with postgres://subject:synthetic-password@example.com:5432/imprint"],
+        metadata={"api_key": "syntheticapikeyvalue123", "path": "/Users/example/private/source"},
+    )
+
+    payload = log.to_public_safe_dict()
+    serialized = str(payload)
+
+    assert payload["replay_manifest_ref"] == manifest.replay_id
+    assert payload["counts"] == {"discovered": 4, "included": 1, "excluded": 2, "quarantined": 1}
+    assert payload["warnings"] == ["warning-1"]
+    assert payload["errors"] == ["error-1"]
+    assert "synthetic-password" not in serialized
+    assert "syntheticapikeyvalue123" not in serialized
+    assert "/Users/example/private/source" not in serialized
+
+
+def test_connector_audit_log_does_not_emit_ordinary_raw_text_metadata() -> None:
+    log = ConnectorAuditLog(
+        connector_run_id="run-synthetic",
+        connector_name="synthetic",
+        connector_type="gmail",
+        source_policy_version="source-policy-v1",
+        discovered_count=1,
+        included_count=0,
+        excluded_count=1,
+        quarantined_count=0,
+        storage_mode="metadata_only",
+        warnings=["ordinary raw message sentence should not appear"],
+        errors=["ordinary raw error text should not appear"],
+        metadata={"raw_text": "ordinary raw body should not appear", "connector_version": "v1"},
+    )
+
+    payload = log.to_public_safe_dict()
+    serialized = str(payload)
+
+    assert "ordinary raw" not in serialized
+    assert payload["metadata"] == {"connector_version": "v1"}
+
+
+def test_fixture_leakage_scanner_flags_private_fixture_content(tmp_path: Path) -> None:
+    unsafe = tmp_path / "mail-export.jsonl"
+    unsafe.write_text(
+        "email=person@private-company.test phone=415-555-1212 "
+        "dsn=postgres://subject:synthetic-password@example.com:5432/imprint",
+        encoding="utf-8",
+    )
+
+    reasons = {finding.reason_code for finding in scan_fixture_path(unsafe)}
+
+    assert "fixture_name_not_synthetic" in reasons
+    assert "real_email" in reasons
+    assert "phone_number" in reasons
+    assert "dsn" in reasons
+
+
+def test_fixture_leakage_scanner_flags_encoded_private_content(tmp_path: Path) -> None:
+    import base64
+
+    unsafe = tmp_path / "synthetic-private-fixture.json"
+    key_name = "api" + "_key"
+    encoded_secret = base64.b64encode(f"{key_name}=syntheticapikeyvalue123".encode()).decode()
+    encoded_path = base64.b64encode(b"/Users/example/private/source").decode()
+    unsafe.write_text(f"{encoded_secret}\n{encoded_path}\n", encoding="utf-8")
+
+    reasons = {finding.reason_code for finding in scan_fixture_path(unsafe)}
+
+    assert "encoded_credential_or_token" in reasons
+    assert "encoded_local_home_path" in reasons
+
+
+def test_current_public_fixture_content_has_no_private_leakage_patterns() -> None:
+    findings = []
+    for root in (FIXTURES, Path(__file__).parents[1] / "examples" / "synthetic_corpus"):
+        findings.extend(scan_fixture_tree(root, require_synthetic_name=False))
+
+    assert findings == []
+
+
+def test_public_narratives_do_not_expose_private_handoff_paths() -> None:
+    narrative_root = Path(__file__).parents[1] / "docs" / "narrative"
+    combined = "\n".join(path.read_text(encoding="utf-8") for path in narrative_root.glob("*.md"))
+
+    forbidden = [
+        "/Users/niclydon",
+        "smb://",
+        "10.10.0.1",
+        "projects/nexus",
+        "Netflix export",
+        "Anvil",
+    ]
+    assert not any(term in combined for term in forbidden)
+
+
 def test_connector_cli_dry_run_reports_summary_without_paths(tmp_path: Path) -> None:
     config_path = tmp_path / "connectors.yaml"
     fixture_path = FIXTURES / "local_text" / "synthetic-note.txt"
@@ -251,7 +482,28 @@ def test_public_example_config_loads_connector_section() -> None:
 
 def test_no_remote_provider_or_llm_calls_in_connector_code() -> None:
     connector_root = Path(__file__).parents[1] / "src" / "imprint" / "connectors"
-    combined = "\n".join(path.read_text(encoding="utf-8") for path in connector_root.glob("*.py"))
+    combined = "\n".join(path.read_text(encoding="utf-8") for path in connector_root.rglob("*.py"))
 
     forbidden = ["requests", "httpx", "urllib", "socket", "subprocess", "openai", "anthropic", "gemini"]
+    assert not any(term in combined for term in forbidden)
+
+
+def test_connector_code_does_not_import_pipeline_authority() -> None:
+    connector_root = Path(__file__).parents[1] / "src" / "imprint" / "connectors"
+    combined = "\n".join(path.read_text(encoding="utf-8") for path in connector_root.rglob("*.py"))
+
+    forbidden = [
+        "from imprint.classification",
+        "import imprint.classification",
+        "from imprint.signals",
+        "import imprint.signals",
+        "from imprint.compiler",
+        "import imprint.compiler",
+        "from imprint.exports",
+        "import imprint.exports",
+        "canonical_profile",
+        "ProfileCompiler",
+        "RuleBasedArtifactClassifier",
+        "RuleBasedSignalExtractor",
+    ]
     assert not any(term in combined for term in forbidden)

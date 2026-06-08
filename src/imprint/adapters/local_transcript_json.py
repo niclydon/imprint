@@ -49,14 +49,21 @@ class LocalTranscriptJsonAdapter(SourceAdapter):
                 f"transcript segment {index} in {file_path} is missing text"
             )
         speaker = segment.get("speaker")
+        speaker_role = segment.get("speaker_role")
         if speaker is None:
             authorship_origin = AuthorshipOrigin.UNKNOWN_SPEAKER
         elif not isinstance(speaker, str):
             raise InvalidArtifactPayloadError(
                 f"transcript segment {index} in {file_path} has invalid speaker"
             )
+        elif speaker_role not in {"subject", "other", "unknown"}:
+            authorship_origin = AuthorshipOrigin.PARSER_UNCERTAIN
         else:
-            authorship_origin = AuthorshipOrigin.HUMAN_ORIGIN
+            authorship_origin = (
+                AuthorshipOrigin.HUMAN_ORIGIN
+                if speaker_role == "subject"
+                else AuthorshipOrigin.UNKNOWN_SPEAKER
+            )
 
         timestamp = parse_timestamp(segment.get("timestamp")) if segment.get("timestamp") is not None else None
         source_id = f"{file_path.as_posix()}#segment:{index}"
@@ -72,5 +79,6 @@ class LocalTranscriptJsonAdapter(SourceAdapter):
             metadata={
                 "artifact_type_hint": ArtifactType.TRANSCRIPT_SEGMENT.value,
                 "speaker_present": isinstance(speaker, str),
+                "speaker_role": speaker_role if isinstance(speaker_role, str) else "unknown",
             },
         )

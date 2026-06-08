@@ -4,19 +4,22 @@
       "artifact_id": "demo-segment-001",
       "speaker": "example_subject",
       "timestamp": "2026-01-01T12:00:00Z",
-      "text": "The obvious issue looked like queue latency, but the useful clue was the retry pattern because every failed job came back twice."
+      "text": "The obvious issue looked like queue latency, but the useful clue was the retry pattern because every failed job came back twice.",
+      "speaker_role": "subject"
     },
     {
       "artifact_id": "demo-segment-002",
       "speaker": "example_subject",
       "timestamp": "2026-01-01T12:03:00Z",
-      "text": "Before the retry counts were visible, the team debated capacity. After the counts were visible, the fix became a small policy change."
+      "text": "Before the retry counts were visible, the team debated capacity. After the counts were visible, the fix became a small policy change.",
+      "speaker_role": "subject"
     },
     {
       "artifact_id": "demo-segment-003",
       "speaker": "example_subject",
       "timestamp": "2026-01-01T12:06:00Z",
-      "text": "Start with the quiet failure. Then make the system say what it already knows."
+      "text": "Start with the quiet failure. Then make the system say what it already knows.",
+      "speaker_role": "subject"
     }
   ]
 }

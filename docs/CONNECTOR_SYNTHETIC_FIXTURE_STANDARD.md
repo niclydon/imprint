@@ -1,6 +1,6 @@
 # Connector Synthetic Fixture Standard
 
-Status: Sprint 13 strategy gate
+Status: Sprint 13.5 enforcement gate
 
 ## Purpose
 
@@ -18,6 +18,7 @@ Synthetic fixtures must be:
 - free of real credentials, real source paths, real account IDs, real people, and real message bodies
 - representative of source-specific edge cases
 - paired with tests that prove public-safe outputs remain raw-free and path-free
+- scanned by the public/private leakage detector before merge
 
 ## Prohibited Fixture Content
 
@@ -31,6 +32,8 @@ Do not commit:
 - real contact names, emails, handles, phone numbers, account IDs, tenant IDs, or source IDs
 - real local paths or private hostnames
 - credential-shaped placeholders
+- filenames that do not clearly indicate synthetic, example, fixture, test, or demo status for
+  private-source fixture sets
 
 Use fictional names, reserved example domains, synthetic IDs, and generated content only.
 
@@ -48,6 +51,7 @@ Each connector class must include fixtures for:
 - storage mode behavior
 - replay metadata behavior
 - source schema drift or malformed records
+- redaction of credentials, DSNs, JWTs, URL API keys, local paths, account IDs, and private URLs
 
 ## Source-Specific Minimums
 
@@ -96,8 +100,12 @@ Each fixture set must support assertions that:
 - public-safe exports contain no raw fixture text
 - validation catches intentional credential, encoded credential, path, encoded path, and private metadata mutations
 - replay/audit metadata is present without private locators
+- fixture leakage scanner returns no findings for committed private-source fixture trees
 
 ## Review Gate
 
 A private connector is not implementation-ready until fixture standards are met and tests can run in
 public CI without credentials or private infrastructure.
+
+Sprint 13.5 implements fixture leakage scanning in `src/imprint/connectors/leakage.py`. Future
+private-source fixture directories must use that scanner or a stricter equivalent in tests.

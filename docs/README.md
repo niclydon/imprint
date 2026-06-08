@@ -30,6 +30,7 @@ Imprint is still pre-release. The docs are intentionally detailed because the pr
 - [Artifact Storage Policy](ARTIFACT_STORAGE_POLICY.md) — metadata-only default and local artifact store modes
 - [Credential Storage Policy](CREDENTIAL_STORAGE_POLICY.md) — private connector credential rules
 - [Consent and Multi-Person Policy](CONSENT_AND_MULTI_PERSON_POLICY.md) — subject-authorship and consent boundaries
+- [Consent Boundary Model](CONSENT_BOUNDARY_MODEL.md) — enforceable connector consent decisions
 - [Evidence and Confidence](EVIDENCE_AND_CONFIDENCE.md) — support metadata and confidence semantics
 - [Evidence Model](EVIDENCE_MODEL.md) — evidence structure and requirements
 
@@ -71,6 +72,8 @@ Imprint is still pre-release. The docs are intentionally detailed because the pr
 - [Connector Framework](CONNECTOR_FRAMEWORK.md) — connector boundaries and dry-run UX
 - [Connector Implementation Standard](CONNECTOR_IMPLEMENTATION_STANDARD.md) — private adapter implementation gate
 - [Connector Synthetic Fixture Standard](CONNECTOR_SYNTHETIC_FIXTURE_STANDARD.md) — fixture and test requirements
+- [Connector Replay Manifest](CONNECTOR_REPLAY_MANIFEST.md) — replay and rebuild compatibility contract
+- [Connector Audit Log](CONNECTOR_AUDIT_LOG.md) — redacted connector audit contract
 - [Gmail Connector Threat Model](GMAIL_CONNECTOR_THREAT_MODEL.md)
 - [iMessage Connector Threat Model](IMESSAGE_CONNECTOR_THREAT_MODEL.md)
 - [Transcript Connector Threat Model](TRANSCRIPT_CONNECTOR_THREAT_MODEL.md)
@@ -86,6 +89,7 @@ Most useful next:
 - [Sprint 11](sprints/SPRINT_11.md) — packaging and install experience
 - [Sprint 12](sprints/SPRINT_12.md) — evaluation, validation, and quality gates
 - [Sprint 13](sprints/SPRINT_13.md) — private adapter strategy and threat models
+- [Sprint 13.5](sprints/SPRINT_13_5.md) — private adapter enforcement foundation
 - [Sprint 10](sprints/SPRINT_10.md) — public web presence
 - [Sprint 09](sprints/SPRINT_09.md) — private connector framework
 
@@ -97,6 +101,7 @@ Recent sprint narratives are available under [`narrative/`](narrative/).
 - [Sprint 01.5 Architecture Review](SPRINT_01_5_ARCHITECTURE_REVIEW.md)
 - [Sprint 02.5 Architecture Review](SPRINT_02_5_ARCHITECTURE_REVIEW.md)
 - [Sprint 13 Architecture Review](SPRINT_13_ARCHITECTURE_REVIEW.md)
+- [Sprint 13.5 Architecture Review](SPRINT_13_5_ARCHITECTURE_REVIEW.md)
 - [Decisions](DECISIONS.md)
 - [Open Questions](OPEN_QUESTIONS.md)
 - [Risks](RISKS.md)

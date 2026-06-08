@@ -1,6 +1,6 @@
 # Connector Framework
 
-Status: Sprint 13 strategy baseline
+Status: Sprint 13.5 enforcement baseline
 
 ## Purpose
 
@@ -32,6 +32,10 @@ src/imprint/connectors/
   local_directory.py # generic local file/directory connector over existing adapters
   manifest.py        # synthetic manifest connector over existing adapters
   redaction.py       # secret/path redaction utilities
+  consent.py         # consent boundary decisions for private-source hints
+  replay.py          # connector replay manifest contract
+  audit.py           # redacted connector audit log contract
+  leakage.py         # public/private fixture leakage scanner
 ```
 
 ## Built-In Connector Types
@@ -180,8 +184,14 @@ A future connector is implementation-ready only when it has:
 - synthetic fixtures for source-specific edge cases
 - redaction tests for credentials, paths, provider locators, and private IDs
 - replay/audit policy
+- consent boundary model tests
+- replay manifest compatibility tests
+- audit log redaction tests
+- public/private fixture leakage scanner tests
 - tests proving dry-run output contains counts and warnings only
 - tests proving generated public-safe exports pass validation
+- tests proving connector modules do not import classification, signal, compiler, export, LLM, or
+  network/API authority
 
 Connectors continue to ingest only. They do not classify, infer, score, summarize, publish, or expose
 raw corpus search.

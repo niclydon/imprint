@@ -1,6 +1,6 @@
 # Private Connector Policy
 
-Status: Sprint 13 strategy baseline
+Status: Sprint 13.5 enforcement baseline
 
 ## Public Repository Policy
 
@@ -46,6 +46,11 @@ No real private connector may be implemented until its source family has:
 - synthetic fixtures and redaction tests
 - replay/rebuild and audit policy
 - public/private repository boundary review
+- consent boundary tests
+- replay manifest compatibility tests
+- audit log redaction tests
+- leakage scanner coverage
+- connector authority boundary tests
 
 ## Connector Authority
 
@@ -90,6 +95,10 @@ must either remain disabled or degrade explicitly according to the private deplo
 Detailed credential rules live in `docs/CREDENTIAL_STORAGE_POLICY.md`. Source-specific threat models
 may add stricter requirements, but they may not weaken this policy.
 
+Connector redaction must cover JWTs, OAuth-style refresh/access tokens, database DSNs with embedded
+credentials, API keys in URL query parameters, AWS access keys, Azure-style connection strings, and
+bearer/basic authorization values before any credentialed connector can ship.
+
 ## Source Privacy
 
 Adapters may briefly read raw local text to normalize artifacts. Public-safe normalized artifacts and
@@ -100,6 +109,9 @@ Original private locators must remain outside canonical/public artifacts.
 
 Multi-person data must follow `docs/CONSENT_AND_MULTI_PERSON_POLICY.md`. Connector possession or
 operator access does not make other people's words eligible profile evidence.
+
+Connector consent hints must pass through `docs/CONSENT_BOUNDARY_MODEL.md`. Third-party and
+system-generated content is excluded by default. Mixed or unknown content is quarantined by default.
 
 ## Deferred Connectors
 
@@ -124,3 +136,7 @@ model.
 Private connector code may enter public core only if it is generic, synthetic-testable, credential-free
 by default, and safe to run in CI without private infrastructure. Otherwise it belongs in a private
 deployment package that depends on public Imprint interfaces.
+
+Public-core connector code must not import or call classifier, signal extractor, compiler, exporter,
+LLM/provider, or network/API authority unless a future source-specific review explicitly changes that
+boundary and adds tests.

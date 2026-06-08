@@ -1,6 +1,6 @@
 # Configuration
 
-Status: Sprint 13 developer-preview baseline
+Status: Sprint 13.5 developer-preview baseline
 
 ## Configuration Goals
 
@@ -99,6 +99,9 @@ Before adding a source-specific connector, read:
 - `docs/CONNECTOR_IMPLEMENTATION_STANDARD.md`
 - `docs/CONNECTOR_SYNTHETIC_FIXTURE_STANDARD.md`
 - `docs/CONSENT_AND_MULTI_PERSON_POLICY.md`
+- `docs/CONSENT_BOUNDARY_MODEL.md`
+- `docs/CONNECTOR_REPLAY_MANIFEST.md`
+- `docs/CONNECTOR_AUDIT_LOG.md`
 - the matching source-family threat model
 
 ## Dry Run
@@ -187,6 +190,8 @@ Startup and connector loading fail closed when:
 - public-safe exports attempt to include raw examples
 - source policy references unknown dimensions in future source-policy validation
 - source-specific connector config lacks required threat-model, fixture, or credential-policy support
+- private-source connector declarations lack consent-boundary, replay, audit, or fixture-leakage test
+  coverage
 
 ## Recommended Default
 

@@ -5,13 +5,15 @@
       "artifact_id": "signal-segment-1",
       "speaker": "Synthetic Speaker",
       "timestamp": "2026-06-07T12:00:00Z",
-      "text": "Start here. Not vague but precise. We'll use short paragraphs."
+      "text": "Start here. Not vague but precise. We'll use short paragraphs.",
+      "speaker_role": "subject"
     },
     {
       "artifact_id": "signal-segment-2",
       "speaker": "Synthetic Speaker",
       "timestamp": "2026-06-07T12:01:00Z",
-      "text": "# Why now?\n- First move\n- Second move\nWe use direct headings and bullets in related material."
+      "text": "# Why now?\n- First move\n- Second move\nWe use direct headings and bullets in related material.",
+      "speaker_role": "subject"
     }
   ]
 }

@@ -4,6 +4,50 @@ Chronological per-phase record of significant work. See `docs/narrative/` for de
 
 ---
 
+## 2026-06-08
+
+### Sprint 13.5: Adversarial Review — Private Adapter Enforcement Foundation
+
+**Decision:** Hostile privacy/security architect review conducted via focused subagent fan-out. All critical enforcement gaps from Sprint 13 have been closed. GO for private adapter implementation planning.
+
+**What changed:**
+
+- `docs/SPRINT_13_5_ARCHITECTURE_REVIEW.md` (new) — Adversarial review results. Shows GO decision after three subagent reviews identified and remediated P1 issues in consent, redaction, replay/audit, and authority boundaries.
+- `docs/CONSENT_BOUNDARY_MODEL.md` (new) — ConsentClass, ConsentAction, ConsentBoundary contract; evaluates hints against owner-authored/third-party/unknown/system classifications
+- `docs/CONNECTOR_REPLAY_MANIFEST.md` (new) — ReplayManifest for connector-driven rebuilds; captures version, config hash, storage mode, compatibility checks
+- `docs/CONNECTOR_AUDIT_LOG.md` (new) — Standardized audit log contract; public-safe projection redacts arbitrary metadata, preserves counts and identifiers
+- `src/imprint/connectors/consent.py` (new) — ConsentBoundary evaluation; integrated into RuleBasedArtifactClassifier
+- `src/imprint/connectors/replay.py` (new) — ConnectorReplayManifest, config hashing, compatibility checking
+- `src/imprint/connectors/audit.py` (new) — ConnectorAuditLog, redacted public-safe payload emission
+- `src/imprint/connectors/leakage.py` (new) — Fixture leakage scanner for unsafe fixture content (emails, paths, credentials, base64 encoding)
+- Expanded `src/imprint/connectors/redaction.py` — OAuth tokens, JWTs, database DSNs, API keys in URLs, AWS/Azure credentials, local home paths
+- Expanded `src/imprint/classification/engine.py` — Integrated consent evaluation and boundary application
+- 26 new connector tests, 95 new classification consent tests; all 139 tests passing
+
+**Critical gaps fixed (Sprint 13 remediation):**
+1. ✓ Consent enforcement mechanisms implemented and tested — third-party content excluded/quarantined
+2. ✓ Redaction patterns expanded — OAuth refresh tokens, JWTs, database DSNs, API keys in URLs, AWS/Azure, local paths all covered
+3. ✓ Replay versioning explicit — manifest captures all version/config drift; compatibility checks prevent false expression-drift claims
+4. ✓ Audit logging contract defined — redacted public-safe payloads prevent credential/path leakage
+5. ✓ Fixture leakage detection implemented — scans for private emails, phone numbers, paths, credentials, base64 encoding
+6. ✓ Adapter authority boundaries enforced — tests prove connectors don't import classifiers, exporters, LLMs, or network clients
+
+**Verification evidence:**
+- Three focused adversarial subagent reviews (consent, redaction/leakage, replay/audit/authority) initially found P1 issues; all remediated
+- Full test suite: 139 tests passing (up from 109 after Sprint 12)
+- Consent evaluation integrated into classifier and tested for received mail, group chats, third-party speakers
+- Redaction tested against all required credential formats
+- Replay manifest tested for version incompatibility detection
+- Audit logs tested for safe redaction
+- Fixture scanner tested against private content and public corpus
+- Authority boundary tests prove connector imports don't violate contracts
+
+**Gate status:** GO for private adapter implementation planning. Real adapters remain blocked unless they add source-specific threat model, fixtures, and tests.
+
+**Full story:** `docs/SPRINT_13_5_ARCHITECTURE_REVIEW.md`
+
+---
+
 ## 2026-06-07
 
 ### Sprint 13: Adversarial Review — Private Adapter Strategy and Threat Models

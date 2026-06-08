@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from imprint.connectors.consent import ConsentAction, evaluate_consent_boundary
 from imprint.schemas import (
     Artifact,
     ArtifactClassification,
@@ -32,6 +33,13 @@ class RuleBasedArtifactClassifier:
 
     def classify_artifact(self, artifact: Artifact) -> ArtifactClassificationResult:
         hints = self._source_hints_considered(artifact)
+        consent_boundary = evaluate_consent_boundary(artifact.reference.source_type, hints)
+        hints = {
+            **hints,
+            "consent_class": consent_boundary.consent_class.value,
+            "consent_action": consent_boundary.action.value,
+            "consent_reason_codes": consent_boundary.reason_codes,
+        }
         rule_ids: list[str] = []
         limitations: list[str] = []
 
@@ -62,6 +70,7 @@ class RuleBasedArtifactClassifier:
             contamination_risk,
             rule_ids,
         )
+        label = self._apply_consent_boundary(label, consent_boundary.action, rule_ids, limitations)
         confidence = self._classification_confidence(
             artifact,
             authorship_confidence,
@@ -107,6 +116,30 @@ class RuleBasedArtifactClassifier:
             evidence=evidence,
             confidence=confidence,
         )
+
+    def _apply_consent_boundary(
+        self,
+        label: ArtifactClassificationLabel,
+        consent_action: ConsentAction,
+        rule_ids: list[str],
+        limitations: list[str],
+    ) -> ArtifactClassificationLabel:
+        if consent_action == ConsentAction.ALLOW:
+            rule_ids.append("consent_boundary_allows_subject_authored_support")
+            return label
+        if consent_action == ConsentAction.EXCLUDE:
+            rule_ids.append("consent_boundary_excludes_non_subject_content")
+            limitations.append(
+                "connector consent boundary excluded non-subject or generated content"
+            )
+            return ArtifactClassificationLabel.EXCLUDED
+        rule_ids.append("consent_boundary_quarantines_unproven_subject_authorship")
+        limitations.append(
+            "connector consent boundary requires quarantine without subject-authored proof"
+        )
+        if label == ArtifactClassificationLabel.EXCLUDED:
+            return label
+        return ArtifactClassificationLabel.QUARANTINED
 
     def classify_artifacts(self, artifacts: list[Artifact]) -> list[ArtifactClassificationResult]:
         return [self.classify_artifact(artifact) for artifact in artifacts]

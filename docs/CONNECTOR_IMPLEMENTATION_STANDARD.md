@@ -1,6 +1,6 @@
 # Connector Implementation Standard
 
-Status: Sprint 13 strategy gate
+Status: Sprint 13.5 enforcement gate
 
 ## Purpose
 
@@ -21,6 +21,10 @@ Before code starts for a source-specific connector, the work must include:
 - public/private repository boundary decision
 - redaction test plan
 - failure-mode test plan
+- `ConsentBoundary` mapping and tests
+- `ConnectorReplayManifest` compatibility tests
+- `ConnectorAuditLog` redaction tests
+- fixture leakage scanner coverage
 
 A connector without these artifacts is not implementation-ready.
 
@@ -47,6 +51,9 @@ Connectors must not:
 - expose raw corpus search
 - bypass public-safe export validation
 - treat provider metadata as durable truth about a person
+
+Sprint 13.5 enforces this boundary with connector source tests that reject imports or calls into the
+classification, signal extraction, compiler, export, LLM/provider, and network/API layers.
 
 ## Public Core Boundary
 
@@ -103,7 +110,20 @@ record:
 - skipped source classes
 - replay limitations
 
+Replay metadata must use `ConnectorReplayManifest` (`docs/CONNECTOR_REPLAY_MANIFEST.md`). Audit
+records must use or match `ConnectorAuditLog` (`docs/CONNECTOR_AUDIT_LOG.md`) and must be redacted
+before display, logging, or serialization outside protected local state.
+
 Audit output is local-private unless explicitly designed as public-safe aggregate metadata.
+
+## Consent Boundary Standard
+
+Every private connector must emit consent hints that can be evaluated by the consent boundary model in
+`docs/CONSENT_BOUNDARY_MODEL.md`. At minimum, source-specific connectors must distinguish
+owner-authored, third-party-authored, mixed, unknown, and system-generated content.
+
+Third-party and system-generated content cannot become durable profile support. Mixed and unknown
+content must quarantine unless a future source-specific policy explicitly allows it and adds tests.
 
 ## Test Standard
 
@@ -115,8 +135,12 @@ Implementation requires tests for:
 - source-specific consent contamination
 - advisory hint handling
 - opaque source IDs
+- replay manifest compatibility
+- audit log redaction
+- fixture leakage scanning
 - dry-run output without paths or raw text
 - no unintended network/model calls in public core
+- no imports of classifier, signal, compiler, or export authority in connector modules
 - public-safe export validation after connector-derived profile generation
 
 ## Documentation Standard
