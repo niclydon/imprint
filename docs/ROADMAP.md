@@ -1,6 +1,6 @@
 # Imprint Roadmap
 
-Status: current as of Sprint 11
+Status: current as of Sprint 13
 
 Imprint has moved past the original planning roadmap. The public repository now contains the core expression-profile pipeline and the first safe downstream contract surfaces.
 
@@ -21,6 +21,10 @@ The following layers are implemented, documented, tested, and reviewed:
 - generic private connector framework with dry-run, redaction, and synthetic-only examples
 - public website at `imprint.niclydon.dev`
 - public developer-preview packaging, quickstart, install docs, CI, and synthetic example exports
+- Sprint 12.5 hardened privacy validation for JWTs, encoded credentials, encoded paths, private
+  metadata, and mixed classifier-version comparison review states
+- Sprint 13 private adapter strategy, source threat models, credential policy, consent policy, and
+  connector implementation/fixture standards
 
 ## Current public-MVP track
 
@@ -79,7 +83,7 @@ Exit criteria met:
 
 Goal: make profile changes reviewable before release or downstream consumption.
 
-Status: complete as of Sprint 12.
+Status: complete and hardened as of Sprint 12.5.
 
 Deliverables:
 
@@ -90,6 +94,9 @@ Deliverables:
 - compatibility warning checks
 - confidence/version drift checks
 - fixture-based quality gate for public-safe exports
+- JWT, base64/base64url credential, percent-encoded path, and underscore metadata rejection
+- structured release-gate reason codes
+- mixed classifier-version comparison review gating
 
 Exit criteria:
 
@@ -101,22 +108,27 @@ Exit criteria:
 
 Goal: define safe source-specific implementation plans for real private adapters without adding private assumptions to public core.
 
+Status: **complete as a strategy and threat-model sprint**. Sprint 13 does not implement real private
+adapters.
+
 Deliverables:
 
-- Gmail threat model and connector plan
-- iMessage/export threat model and connector plan
-- transcript/Plaud/Looki threat model and connector plan
-- database/cloud connector threat model templates
-- credential storage rules
-- consent and multi-person-source policy
-- replay/audit behavior
-- synthetic fixture requirements for each adapter class
+- ✅ Gmail threat model and connector plan
+- ✅ iMessage/chat threat model and connector plan
+- ✅ transcript/Plaud/Looki threat model and connector plan
+- ✅ database/cloud connector threat model
+- ✅ credential storage rules
+- ✅ consent and multi-person-source policy
+- ✅ connector implementation standard covering replay/audit behavior
+- ✅ synthetic fixture requirements for each adapter class
+- ✅ adversarial architecture review gate (`docs/SPRINT_13_ARCHITECTURE_REVIEW.md`)
 
 Exit criteria:
 
-- no private adapter starts without a source-specific threat model
-- credential and consent boundaries are explicit
-- each future adapter has synthetic fixtures and redaction tests before implementation
+- ✅ no private adapter starts without a source-specific threat model
+- ✅ credential and consent boundaries are explicit
+- ✅ each future adapter has synthetic fixtures and redaction tests before implementation
+- ✅ public/private repository boundaries remain intact
 
 ### Phase 14 — Service/API mode and automation
 

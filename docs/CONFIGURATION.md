@@ -1,6 +1,6 @@
 # Configuration
 
-Status: Sprint 11 developer-preview baseline
+Status: Sprint 13 developer-preview baseline
 
 ## Configuration Goals
 
@@ -56,6 +56,10 @@ credentials:
 
 Do not put credential values directly in YAML.
 
+Credential handling is governed by `docs/CREDENTIAL_STORAGE_POLICY.md`. Config files may reference
+credential env var names, but must not contain credential values, provider tokens, DSNs, OAuth
+refresh material, private account IDs, or tenant identifiers.
+
 ## Connector Config
 
 Sprint 09 connector declarations live under `connectors`:
@@ -81,13 +85,21 @@ connectors:
     tags: [synthetic]
 ```
 
-Supported Sprint 09 connector types:
+Supported public-core connector types:
 
 - `local_directory`
 - `manifest`
 
 Deferred connector types such as Gmail, iMessage, Plaud, Looki, databases, cloud storage, and live
-APIs must stay out of public core until a future private connector sprint.
+APIs must stay out of public core until their Sprint 13 threat models, consent policy, credential
+policy, replay/audit policy, and synthetic fixture tests are satisfied.
+
+Before adding a source-specific connector, read:
+
+- `docs/CONNECTOR_IMPLEMENTATION_STANDARD.md`
+- `docs/CONNECTOR_SYNTHETIC_FIXTURE_STANDARD.md`
+- `docs/CONSENT_AND_MULTI_PERSON_POLICY.md`
+- the matching source-family threat model
 
 ## Dry Run
 
@@ -174,6 +186,7 @@ Startup and connector loading fail closed when:
 - redaction mode is unsafe or missing in future runtime config
 - public-safe exports attempt to include raw examples
 - source policy references unknown dimensions in future source-policy validation
+- source-specific connector config lacks required threat-model, fixture, or credential-policy support
 
 ## Recommended Default
 
@@ -186,3 +199,7 @@ Default mode should remain boring and safe:
 - no network connectors
 - no cloud providers
 - exports written to ignored directories
+
+Real private connector config belongs in ignored local files. Public examples must remain synthetic
+and safe to run without credentials, private paths, network access, OAuth, database drivers, or cloud
+SDKs.

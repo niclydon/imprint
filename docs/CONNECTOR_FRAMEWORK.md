@@ -1,6 +1,6 @@
 # Connector Framework
 
-Status: Sprint 09 baseline
+Status: Sprint 13 strategy baseline
 
 ## Purpose
 
@@ -22,7 +22,7 @@ connector config -> connector discovery/ingest -> existing source adapter -> Art
 Connectors use adapters; they do not replace adapters. Adapter normalization remains responsible for
 opaque source IDs, metadata-only artifact defaults, and advisory source hints.
 
-Sprint 09 implementation:
+Current public-core implementation:
 
 ```text
 src/imprint/connectors/
@@ -59,6 +59,24 @@ Required config:
 - `type: manifest`
 - `enabled`
 - `manifest_path`
+
+## Deferred Private Connector Families
+
+Sprint 13 keeps real private adapters deferred. Future Gmail, iMessage/chat, transcript/recorder,
+database/cloud, and live API connectors must satisfy these documents before implementation:
+
+- `docs/GMAIL_CONNECTOR_THREAT_MODEL.md`
+- `docs/IMESSAGE_CONNECTOR_THREAT_MODEL.md`
+- `docs/TRANSCRIPT_CONNECTOR_THREAT_MODEL.md`
+- `docs/DATABASE_CONNECTOR_THREAT_MODEL.md`
+- `docs/CREDENTIAL_STORAGE_POLICY.md`
+- `docs/CONSENT_AND_MULTI_PERSON_POLICY.md`
+- `docs/CONNECTOR_IMPLEMENTATION_STANDARD.md`
+- `docs/CONNECTOR_SYNTHETIC_FIXTURE_STANDARD.md`
+
+No source-specific connector may enter public core solely because the generic framework exists.
+Threat model, consent policy, credential handling, replay/audit behavior, and synthetic fixture tests
+are preconditions.
 
 ## Config Shape
 
@@ -151,3 +169,19 @@ Connectors must preserve these boundaries:
 - Private paths, credentials, service names, account identifiers, and corpora stay outside tracked
   public files.
 - Consumer contracts remain projections of canonical JSON and do not become connector integrations.
+
+## Implementation Gate
+
+A future connector is implementation-ready only when it has:
+
+- a source-specific threat model
+- a credential-storage decision
+- consent and multi-person-data handling
+- synthetic fixtures for source-specific edge cases
+- redaction tests for credentials, paths, provider locators, and private IDs
+- replay/audit policy
+- tests proving dry-run output contains counts and warnings only
+- tests proving generated public-safe exports pass validation
+
+Connectors continue to ingest only. They do not classify, infer, score, summarize, publish, or expose
+raw corpus search.

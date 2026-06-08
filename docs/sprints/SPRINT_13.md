@@ -2,7 +2,7 @@
 
 Primary Model: GPT 5.5 for design, GPT 5.4 for implementation planning
 Adversarial Reviewer: GPT 5.5 or Gemini Antigravity
-Status: Future phase after Sprint 12 evaluation and quality gates
+Status: Complete as Sprint 13 strategy and threat-model gate
 
 ## Mission
 
