@@ -16,9 +16,35 @@ Imprint is open-source and public-first by design, but not yet ready for product
 
 Current focus:
 
-1. Schema, model-provider, ingestion, classification, and signal extraction foundations
+1. Packaging and onboarding for a public developer preview
 2. Public landing site at [imprint.niclydon.dev](https://imprint.niclydon.dev)
 3. Keeping all examples synthetic and all private corpora out of git
+
+## Quickstart
+
+This path uses only the committed synthetic corpus. It does not require private services,
+credentials, model providers, or network connectors.
+
+```bash
+git clone https://github.com/niclydon/imprint.git
+cd imprint
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[test]"
+
+imprint --help
+imprint connectors-dry-run --config imprint.config.example.yaml
+imprint example
+
+sed -n '1,80p' exports/synthetic-demo/what-imprint-learned.md
+sed -n '1,80p' exports/synthetic-demo/profile.md
+```
+
+Expected example outputs are written under `exports/synthetic-demo/`, which is ignored by git.
+The generated files include canonical JSON, Markdown, first-run summary, Mosvera expression overlay,
+and human CLI consumer-contract examples.
+
+For a fuller walkthrough, see `docs/QUICKSTART.md`.
 
 ## What Imprint is
 
@@ -70,13 +96,16 @@ Imprint observes expression patterns. It does not diagnose people or infer menta
 ## Start here
 
 - `docs/README.md` — documentation map
+- `docs/QUICKSTART.md` — copy-paste synthetic onboarding path
+- `docs/INSTALL.md` — clean install and local verification
 - `docs/PROJECT_STRATEGY.md` — project strategy
 - `docs/PRODUCT_POSITIONING.md` — what Imprint is and is not
 - `docs/PROFILE_THEORY.md` — expression profile theory and claim boundaries
 - `docs/SCHEMA.md` — canonical schema overview
+- `docs/EXPORT_FORMATS.md` — public-safe export contracts
 - `docs/MODEL_PROVIDER_POLICY.md` — BYOM/BYOP model policy
 - `docs/PRIVACY_AND_LOCAL_MODE.md` — privacy and local-first posture
-- `docs/sprints/SPRINT_03.md` — next sprint
+- `docs/RELEASE_CHECKLIST.md` — `v0.1.0` release checklist
 
 ## Privacy stance
 

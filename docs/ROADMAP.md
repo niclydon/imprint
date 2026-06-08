@@ -1,228 +1,152 @@
 # Imprint Roadmap
 
-Status: planning
+Status: current as of Sprint 11
 
-## Phase 0 — Public-safe foundation
+Imprint has moved past the original planning roadmap. The public repository now contains the core expression-profile pipeline and the first safe downstream contract surfaces.
 
-Goal: make the repository safe to publish before adding private connectors.
+## Completed foundation
 
-Deliverables:
+The following layers are implemented, documented, tested, and reviewed:
 
-- Project rename plan from internal name to Imprint.
-- README rewritten around public product concept.
-- `.env.example` with generic values only.
-- `imprint.config.example.yaml` with synthetic sources.
-- Public-safe `.gitignore`.
-- Security and privacy docs.
-- Synthetic fixture corpus.
-- Schema-first profile format.
-- CI that runs without private dependencies.
+- public-safe project foundation
+- schema contracts
+- local artifact adapters
+- classification engine
+- signal extraction engine
+- profile compiler
+- public-safe JSON and Markdown exports
+- first-run “What Imprint Learned” output
+- Mosvera expression overlay export
+- consumer contracts for Mosvera, Broadside, agents/apps, and CLI/human inspection
+- generic private connector framework with dry-run, redaction, and synthetic-only examples
+- public website at `imprint.niclydon.dev`
+- public developer-preview packaging, quickstart, install docs, CI, and synthetic example exports
 
-Exit criteria:
+## Current public-MVP track
 
-- Secret scan passes.
-- No private corpus or deployment details in repo.
-- A new user can run the synthetic example locally.
+### Phase 10 — Public web presence and launch polish
 
-## Phase 1 — Core schemas and local MVP
-
-Goal: compile a basic expression profile from local files.
-
-Deliverables:
-
-- Pydantic schemas for artifacts, classifications, signals, profiles, exports.
-- Local Markdown/text/JSONL source adapters.
-- SQLite artifact registry with explicit Artifact Store modes.
-- CLI commands: `init`, `harvest`, `classify`, `extract`, `compile`, `export`, `audit`.
-- Rule-based baseline extractors.
-- Optional LLM extractor through OpenAI-compatible endpoint.
-- JSON/YAML exporters.
-- Human-readable Markdown report.
-
-Exit criteria:
-
-- Synthetic corpus produces stable profile output.
-- Tests validate schemas and privacy defaults.
-- No provider credentials required for basic mode.
-- Profile builds record artifact storage mode and build manifest metadata.
-
-## Phase 2 — Source weighting and contamination controls
-
-Goal: make voice multi-dimensional instead of treating all samples equally.
+Goal: keep the public site, README, docs, and social-share assets aligned with the implemented architecture.
 
 Deliverables:
 
-- Source policy config.
-- Signal-dimension weights: lexical, tone, humor, reasoning, structure, narrative, longform.
-- Authorship-origin classifier.
-- AI-assistance risk classifier.
-- Quote/forward/template classifier.
-- Quarantine and exclusion mechanics.
-- Profile confidence scoring.
-- Drift baseline support.
-- Compiler/corpus/expression drift separation.
+- deployed single-page public site
+- dark/light visual assets
+- favicon and app icon
+- Open Graph image and social metadata
+- current implementation status
+- links to GitHub and core docs
+- clear privacy/local-first positioning
+- current roadmap and quickstart alignment
 
 Exit criteria:
 
-- Chat-like samples can influence lexical/tone but not long-form structure.
-- AI-assisted samples can be retained as low-weight or reference-only.
-- Quarantined artifacts do not influence compiled profiles.
-- Drift reports do not present model or extractor changes as expression drift.
+- live site describes what exists today
+- README and website agree
+- social previews render cleanly
+- no stale sprint/status language remains
+- no private infrastructure details are exposed
 
-## Phase 3 — Export adapters
+### Phase 11 — Packaging and install experience
 
-Goal: make Imprint useful to downstream systems.
+Goal: make the public developer preview easy for a stranger to install and run against synthetic data.
+
+Status: complete as of Sprint 11.
 
 Deliverables:
 
-- Aesthetic pack fragment exporter.
-- Publishing profile contract exporter.
-- Generic agent persona exporter.
-- Profile diff command.
-- Profile validation command.
-- Export metadata with source counts and confidence.
+- verified clean install path
+- package metadata cleanup
+- quickstart command sequence
+- `imprint init` or equivalent bootstrap UX
+- synthetic sample project / corpus
+- documented run path from synthetic artifacts to profile export
+- clear CLI help output
+- GitHub Actions CI for tests and lint/type checks if appropriate
+- release checklist for `v0.1.0`
 
 Exit criteria:
 
-- Downstream systems can consume exported profile JSON without direct corpus access.
-- Exported artifacts contain no raw private text by default.
-- Core exports remain profile contracts; downstream adapters own prompt assembly and generation.
+- a new user can clone, install, run the synthetic example, and inspect exports without private infrastructure
+- all examples are synthetic
+- no provider credentials are required for baseline operation
+- README quickstart works copy-paste
 
-## Phase 4 — Private connector framework
+### Phase 12 — Evaluation and quality gates
 
-Goal: support private data sources without compromising public repo safety.
+Goal: make profile changes reviewable before release or downstream consumption.
 
 Deliverables:
 
-- Connector interface.
-- Local SQL connector using configured query files.
-- Sent mail connector skeleton.
-- Chat export connector skeleton.
-- Transcript connector skeleton.
-- AI conversation export connector skeleton.
-- Connector test harness using synthetic fixtures.
+- export validation command
+- profile comparison / diff basics
+- regression corpus using synthetic examples
+- validation report format
+- compatibility warning checks
+- confidence/version drift checks
+- fixture-based quality gate for public-safe exports
 
 Exit criteria:
 
-- Connectors can be configured entirely outside the repo.
-- Tests use fake data only.
-- Each connector emits normalized artifacts with provenance.
+- profile/export changes can be compared deterministically
+- compatibility warnings are visible and testable
+- regressions in privacy, source IDs, raw-text leakage, or claim boundaries fail tests
 
-## Phase 5 — Service mode and automation
+### Phase 13 — Private adapter strategy
 
-Goal: run Imprint as a lightweight service for multiple consumers.
+Goal: define safe source-specific implementation plans for real private adapters without adding private assumptions to public core.
 
 Deliverables:
 
-- FastAPI service mode.
-- Scheduled harvest jobs.
-- Scheduled profile rebuilds.
-- Webhook or file-drop export delivery.
-- Prometheus metrics.
-- Health endpoint.
-- Basic auth or bearer token support for private deployments.
+- Gmail threat model and connector plan
+- iMessage/export threat model and connector plan
+- transcript/Plaud/Looki threat model and connector plan
+- database/cloud connector threat model templates
+- credential storage rules
+- consent and multi-person-source policy
+- replay/audit behavior
+- synthetic fixture requirements for each adapter class
 
 Exit criteria:
 
-- Downstream tools can fetch the latest profile over HTTP.
-- Batch and API modes produce equivalent profile versions.
+- no private adapter starts without a source-specific threat model
+- credential and consent boundaries are explicit
+- each future adapter has synthetic fixtures and redaction tests before implementation
 
-## Phase 6 — Evaluation and quality gates
+### Phase 14 — Service/API mode and automation
 
-Goal: measure whether profiles improve downstream generation.
+Goal: optionally run Imprint as a lightweight local/private service for multiple downstream consumers.
 
 Deliverables:
 
-- Blind A/B eval harness.
-- Voice authenticity rubric.
-- Drift reports.
-- Anti-pattern detector.
-- Platform fit scoring.
-- Regression corpus using synthetic examples.
+- service/API design doc
+- local-only service mode decision
+- health endpoint
+- export delivery mechanism, such as file-drop or webhook
+- scheduled harvest/profile rebuild plan
+- metrics and audit events
+- authentication/authorization policy for private deployments
+- parity tests between batch CLI and service output
 
 Exit criteria:
 
-- Profile changes can be evaluated before release.
-- Downstream output can be scored against profile rules.
+- service mode does not weaken local-first/privacy boundaries
+- downstream tools can fetch current public-safe profiles without raw corpus access
+- batch and service outputs remain equivalent and versioned
 
-## Phase 7 — Public release
+## Later backlog
 
-Goal: publish a useful public project with safe defaults.
+- interactive artifact review UI
+- profile editor
+- profile merge and branch support
+- richer context-profile management
+- consent-aware multi-person profiles
+- profile signing / provenance attestations
+- local-only embedding index
+- browser extension for public writing samples
+- Obsidian plugin
+- richer Mosvera/Broadside adapters outside core Imprint
 
-Deliverables:
+## Boundary rule
 
-- Public GitHub repository.
-- Release v0.1.0.
-- Quickstart docs.
-- Example synthetic profile.
-- Architecture diagram.
-- Contributor guide.
-- Security policy.
-- Roadmap issues.
-- Build-in-public launch post.
-
-Exit criteria:
-
-- Users can run the project without private infrastructure.
-- Project purpose is clear.
-- Privacy posture is credible.
-
-## Backlog ideas
-
-- Web UI for reviewing artifacts and quarantines.
-- Interactive profile editor.
-- Profile merge and branch support.
-- Cross-profile comparison.
-- Consent-aware multi-person profiles.
-- Profile signing or provenance attestations.
-- Local-only embedding index.
-- Browser extension for collecting public writing samples.
-- Obsidian plugin.
-- Static-site profile viewer.
-
-## Phase 7 - Public Web Presence
-
-Goal: create a single-page public landing site for Imprint at `imprint.niclydon.dev`.
-
-This phase is for project communication and social sharing only. It is not the Imprint application UI.
-
-Required outputs:
-
-- single-page landing site
-- concise description of what Imprint is and is not
-- README hero image reused or adapted for the site
-- favicon and app icon assets
-- Open Graph image for social sharing
-- Twitter/X card metadata
-- GitHub repository link
-- short usage/status section that makes clear the project is pre-release
-- privacy/local-first positioning
-
-Recommended visual direction:
-
-- use the Imprint aesthetic derived from niclydon.dev structure and niclydon.io colors
-- dark graphite background
-- cerulean/cyan primary accents
-- amber punctuation
-- evidence fragments converging into structured profiles
-- minimal text in imagery
-
-Non-goals:
-
-- no dashboard
-- no corpus upload
-- no authentication
-- no live profile generation
-- no private data integrations
-- no marketing funnel or SaaS conversion flow
-
-Deployment target:
-
-- `imprint.niclydon.dev`
-
-Success criteria:
-
-- link previews render cleanly on LinkedIn, Bluesky, X/Twitter, Discord, and iMessage
-- README and website visual language match
-- the page clearly communicates that Imprint is open-source, pre-release, local-first, and evidence-backed
-
+Imprint compiles expression profiles. It does not become a memory system, data lake, writing assistant, publishing platform, model router, Mosvera runtime, or private-source SaaS.

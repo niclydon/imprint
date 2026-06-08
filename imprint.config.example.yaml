@@ -32,6 +32,17 @@ connectors:
     local_only: true
     private: false
 
+  - name: synthetic_transcript
+    type: local_directory
+    enabled: true
+    adapter: local_transcript_json
+    path: ./examples/synthetic_corpus/transcript/synthetic-demo.json
+    storage_mode: metadata_only
+    source_policy_version: sprint11-source-policy-v1
+    tags: [synthetic]
+    local_only: true
+    private: false
+
   - name: disabled_private_example
     type: local_directory
     enabled: false
@@ -61,6 +72,13 @@ sources:
     path: ./examples/synthetic_corpus/chat.jsonl
     default_speaker: example_subject
     artifact_type: chat_message
+
+  synthetic_transcript:
+    type: local_transcript_json
+    enabled: true
+    path: ./examples/synthetic_corpus/transcript/synthetic-demo.json
+    default_speaker: example_subject
+    artifact_type: transcript_segment
 
 privacy:
   redaction_mode: strict

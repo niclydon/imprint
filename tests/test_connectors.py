@@ -243,6 +243,7 @@ def test_public_example_config_loads_connector_section() -> None:
     assert [discovery.connector_name for discovery in discoveries] == [
         "synthetic_markdown",
         "synthetic_chat",
+        "synthetic_transcript",
         "disabled_private_example",
     ]
     assert sum(discovery.artifact_count for discovery in discoveries) >= 2

@@ -6,11 +6,14 @@ Imprint is still pre-release. The docs are intentionally detailed because the pr
 
 ## Start Here
 
+- [Quickstart](QUICKSTART.md) — copy-paste synthetic install and first run
+- [Install](INSTALL.md) — clean local install path and troubleshooting
 - [Project Strategy](PROJECT_STRATEGY.md) — overall strategy and project intent
 - [Product Positioning](PRODUCT_POSITIONING.md) — what Imprint is and is not
 - [Architecture](ARCHITECTURE.md) — system boundaries and major components
 - [Roadmap](ROADMAP.md) — staged implementation plan
 - [Public Build Guide](PUBLIC_BUILD_GUIDE.md) — public-first development rules
+- [Release Checklist](RELEASE_CHECKLIST.md) — `v0.1.0` developer-preview readiness
 
 ## Product Theory
 
@@ -59,6 +62,7 @@ Imprint is still pre-release. The docs are intentionally detailed because the pr
 - [Export Boundaries](EXPORT_BOUNDARIES.md) — what core Imprint can and cannot export
 - [Downstream Integrations](DOWNSTREAM_INTEGRATIONS.md) — integration posture
 - [Connector Guide](CONNECTOR_GUIDE.md) — connector design rules
+- [Connector Framework](CONNECTOR_FRAMEWORK.md) — Sprint 09 connector boundaries and dry-run UX
 - [Configuration](CONFIGURATION.md) — configuration conventions
 
 ## Sprint Runbooks
@@ -67,9 +71,9 @@ Sprint runbooks live under [`sprints/`](sprints/).
 
 Most useful next:
 
-- [Sprint 03](sprints/SPRINT_03.md) — local ingestion framework
-- [Sprint 02.5](sprints/SPRINT_02_5.md) — model provider policy
-- [Sprint 02](sprints/SPRINT_02.md) — schema and contract design
+- [Sprint 11](sprints/SPRINT_11.md) — packaging and install experience
+- [Sprint 10](sprints/SPRINT_10.md) — public web presence
+- [Sprint 09](sprints/SPRINT_09.md) — private connector framework
 
 Recent sprint narratives are available under [`narrative/`](narrative/).
 

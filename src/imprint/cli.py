@@ -32,6 +32,9 @@ from imprint.schemas import ArtifactStorageMode, ArtifactStoragePolicy, Expressi
 
 app = typer.Typer(help="Imprint identity and expression profile compiler.")
 
+DEFAULT_EXAMPLE_PATH = Path("examples/synthetic_corpus/transcript/synthetic-demo.json")
+DEFAULT_EXAMPLE_OUTPUT_DIR = Path("exports/synthetic-demo")
+
 
 def _compile_local_profile(
     source_type: str,
@@ -202,6 +205,61 @@ def connectors_dry_run(
         typer.echo(f"storage_mode={discovery.storage_mode}")
         if discovery.warnings:
             typer.echo(f"warnings={';'.join(discovery.warnings)}")
+
+
+@app.command(name="example")
+def example(
+    path: Path = typer.Option(
+        DEFAULT_EXAMPLE_PATH,
+        "--path",
+        exists=True,
+        file_okay=True,
+        dir_okay=True,
+        readable=True,
+        help="Synthetic transcript JSON file or directory to compile.",
+    ),
+    output_dir: Path = typer.Option(
+        DEFAULT_EXAMPLE_OUTPUT_DIR,
+        "--output-dir",
+        file_okay=False,
+        dir_okay=True,
+        help="Directory for generated public-safe example exports.",
+    ),
+    subject_id: str = typer.Option("example_subject", help="Opaque synthetic subject ID."),
+) -> None:
+    """Run the public synthetic example and write public-safe exports."""
+    profile, artifact_count, signal_count = _compile_local_profile(
+        "local_transcript_json",
+        path,
+        subject_id,
+        ArtifactStorageMode.METADATA_ONLY,
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs = {
+        "profile.imprint.json": canonical_profile_json(profile),
+        "profile.md": markdown_profile_export(profile),
+        "what-imprint-learned.md": first_run_summary(profile),
+        "mosvera.expression.json": json.dumps(
+            mosvera_expression_overlay(profile),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        "human-cli.consumer.json": json.dumps(
+            human_cli_consumer_contract(profile),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    }
+    for filename, content in outputs.items():
+        (output_dir / filename).write_text(content, encoding="utf-8")
+
+    typer.echo("example=synthetic_transcript")
+    typer.echo(f"artifacts={artifact_count}")
+    typer.echo(f"candidate_signals={signal_count}")
+    typer.echo(f"profile_signals={len(profile.signals)}")
+    typer.echo(f"outputs={','.join(outputs)}")
 
 
 @app.command(name="compile")

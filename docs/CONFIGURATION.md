@@ -1,6 +1,6 @@
 # Configuration
 
-Status: Sprint 09 baseline
+Status: Sprint 11 developer-preview baseline
 
 ## Configuration Goals
 
@@ -43,7 +43,7 @@ IMPRINT_LOG_LEVEL=INFO
 ```
 
 Optional local model/provider variables remain local configuration. They are not required for default
-synthetic runs or Sprint 09 connector tests.
+synthetic runs, connector dry-runs, or the Sprint 11 `imprint example` command.
 
 Connector credentials must be referenced by env var name from config:
 
@@ -99,6 +99,25 @@ imprint connectors-dry-run --config imprint.config.example.yaml
 
 The dry-run output reports counts and connector metadata. It must not print raw artifact text or local
 paths.
+
+## Synthetic Example Run
+
+Generate public-safe example exports from the committed synthetic transcript corpus:
+
+```bash
+imprint example
+```
+
+The command writes deterministic outputs to `exports/synthetic-demo/` by default:
+
+- `profile.imprint.json`
+- `profile.md`
+- `what-imprint-learned.md`
+- `mosvera.expression.json`
+- `human-cli.consumer.json`
+
+`exports/` is ignored by git. These outputs are generated from compiled profile metadata and must not
+include raw artifact text, filesystem paths, private source IDs, provider prompts, or credentials.
 
 ## Source Policy Config
 
