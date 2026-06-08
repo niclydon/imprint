@@ -215,6 +215,17 @@ Avoid by default:
 Profiles should record artifact storage mode and raw-content availability without exposing the raw
 content in public-safe exports.
 
+## Service-mode privacy boundary
+
+Sprint 14 service mode is disabled by default and may expose only public-safe exports and
+public-safe operational metadata from an explicit export directory. Service responses must not
+include raw artifact text, source filesystem paths, credentials, private connector config, prompt
+assembly, provider/model settings, or downstream publishing state.
+
+Allowed service metadata is limited to health, version, validation status, warning counts, generated
+export filenames, and compatibility warnings that pass the public-safe payload validator. Job
+endpoints require explicit authentication and fail closed when auth is missing or invalid.
+
 ## Threat model
 
 ### Accidental public data leak

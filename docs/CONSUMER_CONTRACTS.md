@@ -125,6 +125,11 @@ Forbidden behavior:
 - inferring personality, diagnosis, values, or intent from expression patterns
 - silently ignoring warnings
 
+Service mode is an optional delivery mechanism for this same contract. A local service consumer must
+still validate canonical JSON, surface compatibility warnings, and treat service-returned profiles as
+CLI-generated public-safe exports. The service does not grant access to raw corpora, private paths,
+connector state, prompts, provider settings, or publishing automation.
+
 ## Human / CLI Contract
 
 Purpose: define how a person should inspect export outputs from the CLI.

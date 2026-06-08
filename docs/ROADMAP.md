@@ -1,6 +1,6 @@
 # Imprint Roadmap
 
-Status: current as of Sprint 13
+Status: current as of Sprint 14
 
 Imprint has moved past the original planning roadmap. The public repository now contains the core expression-profile pipeline and the first safe downstream contract surfaces.
 
@@ -134,22 +134,24 @@ Exit criteria:
 
 Goal: optionally run Imprint as a lightweight local/private service for multiple downstream consumers.
 
+Status: Sprint 14 design complete with a minimal disabled-by-default local/private scaffold.
+
 Deliverables:
 
-- service/API design doc
-- local-only service mode decision
-- health endpoint
-- export delivery mechanism, such as file-drop or webhook
-- scheduled harvest/profile rebuild plan
-- metrics and audit events
-- authentication/authorization policy for private deployments
-- parity tests between batch CLI and service output
+- ✅ service/API design doc
+- ✅ local-only service mode decision
+- ✅ health, version, status, latest export, latest warnings, and dry-run contracts
+- ✅ export delivery mechanism for generated public-safe JSON and Markdown exports
+- ✅ scheduled rebuild plan with rebuild explicitly deferred
+- ✅ metrics and audit event model
+- ✅ authentication/authorization policy for private deployments
+- ✅ parity tests between batch CLI and service output
 
 Exit criteria:
 
-- service mode does not weaken local-first/privacy boundaries
-- downstream tools can fetch current public-safe profiles without raw corpus access
-- batch and service outputs remain equivalent and versioned
+- ✅ service mode does not weaken local-first/privacy boundaries
+- ✅ downstream tools can fetch current public-safe profiles without raw corpus access
+- ✅ batch and service outputs remain equivalent and versioned
 
 ## Later backlog
 
