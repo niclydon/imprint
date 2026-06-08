@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
-import re
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +12,7 @@ from imprint.exports import EXPORT_SCHEMA_VERSION
 from imprint.exports.safety import (
     ExportSafetyError,
     assert_public_safe_payload,
+    validate_public_safe_string,
     validate_opaque_source_id,
 )
 from imprint.schemas import (
@@ -26,17 +26,6 @@ from imprint.schemas import (
 VALIDATION_REPORT_VERSION = "sprint12-validation-report-v1"
 COMPARISON_REPORT_VERSION = "sprint12-comparison-report-v1"
 
-CREDENTIAL_PATTERN = re.compile(
-    r"(?:"
-    r"sk-[A-Za-z0-9]{20,}|"
-    r"ghp_[A-Za-z0-9]{20,}|"
-    r"xox[baprs]-[A-Za-z0-9-]{20,}|"
-    r"AKIA[0-9A-Z]{16}|"
-    r"BEGIN (?:RSA|OPENSSH|EC|PRIVATE) KEY|"
-    r"[a-z][a-z0-9+.-]*://[^/\s:@]+:[^/\s:@]+@"
-    r")"
-)
-PATH_PATTERN = re.compile(r"(?:^/|^[A-Za-z]:[\\/]|(?:^|[\\/])\.\.(?:[\\/]|$)|[/\\][^\s]+[/\\])")
 RAW_CONTENT_KEYS = {
     "raw_text",
     "raw_content",
@@ -72,6 +61,7 @@ def validate_export_file(path: Path) -> dict[str, Any]:
 
     failed = [check for check in checks if check["status"] == "FAIL"]
     warnings = [check["message"] for check in checks if check["status"] == "WARN"]
+    reason_codes = sorted({check["reason_code"] for check in failed})
     report.update(
         {
             "status": "FAIL" if failed else "PASS",
@@ -80,6 +70,8 @@ def validate_export_file(path: Path) -> dict[str, Any]:
             "release_gate": {
                 "status": "FAIL" if failed else "PASS",
                 "blocking_failures": [check["name"] for check in failed],
+                "required_reviews": [],
+                "reason_codes": reason_codes,
             },
         }
     )
@@ -107,7 +99,9 @@ def compare_export_files(baseline_path: Path, candidate_path: Path) -> dict[str,
         comparability_label=str(comparability.label),
     )
     warnings = _comparison_warnings(comparability, drift_kinds)
-    release_status = "PASS" if str(comparability.label) != "not_comparable" else "WARN"
+    version_metadata = _comparison_version_metadata(baseline, candidate)
+    required_reviews = _required_comparison_reviews(comparability, version_metadata)
+    release_status = "PASS" if not required_reviews else "WARN"
 
     return {
         "report_version": COMPARISON_REPORT_VERSION,
@@ -125,6 +119,7 @@ def compare_export_files(baseline_path: Path, candidate_path: Path) -> dict[str,
         "comparability": {
             **comparability.model_dump(mode="json"),
             "state": str(comparability.label).upper(),
+            "version_metadata": version_metadata,
         },
         "drift": {
             "kinds": [str(kind) for kind in drift_kinds],
@@ -135,10 +130,13 @@ def compare_export_files(baseline_path: Path, candidate_path: Path) -> dict[str,
         "warnings": warnings,
         "release_gate": {
             "status": release_status,
+            "required_reviews": required_reviews,
+            "reason_codes": required_reviews,
+            "blocking_failures": [],
             "summary": (
                 "comparison is release-reviewable"
                 if release_status == "PASS"
-                else "not-comparable profiles require release review"
+                else "comparison requires release review before drift claims"
             ),
         },
     }
@@ -317,10 +315,10 @@ def _walk_privacy(value: Any, path: str = "$") -> None:
         for index, item in enumerate(value):
             _walk_privacy(item, f"{path}[{index}]")
     elif isinstance(value, str):
-        if CREDENTIAL_PATTERN.search(value):
-            raise QualityGateError(f"credential-like value is not allowed at {path}")
-        if PATH_PATTERN.search(value):
-            raise QualityGateError(f"path-like value is not allowed at {path}")
+        try:
+            validate_public_safe_string(value, path=path)
+        except ExportSafetyError as exc:
+            raise QualityGateError(str(exc)) from exc
 
 
 def _profile_changes(baseline: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
@@ -417,6 +415,60 @@ def _drift_kinds(
     return list(dict.fromkeys(kinds))
 
 
+def _comparison_version_metadata(
+    baseline: dict[str, Any],
+    candidate: dict[str, Any],
+) -> dict[str, Any]:
+    baseline_classifier_versions = _version_list(
+        baseline["compatibility"].get("classifier_versions", [])
+    )
+    candidate_classifier_versions = _version_list(
+        candidate["compatibility"].get("classifier_versions", [])
+    )
+    baseline_signal_versions = _version_list(
+        baseline["compatibility"].get("signal_model_versions", [])
+    )
+    candidate_signal_versions = _version_list(
+        candidate["compatibility"].get("signal_model_versions", [])
+    )
+    return {
+        "baseline_classifier_versions": baseline_classifier_versions,
+        "candidate_classifier_versions": candidate_classifier_versions,
+        "baseline_signal_model_versions": baseline_signal_versions,
+        "candidate_signal_model_versions": candidate_signal_versions,
+        "mixed_classifier_versions": (
+            len(baseline_classifier_versions) > 1 or len(candidate_classifier_versions) > 1
+        ),
+        "mixed_signal_model_versions": (
+            len(baseline_signal_versions) > 1 or len(candidate_signal_versions) > 1
+        ),
+    }
+
+
+def _required_comparison_reviews(
+    comparability: ComparabilityResult,
+    version_metadata: dict[str, Any],
+) -> list[str]:
+    reviews: list[str] = []
+    if str(comparability.label) == "not_comparable":
+        reviews.append("not_comparable")
+    elif str(comparability.label) == "partially_comparable":
+        reviews.append("partially_comparable")
+    if version_metadata["mixed_classifier_versions"]:
+        reviews.append("mixed_classifier_versions")
+    if version_metadata["mixed_signal_model_versions"]:
+        reviews.append("mixed_signal_model_versions")
+    return list(dict.fromkeys(reviews))
+
+
+def _version_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return sorted({str(item) for item in value if str(item)})
+    if isinstance(value, str) and value:
+        return sorted({item.strip() for item in value.split(",") if item.strip()})
+    return []
+
+
 def _comparison_warnings(
     comparability: ComparabilityResult,
     drift_kinds: list[DriftKind],
@@ -438,11 +490,13 @@ def _record(
     name: str,
     passed: bool,
     message: str | None = None,
+    reason_code: str | None = None,
 ) -> None:
     checks.append(
         {
             "name": name,
             "status": "PASS" if passed else "FAIL",
             "message": message or ("ok" if passed else "failed"),
+            "reason_code": reason_code or name,
         }
     )

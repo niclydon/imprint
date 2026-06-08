@@ -1,6 +1,6 @@
 # Profile Comparison
 
-Status: Sprint 12 baseline
+Status: Sprint 12.5 hardened baseline
 
 `imprint diff` compares two canonical JSON profile exports without reading raw corpora.
 
@@ -40,6 +40,9 @@ The report compares:
 - support count deltas
 - compatibility warnings
 
+The `comparability.version_metadata` block exposes baseline and candidate classifier/signal model
+versions, including `mixed_classifier_versions` and `mixed_signal_model_versions` booleans.
+
 ## Drift Categories
 
 Comparison separates:
@@ -52,6 +55,11 @@ Comparison separates:
 Implementation drift must not be presented as expression drift. If profiles are `NOT_COMPARABLE`,
 `expression_drift` is not reported even when signal payloads differ.
 
+`PARTIALLY_COMPARABLE` and `NOT_COMPARABLE` comparisons set `release_gate.status` to `WARN` and
+include `release_gate.reason_codes`. Mixed classifier versions add the
+`mixed_classifier_versions` reason code so automation cannot silently treat semantically ambiguous
+outputs as fully comparable.
+
 ## Corpus Policy
 
 Sprint 12 treats profiles as corpus-compatible only when the source-summary fingerprint and build
@@ -60,3 +68,10 @@ manifest `config_hash` match. A changed corpus fingerprint produces `NOT_COMPARA
 
 This is intentionally conservative. Future sprints may add a richer controlled-corpus equivalence
 registry, but no manual override exists in Sprint 12.
+
+## Provider Metadata Compatibility
+
+Build manifests already carry optional provider, model name, model version, and
+profile-affecting-model invocation metadata. Sprint 12.5 does not add broader provider drift
+modeling beyond the existing manifest comparison, but Sprint 13+ must preserve and extend these
+fields before any private-adapter or model-provider work changes classifier/extractor behavior.

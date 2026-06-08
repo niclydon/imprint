@@ -190,6 +190,7 @@ class ComparabilityReason(StrEnum):
     MINOR_EXTRACTOR_CHANGE = "minor_extractor_change"
     PROMPT_VERSION_CHANGE = "prompt_version_change"
     MODEL_VERSION_CHANGE = "model_version_change"
+    MIXED_CLASSIFIER_VERSIONS = "mixed_classifier_versions"
     SOURCE_MIX_CHANGE = "source_mix_change"
     DIFFERENT_EXTRACTOR_FAMILY = "different_extractor_family"
     DIFFERENT_MODEL_FAMILY = "different_model_family"
@@ -639,6 +640,12 @@ class ComparabilityResult(ImprintSchemaModel):
         partial_reasons: list[ComparabilityReason] = []
         if baseline.extractor_minor_version != candidate.extractor_minor_version:
             partial_reasons.append(ComparabilityReason.MINOR_EXTRACTOR_CHANGE)
+        if baseline.classifier_version != candidate.classifier_version:
+            partial_reasons.append(ComparabilityReason.MODEL_VERSION_CHANGE)
+        if _has_mixed_versions(baseline.classifier_version) or _has_mixed_versions(
+            candidate.classifier_version
+        ):
+            partial_reasons.append(ComparabilityReason.MIXED_CLASSIFIER_VERSIONS)
         if baseline.extractor_prompt_version != candidate.extractor_prompt_version:
             partial_reasons.append(ComparabilityReason.PROMPT_VERSION_CHANGE)
         if baseline.model_version != candidate.model_version:
@@ -664,6 +671,10 @@ class ComparabilityResult(ImprintSchemaModel):
             ],
             explanation="Structured manifest fields support expression-drift comparison.",
         )
+
+
+def _has_mixed_versions(value: str) -> bool:
+    return len({item.strip() for item in value.split(",") if item.strip()}) > 1
 
 
 class DivergenceValue(ImprintSchemaModel):

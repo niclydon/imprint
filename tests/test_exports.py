@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 from pathlib import Path
 
@@ -18,11 +19,18 @@ from imprint.exports import (
     markdown_profile_export,
     mosvera_expression_overlay,
 )
+from imprint.exports.safety import assert_public_safe_payload
 from imprint.schemas import ClaimLevel, ClaimValidationMethod
 from imprint.signals import RuleBasedSignalExtractor
 
 FIXTURES = Path(__file__).parent / "fixtures"
 RUNNER = CliRunner()
+JWT_CREDENTIAL = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+    "eyJzdWIiOiJzdWJqZWN0IiwiaWF0IjoxNzAwMDAwMDAwfQ."
+    "c2lnbmF0dXJl"
+)
+OPENAI_STYLE_CREDENTIAL = "s" "k-" + "ABCDEFGHIJKLMNOPQRSTUVWX"
 
 
 def compiled_profile(path: Path = FIXTURES / "local_transcript_json" / "signal-transcript.json"):
@@ -118,6 +126,46 @@ def test_opaque_source_ids_remain_opaque_in_json_export() -> None:
     assert source_ids
     assert all(source_id.startswith("source-") for source_id in source_ids)
     assert all("/" not in source_id and "\\" not in source_id for source_id in source_ids)
+
+
+def test_public_safe_payload_rejects_jwt_shaped_credentials() -> None:
+    with pytest.raises(ExportSafetyError, match="credential-like"):
+        assert_public_safe_payload({"token": JWT_CREDENTIAL})
+
+
+def test_public_safe_payload_rejects_base64_encoded_credentials() -> None:
+    encoded = base64.b64encode(f"api_key={OPENAI_STYLE_CREDENTIAL}".encode()).decode()
+
+    with pytest.raises(ExportSafetyError, match="encoded credential-like"):
+        assert_public_safe_payload({"token": encoded})
+
+
+def test_public_safe_payload_rejects_base64url_encoded_credentials() -> None:
+    encoded = base64.urlsafe_b64encode(f"api_key={OPENAI_STYLE_CREDENTIAL}".encode()).decode()
+    encoded = encoded.rstrip("=")
+
+    with pytest.raises(ExportSafetyError, match="encoded credential-like"):
+        assert_public_safe_payload({"token": encoded})
+
+
+def test_public_safe_payload_rejects_percent_encoded_unix_paths() -> None:
+    with pytest.raises(ExportSafetyError, match="path-like"):
+        assert_public_safe_payload({"source": "%2Fprivate%2Fcorpus%2Fsource.txt"})
+
+
+def test_public_safe_payload_rejects_percent_encoded_windows_paths() -> None:
+    with pytest.raises(ExportSafetyError, match="path-like"):
+        assert_public_safe_payload({"source": "C:%5CUsers%5Csubject%5Csource.txt"})
+
+
+def test_public_safe_payload_rejects_private_metadata_keys() -> None:
+    with pytest.raises(ExportSafetyError, match="private metadata"):
+        assert_public_safe_payload({"_metadata": {"note": "looks harmless"}})
+
+
+def test_public_safe_payload_rejects_nested_private_metadata_keys() -> None:
+    with pytest.raises(ExportSafetyError, match="private metadata"):
+        assert_public_safe_payload({"profile": {"_internals": {"prompt": "hidden"}}})
 
 
 def test_incompatible_signal_versions_cannot_export_as_comparable() -> None:
