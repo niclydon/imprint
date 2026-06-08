@@ -60,6 +60,10 @@ Imprint is still pre-release. The docs are intentionally detailed because the pr
 - [First-Run Output](FIRST_RUN_OUTPUT.md) — What Imprint Learned output contract
 - [Mosvera Integration](MOSVERA_INTEGRATION.md) — expression overlay boundary
 - [Export Boundaries](EXPORT_BOUNDARIES.md) — what core Imprint can and cannot export
+- [Validation](VALIDATION.md) — export validation report format and CLI gate
+- [Profile Comparison](PROFILE_COMPARISON.md) — deterministic profile diff and comparability rules
+- [Quality Gates](QUALITY_GATES.md) — release gate checks for public-safe outputs
+- [Regression Corpus](REGRESSION_CORPUS.md) — synthetic regression corpus policy
 - [Downstream Integrations](DOWNSTREAM_INTEGRATIONS.md) — integration posture
 - [Connector Guide](CONNECTOR_GUIDE.md) — connector design rules
 - [Connector Framework](CONNECTOR_FRAMEWORK.md) — Sprint 09 connector boundaries and dry-run UX
@@ -72,6 +76,7 @@ Sprint runbooks live under [`sprints/`](sprints/).
 Most useful next:
 
 - [Sprint 11](sprints/SPRINT_11.md) — packaging and install experience
+- [Sprint 12](sprints/SPRINT_12.md) — evaluation, validation, and quality gates
 - [Sprint 10](sprints/SPRINT_10.md) — public web presence
 - [Sprint 09](sprints/SPRINT_09.md) — private connector framework
 

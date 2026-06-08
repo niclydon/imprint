@@ -2,7 +2,7 @@
 
 Primary Model: GPT 5.5 for design, GPT 5.4 for implementation
 Adversarial Reviewer: GPT 5.5 or Gemini Antigravity
-Status: Ready after Sprint 11 packaging and install experience
+Status: **Complete** — 2026-06-08 (`validate-export`, `diff`, regression corpus, release gates)
 
 ## Mission
 

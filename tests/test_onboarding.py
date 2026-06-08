@@ -24,6 +24,8 @@ def test_cli_help_exposes_public_onboarding_commands() -> None:
     assert "connectors-dry-run" in result.output
     assert "example" in result.output
     assert "export-profile" in result.output
+    assert "validate-export" in result.output
+    assert "diff" in result.output
 
 
 def test_public_example_config_validates_without_credentials() -> None:

@@ -126,3 +126,22 @@ imprint export-profile --source-type local_transcript_json --path tests/fixtures
 
 The CLI compiles a local profile first, then emits the selected public-safe export or consumer
 projection.
+
+## Validation
+
+Sprint 12 adds JSON validation gates:
+
+```bash
+imprint validate-export exports/synthetic-demo/profile.imprint.json
+imprint validate-export exports/synthetic-demo/mosvera.expression.json
+imprint validate-export exports/synthetic-demo/human-cli.consumer.json
+```
+
+Validation emits a machine-readable PASS/FAIL report and fails on raw text, paths, credentials,
+invalid source IDs, missing compatibility metadata, prohibited claims, and generation controls.
+
+Profile comparison uses canonical JSON exports:
+
+```bash
+imprint diff profile-a.imprint.json profile-b.imprint.json
+```

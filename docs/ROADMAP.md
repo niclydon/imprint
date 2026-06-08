@@ -76,6 +76,8 @@ Exit criteria:
 
 Goal: make profile changes reviewable before release or downstream consumption.
 
+Status: complete as of Sprint 12.
+
 Deliverables:
 
 - export validation command

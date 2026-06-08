@@ -27,6 +27,7 @@ from imprint.exports import (
     markdown_profile_export,
     mosvera_expression_overlay,
 )
+from imprint.quality import QualityGateError, compare_export_files, validate_export_file
 from imprint.signals import RuleBasedSignalExtractor
 from imprint.schemas import ArtifactStorageMode, ArtifactStoragePolicy, ExpressionProfile
 
@@ -330,6 +331,33 @@ def export_profile(
             )
     except ExportSafetyError as exc:
         raise typer.BadParameter(str(exc)) from exc
+
+
+@app.command(name="validate-export")
+def validate_export(
+    path: Path = typer.Argument(..., exists=True, file_okay=True, dir_okay=False, readable=True),
+) -> None:
+    """Validate a public-safe profile export or consumer contract."""
+    try:
+        report = validate_export_file(path)
+    except QualityGateError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    typer.echo(json.dumps(report, indent=2, sort_keys=True))
+    if report["status"] != "PASS":
+        raise typer.Exit(1)
+
+
+@app.command(name="diff")
+def diff_profiles(
+    baseline: Path = typer.Argument(..., exists=True, file_okay=True, dir_okay=False, readable=True),
+    candidate: Path = typer.Argument(..., exists=True, file_okay=True, dir_okay=False, readable=True),
+) -> None:
+    """Compare two canonical JSON profile exports without reading raw corpora."""
+    try:
+        report = compare_export_files(baseline, candidate)
+    except QualityGateError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    typer.echo(json.dumps(report, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

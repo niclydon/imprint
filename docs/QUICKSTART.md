@@ -45,6 +45,8 @@ Expected:
 
 ```bash
 imprint example
+imprint validate-export exports/synthetic-demo/profile.imprint.json
+imprint diff exports/synthetic-demo/profile.imprint.json exports/synthetic-demo/profile.imprint.json
 ```
 
 Expected output files:
@@ -66,6 +68,19 @@ sed -n '1,80p' exports/synthetic-demo/profile.md
 
 The generated files are ignored by git. They are derived from compiled profile metadata and should not
 contain raw synthetic article text, source paths, credentials, provider prompts, or private source IDs.
+
+Validate the generated canonical export and compare it to itself:
+
+```bash
+imprint validate-export exports/synthetic-demo/profile.imprint.json
+imprint diff exports/synthetic-demo/profile.imprint.json exports/synthetic-demo/profile.imprint.json
+```
+
+Expected:
+
+- validation report status is `PASS`
+- comparison state is `COMPARABLE`
+- no implementation drift is reported as expression drift
 
 ## 5. Produce a Specific Export Manually
 
