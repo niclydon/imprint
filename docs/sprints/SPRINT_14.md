@@ -2,13 +2,15 @@
 
 Primary Model: GPT 5.5 for design, GPT 5.4 for scoped implementation
 Adversarial Reviewer: GPT 5.5 or Gemini Antigravity
-Status: Future phase after Sprint 13.5 private adapter enforcement foundation
+Status: Future/optional phase after Sprint 13.5 private adapter enforcement foundation and fresh-user validation
 
 ## Mission
 
 Design and, only if still small and safe, scaffold a local/private service mode for Imprint.
 
 Sprint 14 must not turn Imprint into a SaaS, dashboard, raw-corpus browser, model router, publishing engine, or background data lake. It should make the existing CLI/export pipeline operable as a private local service for trusted downstream consumers.
+
+Sprint 14 is not required for the v0.1.0 public developer preview. Before starting this sprint, first complete a fresh-user install/use validation and a fresh-agent repository handoff validation against the public GitHub URL.
 
 ## Product Goal
 
@@ -56,7 +58,7 @@ Service mode may expose public-safe contracts. It must not expose raw corpora, c
 
 ## Implementation Posture
 
-Sprint 14 is design-first. Code is allowed only after the service boundary is documented.
+Sprint 14 is design-first and optional for v0.1.0. Code is allowed only after the service boundary is documented, the fresh-user path is verified, and the agent-onboarding path is clear. Do not use Sprint 14 to compensate for unclear install, quickstart, README, or agent handoff docs.
 
 Preferred sequence:
 
@@ -67,6 +69,17 @@ Preferred sequence:
 5. Define batch/service parity requirements.
 6. Add tests for contract assumptions.
 7. Add minimal local service scaffold only if all boundaries remain clear.
+
+## Prerequisites
+
+Do not begin Sprint 14 until:
+
+- `imprint example` works from a fresh clone
+- README quickstart works copy-paste
+- generated public-safe exports validate
+- Sprint 12.5 quality gates are green
+- Sprint 13.5 private-adapter enforcement foundation is green
+- repository handoff docs are sufficient for coding agents to understand safe commands and boundaries
 
 ## Required Design Deliverables
 
@@ -86,9 +99,23 @@ Update:
 - `docs/CONSUMER_CONTRACTS.md`
 - `docs/ROADMAP.md`
 
+## Required First Deliverable: Service Decision Record
+
+Before writing service code, create a decision record answering:
+
+- why service mode is needed now
+- why CLI/file-drop mode is insufficient
+- who the service consumer is
+- which deployment mode is allowed
+- which endpoints are required for the first cut
+- which endpoints are explicitly deferred
+- how service outputs remain equivalent to CLI outputs
+
+If this decision record does not justify service mode, Sprint 14 should stop at design docs.
+
 ## Allowed Implementation Scope
 
-Allowed only after docs exist:
+Allowed only after docs and the service decision record exist:
 
 - local-only service scaffold
 - health endpoint
@@ -219,6 +246,7 @@ If code is implemented, add tests proving:
 
 Sprint 14 is complete only if:
 
+- service decision record exists and justifies any implementation
 - service/API design is documented
 - auth policy is documented
 - automation plan is documented

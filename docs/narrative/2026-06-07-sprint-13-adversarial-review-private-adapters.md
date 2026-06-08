@@ -106,4 +106,20 @@ The strategy is sound. Gaps are about enforcement and completeness, not fundamen
 
 ---
 
+## Update: Sprint 13.5 Enforcement Follow-up (2026-06-08)
+
+Sprint 13.5 implemented the seven critical enforcement items identified above and added hardening tests before closing the NO-GO items from this review.
+
+Added in code and tests:
+- `ConsentBoundary` enforcement and source-specific unknown/third-party handling in classifier flow
+- Expanded connector redaction coverage (OAuth refresh tokens, JWTs, DSNs, URL params, query secrets, cloud credentials)
+- Connector replay manifest with compatibility checks and redacted config hashing
+- Public-safe `ConnectorAuditLog` serialization and placeholder-coded warning/error outputs
+- Fixture-leakage scanner with recursion, encoded-path and encoded-credential detection
+- Recursive adapter-authority checks to prevent connector access to prohibited modules
+
+As of 2026-06-08, `docs/SPRINT_13_5_ARCHITECTURE_REVIEW.md` records the hostile review outcome as **GO for private adapter implementation planning**, with source-specific adapters still blocked until they complete their own threat models, fixtures, and regression tests.
+
+---
+
 **Document:** `docs/SPRINT_13_ARCHITECTURE_REVIEW.md`
